@@ -5,7 +5,7 @@ stages:
   - package
 
 checks:
-  stage: bootstrap
+  stage: checks
   except:
     - staging
     - tags
