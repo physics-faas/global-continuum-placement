@@ -5,7 +5,6 @@ in
 rec {
   package = poetry2nix.mkPoetryApplication {
     projectDir = ./.;
-    inherit (ryaxpkgs) python;
   };
 
   shell = let
@@ -14,7 +13,7 @@ rec {
     };
   in envShell.env;
 
-  image = ryaxpkgs.callPackage ./nix/docker.nix {
+  image = nixpkgs.callPackage ./nix/docker.nix {
     global_continuum_placement = package;
   };
 }
