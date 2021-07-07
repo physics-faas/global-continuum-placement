@@ -1,7 +1,9 @@
 import abc
 from dataclasses import dataclass
 
-from global_continuum_placement.domain.CHANGEME_object.CHANGEME_repository import ICHANGEMERepository
+from global_continuum_placement.domain.CHANGEME_object.CHANGEME_repository import (
+    ICHANGEMERepository,
+)
 
 
 @dataclass

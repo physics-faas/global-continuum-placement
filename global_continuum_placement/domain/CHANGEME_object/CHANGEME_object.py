@@ -4,7 +4,9 @@ from typing import List, Union
 
 from global_continuum_placement.domain.base_command import BaseCommand
 from global_continuum_placement.domain.base_event import BaseEvent
-from global_continuum_placement.domain.CHANGEME_object.CHANGEME_events import CHANGEMEIsReadyEvent
+from global_continuum_placement.domain.CHANGEME_object.CHANGEME_events import (
+    CHANGEMEIsReadyEvent,
+)
 
 
 @dataclass

@@ -2,7 +2,9 @@ from global_continuum_placement.application.handlers import CHANGEME_handlers
 from global_continuum_placement.application.message_bus import MessageBus
 from global_continuum_placement.container import ApplicationContainer
 from global_continuum_placement.domain.base_event import ApplicationStartupEvent
-from global_continuum_placement.domain.CHANGEME_object.CHANGEME_events import CreateCHANGEMECommand
+from global_continuum_placement.domain.CHANGEME_object.CHANGEME_events import (
+    CreateCHANGEMECommand,
+)
 
 
 def setup(container: ApplicationContainer):

@@ -1,9 +1,4 @@
-from sqlalchemy import (
-    Column,
-    MetaData,
-    String,
-    Table,
-)
+from sqlalchemy import Column, MetaData, String, Table
 from sqlalchemy.dialects.postgresql import UUID
 
 metadata = MetaData()

@@ -3,7 +3,9 @@ from dependency_injector import containers, providers
 from .application.message_bus import MessageBus
 from .domain.CHANGEME_object.CHANGEME_repository import ICHANGEMERepository
 from .infrastructure.database.engine import DatabaseEngine
-from .infrastructure.database.repositories.CHANGEME_repository import DatabaseCHANGEMERepository
+from .infrastructure.database.repositories.CHANGEME_repository import (
+    DatabaseCHANGEMERepository,
+)
 from .infrastructure.database.unit_of_work import DatabaseUnitOfWork
 
 

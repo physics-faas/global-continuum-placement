@@ -1,5 +1,5 @@
 import logging
-from typing import Callable, Dict, List, Type, Union, Coroutine, Any
+from typing import Any, Callable, Coroutine, Dict, List, Type, Union
 
 from global_continuum_placement.domain.base_command import BaseCommand
 from global_continuum_placement.domain.base_event import BaseEvent
@@ -23,7 +23,9 @@ class MessageBus:
             MessageBus.event_handlers[event] = [event_handler]
 
     @staticmethod
-    def register_command_handler(command: Type[BaseCommand], command_handler: HANDLER_TYPE):
+    def register_command_handler(
+        command: Type[BaseCommand], command_handler: HANDLER_TYPE
+    ):
         MessageBus.command_handlers[command] = command_handler
 
     async def handle(self, messages):

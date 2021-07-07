@@ -2,9 +2,12 @@ from collections import Callable
 
 from aiohttp import web
 from dependency_injector.wiring import Provide
+
 from global_continuum_placement.application.auth_service import AuthService
 from global_continuum_placement.container import ApplicationContainer
-from global_continuum_placement.infrastructure.api.schemas.error_schema import ErrorSchema
+from global_continuum_placement.infrastructure.api.schemas.error_schema import (
+    ErrorSchema,
+)
 
 
 # Design decorator to indicate that

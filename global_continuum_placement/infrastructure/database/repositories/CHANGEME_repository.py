@@ -3,7 +3,9 @@ from typing import List
 from sqlalchemy.orm import Session
 
 from global_continuum_placement.domain.CHANGEME_object.CHANGEME_object import CHANGEME
-from global_continuum_placement.domain.CHANGEME_object.CHANGEME_repository import ICHANGEMERepository
+from global_continuum_placement.domain.CHANGEME_object.CHANGEME_repository import (
+    ICHANGEMERepository,
+)
 
 
 class DatabaseCHANGEMERepository(ICHANGEMERepository):

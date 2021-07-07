@@ -1,5 +1,4 @@
 import pytest
-
 from changeme.container import ApplicationContainer
 
 

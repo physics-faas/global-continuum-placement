@@ -4,7 +4,9 @@ from sqlalchemy.orm import Session
 
 from global_continuum_placement.application.unit_of_work import IUnitOfWork
 from global_continuum_placement.infrastructure.database.engine import DatabaseEngine
-from global_continuum_placement.infrastructure.database.repositories.CHANGEME_repository import DatabaseCHANGEMERepository
+from global_continuum_placement.infrastructure.database.repositories.CHANGEME_repository import (
+    DatabaseCHANGEMERepository,
+)
 
 
 class DatabaseUnitOfWork(IUnitOfWork):
