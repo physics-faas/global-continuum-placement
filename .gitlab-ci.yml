@@ -1,0 +1,81 @@
+
+checks:
+  stage: bootstrap
+  except:
+    - staging
+    - tags
+  tags:
+    - shell
+    - nix
+  script:
+    - nix-shell $NIX_OPTS ./release.nix -A shell --command $LINT_CMD
+
+test:
+  stage: test
+  except:
+    - staging
+    - tags
+  tags:
+    - shell
+    - nix
+  script:
+    - nix-shell $NIX_OPTS ./release.nix -A shell --command "timeout --preserve-status $UNIT_TEST_TIMEOUT bash test.sh --junitxml=./report.xml"
+  artifacts:
+    when: always
+    paths:
+      - report.xml
+    reports:
+      junit: report.xml
+      cobertura: coverage.xml
+  coverage: '/^TOTAL\s+\d+\s+\d+\s+\d+\s+\d+\s+(\d+\%)/'
+
+build_package:
+  stage: build
+  tags:
+    - shell
+    - nix
+  variables:
+    TARGET: package
+  script:
+    - nix-build $NIX_OPTS release.nix -A $TARGET $NIX_BUILD_EXTRA_OPTS $EXTRA_ARGS
+    - nix-store -qR ./result | cachix push ryaxtech
+  except:
+    - tags
+
+build_image:
+  stage: package
+  tags:
+    - shell
+    - nix
+  variables:
+    IMAGE_NAME: $CI_PROJECT_NAME
+    REGISTRY_PATH: docker.io/ryaxtech
+    RELEASE_TARGET: image
+  script:
+    - nix-build $NIX_OPTS release.nix -A $RELEASE_TARGET $NIX_BUILD_EXTRA_OPTS $EXTRA_ARGS
+    # Push the generated image to the registry
+    - export IMAGE_TAG=${CI_COMMIT_SHORT_SHA}
+    - >
+        skopeo copy
+        --insecure-policy
+        --dest-creds "$REGISTRY_CREDS"
+        "docker-archive:$PWD/result"
+        "docker://$REGISTRY_PATH/$IMAGE_NAME:$IMAGE_TAG"
+    # Add the current ref tag in the registry
+    - export SRC_IMAGE_TAG=$IMAGE_TAG
+    - TAGS="${CI_COMMIT_REF_NAME}"
+    - |
+      for tag in "$TAGS"; do
+        echo "Tagging $IMAGE_NAME:$SRC_IMAGE_TAG with $tag"
+        skopeo copy \
+        --insecure-policy \
+        --src-creds "$REGISTRY_CREDS" \
+        --dest-creds "$REGISTRY_CREDS" \
+        "docker://$REGISTRY_PATH/$IMAGE_NAME:$SRC_IMAGE_TAG" \
+        "docker://$REGISTRY_PATH/$IMAGE_NAME:$tag"
+      done
+  retry: 2
+  except:
+    - tags
+  needs:
+    - build_package
