@@ -1,3 +1,8 @@
+stages:
+  - checks
+  - test
+  - build
+  - package
 
 checks:
   stage: bootstrap
