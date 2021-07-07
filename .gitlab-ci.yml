@@ -13,7 +13,7 @@ checks:
     - shell
     - nix
   script:
-    - nix-shell $NIX_OPTS ./release.nix -A shell --command $LINT_CMD
+    - nix-shell $NIX_OPTS ./release.nix -A shell --command ./lint.sh
 
 test:
   stage: test
