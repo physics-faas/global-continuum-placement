@@ -1,0 +1,52 @@
+from aiohttp import web
+from aiohttp_apispec import setup_aiohttp_apispec, validation_middleware
+
+from global_continuum_placement.container import ApplicationContainer
+from global_continuum_placement.infrastructure.api.controllers import util_controller
+from global_continuum_placement.infrastructure.api.middlewares import auth_middleware
+from global_continuum_placement.version import __version__
+
+
+def setup(app: web.Application, container: ApplicationContainer):
+    """ Method to setup api """
+    # Configure application container for wiring
+    container.wire(
+        modules=[
+            auth_middleware,
+            util_controller,
+        ]
+    )
+
+    # Setup server middlewares
+    app.middlewares.extend(
+        [
+            auth_middleware.handle(public_paths=["/docs", "/static", "/healthz"]),
+            validation_middleware,
+        ]
+    )
+
+    # Configure api routing
+    app.add_routes(
+        [
+            web.get("/healthz", util_controller.health_check, allow_head=False),
+        ]
+    )
+
+    # Configure api documentation
+    setup_aiohttp_apispec(
+        app,
+        title="global_continuum_placement",
+        version=__version__,
+        url="/docs/swagger.json",
+        swagger_path="/docs",
+        static_path="/static/swagger",
+        securityDefinitions={
+            "bearer": {
+                "type": "apiKey",
+                "name": "Authorization",
+                "in": "header",
+                "description": "Ryax token",
+            }
+        },
+        security=[{"bearer": []}],
+    )
