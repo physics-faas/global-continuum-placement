@@ -1,6 +1,15 @@
-{ nixpkgs ? import <nixpkgs> { } }:
+{ hostPkgs ? import <nixpkgs> { }
+, pinnedVersion ? hostPkgs.lib.importJSON ./nixpkgs-version.json
+, pinnedPkgs ?
+  hostPkgs.fetchFromGitHub {
+    owner = "nixos";
+    repo = "nixpkgs";
+    inherit (pinnedVersion) rev sha256;
+  }
+, pkgs ? import pinnedPkgs { }
+}:
 let
-  poetry2nix = nixpkgs.poetry2nix;
+  poetry2nix = pkgs.poetry2nix;
 in
 rec {
   package = poetry2nix.mkPoetryApplication {
@@ -13,7 +22,7 @@ rec {
     };
   in envShell.env;
 
-  image = nixpkgs.callPackage ./nix/docker.nix {
+  image = pkgs.callPackage ./nix/docker.nix {
     global_continuum_placement = package;
   };
 }
