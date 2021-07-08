@@ -1,9 +1,5 @@
 from aiohttp import web
 from aiohttp_apispec import docs
-from dependency_injector.wiring import Provide
-
-from global_continuum_placement.application.util_service import UtilService
-from global_continuum_placement.container import ApplicationContainer
 
 
 @docs(
@@ -18,9 +14,5 @@ from global_continuum_placement.container import ApplicationContainer
 )
 async def health_check(
     _: web.Request,
-    service: UtilService = Provide[ApplicationContainer.util_service],
 ):
-    if service.is_healthy():
-        return web.json_response("Service healthy", status=200)
-    else:
-        return web.json_response("Service unhealthy", status=400)
+    return web.json_response("Service healthy", status=200)

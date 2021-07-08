@@ -2,8 +2,7 @@ from aiohttp import web
 from aiohttp_apispec import setup_aiohttp_apispec, validation_middleware
 
 from global_continuum_placement.container import ApplicationContainer
-from global_continuum_placement.infrastructure.api.controllers import util_controller
-from global_continuum_placement.infrastructure.api.middlewares import auth_middleware
+from global_continuum_placement.infrastructure.api.controllers import util_controller, scheduler_controller
 from global_continuum_placement.version import __version__
 
 
@@ -12,15 +11,14 @@ def setup(app: web.Application, container: ApplicationContainer):
     # Configure application container for wiring
     container.wire(
         modules=[
-            auth_middleware,
             util_controller,
+            scheduler_controller,
         ]
     )
 
     # Setup server middlewares
     app.middlewares.extend(
         [
-            auth_middleware.handle(public_paths=["/docs", "/static", "/healthz"]),
             validation_middleware,
         ]
     )
@@ -40,13 +38,13 @@ def setup(app: web.Application, container: ApplicationContainer):
         url="/docs/swagger.json",
         swagger_path="/docs",
         static_path="/static/swagger",
-        securityDefinitions={
-            "bearer": {
-                "type": "apiKey",
-                "name": "Authorization",
-                "in": "header",
-                "description": "Ryax token",
-            }
-        },
-        security=[{"bearer": []}],
+        #securityDefinitions={
+        #    "bearer": {
+        #        "type": "apiKey",
+        #        "name": "Authorization",
+        #        "in": "header",
+        #        "description": "Ryax token",
+        #    }
+        #},
+        #security=[{"bearer": []}],
     )

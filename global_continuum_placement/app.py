@@ -3,7 +3,6 @@ import logging
 from aiohttp import web
 from logfmt_logger import getLogger
 
-from .application.setup import setup as application_setup
 from .container import ApplicationContainer
 from .domain.base_event import ApplicationStartupEvent
 from .infrastructure.api.setup import setup as api_setup
@@ -27,8 +26,7 @@ def init():
     logger = getLogger(__name__, numeric_level)
     logger.info("Logging level is set to %s" % str_level.upper())
 
-    application_setup(container)
-
+    # Init web app
     app: web.Application = web.Application()
     api_setup(app, container)
     app["container"] = container
@@ -47,6 +45,7 @@ async def on_cleanup(app: web.Application):
     """ Define hook when application stop"""
     # container: ApplicationContainer = app["container"]
     # FIXME: add cleaning hooks here
+    pass
 
 
 def start():

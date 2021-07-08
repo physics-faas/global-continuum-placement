@@ -1,0 +1,2 @@
+class ISchedulerService:
+    pass
