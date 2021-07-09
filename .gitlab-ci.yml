@@ -17,6 +17,8 @@ checks:
 
 test:
   stage: test
+  variables:
+    UNIT_TEST_TIMEOUT: 60
   except:
     - staging
     - tags
@@ -24,7 +26,7 @@ test:
     - shell
     - nix
   script:
-    - nix-shell $NIX_OPTS ./release.nix -A shell --command "timeout --preserve-status $UNIT_TEST_TIMEOUT bash test.sh --junitxml=./report.xml"
+    - nix-shell $NIX_OPTS ./release.nix -A shell --command "timeout --preserve-status "$UNIT_TEST_TIMEOUT" bash test.sh --junitxml=./report.xml"
   artifacts:
     when: always
     paths:
