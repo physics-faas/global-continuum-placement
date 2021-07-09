@@ -1,5 +1,5 @@
 from dataclasses import dataclass, field
-from typing import Dict, List
+from typing import Dict, List, Union
 
 from ..workload.workload import ResourceRequest, TaskDag
 from .platfom_values import SiteType
@@ -17,6 +17,10 @@ class Resources:
         self.memory_in_MB = self.memory_in_MB - resources.memory_in_MB
 
 
+class InvalidSiteDefinition(Exception):
+    pass
+
+
 @dataclass
 class Site:
     id: str
@@ -26,11 +30,19 @@ class Site:
     allocated_tasks: List[TaskDag]
 
     @classmethod
-    def create_site_from_dict(cls, site_dict: Dict) -> "Site":
-        resources = site_dict["resources"]
+    def create_site_from_dict(
+        cls, site_id: str, site_dict: Dict[str, Union[str, Dict[str, int]]]
+    ) -> "Site":
+        try:
+            resources = site_dict["resources"]
+            type = site_dict["type"]
+        except KeyError as err:
+            raise InvalidSiteDefinition(
+                f"Missing element in the Site definition: {err}"
+            )
         return Site(
-            id=site_dict["id"],
-            type=SiteType[site_dict["type"].to_uppercase()],
+            id=site_id,
+            type=SiteType[type.upper()],
             total_resources=Resources(**resources),
             free_resources=Resources(**resources),
             allocated_tasks=[],
@@ -46,8 +58,8 @@ class Platform:
     sites: List[Site] = field(default_factory=list)
 
     @classmethod
-    def create_site_from_dict(cls, platform_dict: Dict) -> "Platform":
+    def create_from_dict(cls, platform_dict: Dict) -> "Platform":
         sites: List[Site] = []
-        for site in platform_dict:
-            sites.append(Site.create_site_from_dict(site))
+        for site_id, site in platform_dict.items():
+            sites.append(Site.create_site_from_dict(site_id, site))
         return Platform(sites)

@@ -26,8 +26,8 @@ class SitesSchema(Schema):
 
 
 class InitializeRequestSchema(Schema):
-    platfom = fields.Nested(
-        SitesSchema,
-        many=True,
+    platform = fields.Dict(
+        keys=fields.Str(),
+        values=fields.Nested(SitesSchema),
         description="The entire platform description with all sites",
     )

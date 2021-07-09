@@ -2,7 +2,7 @@
 # Copyright (C) Ryax Technologies
 # All rights reserved.
 
-from global_continuum_placemement.app import start
+from global_continuum_placement.app import start
 
 
 def main():

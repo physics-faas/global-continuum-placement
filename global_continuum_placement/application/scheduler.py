@@ -38,6 +38,9 @@ class SchedulerService:
         site_that_fit: List[Site] = []
         platform = self.platform
 
+        if len(constraints) == 0:
+            return platform.sites
+
         for constraint in constraints:
             if constraint.site is not None:
                 for site in platform.sites:
@@ -48,7 +51,7 @@ class SchedulerService:
                 for site in platform.sites:
                     # TODO Implement smarter scheduling policy!
                     # Here we always schedule the task to the first site in the list
-                    if site.type is constraint.site_type:
+                    if site.type.name == constraint.site_type.upper():
                         site_that_fit.append(site)
                         logger.debug(
                             f"Found valid site type constraint for site {site.id}"
@@ -73,6 +76,7 @@ class SchedulerService:
             if site_has_enough_resources(site, task.resource_request):
                 site.allocate(task)
                 placements.append(Placement(site.id, task.id))
+                break
 
         # Recursion
         for task in task.next_task:
@@ -80,11 +84,10 @@ class SchedulerService:
 
         return placements
 
-    def schedule(self, workload: Workload):
+    def schedule(self):
         placements: List[Placement] = []
 
-        for workflow in workload.workflows.values():
-            for task in workflow.tasks_dag.next_task():
-                placements.extend(self.schedule_task(task))
+        for workflow in self.workload.workflows.values():
+            placements.extend(self.schedule_task(workflow.tasks_dag))
 
         return placements

@@ -31,6 +31,7 @@ def setup(app: web.Application, container: ApplicationContainer):
         [
             web.get("/healthz", util_controller.health_check, allow_head=False),
             web.post("/init", scheduler_controller.initialize),
+            web.post("/schedule", scheduler_controller.schedule),
         ]
     )
 

@@ -23,7 +23,8 @@ class PlacementConstraint:
 class TaskDag:
     id: str = field(default=None)
     resource_request: ResourceRequest = field(default_factory=None)
-    placement_constraints: List[PlacementConstraint] = field(default=list)
+    # WARNING: Multiple constraints defined are resolved with a logical OR.
+    placement_constraints: List[PlacementConstraint] = field(default_factory=list)
     state: TaskState = field(default=TaskState.NONE)
     next_task: List["TaskDag"] = field(default_factory=list)
 
@@ -40,6 +41,10 @@ class TaskDag:
                     resource_request=ResourceRequest(
                         **current_task.get("resources", {})
                     ),
+                    placement_constraints=[
+                        PlacementConstraint(**constraint)
+                        for constraint in current_task.get("constraints", [])
+                    ],
                     next_task=cls._create_task_from_dict(
                         current_task.get("next_tasks", []), workflow
                     ),

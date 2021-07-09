@@ -1,3 +1,5 @@
 /.idea
 /.flake8
 __pycache__
+/.coverage
+/coverage.xml
