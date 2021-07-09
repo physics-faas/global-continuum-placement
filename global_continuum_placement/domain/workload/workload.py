@@ -4,9 +4,9 @@ from typing import List, Dict
 
 from .workload_values import TaskState
 from ..platform.platfom_values import SiteType
-from ..events import InitializeCommand
 
 
+@dataclass
 class ResourceRequest:
     nb_cpu: int = field(default=0)
     nb_gpu: int = field(default=0)
@@ -32,7 +32,11 @@ class TaskDag:
         new_tasks = []
         for task_id in task_ids:
             current_task = workflow[task_id]
-            new_tasks.append(TaskDag(**current_task, next_task=cls._create_task_from_dict(current_task.next_tasks, workflow)))
+            new_tasks.append(
+                TaskDag(
+                    id=task_id,
+                    resource_request=ResourceRequest(**current_task.get("resources", {})),
+                    next_task=cls._create_task_from_dict(current_task.get("next_tasks", []), workflow)))
         return new_tasks
 
     @classmethod
@@ -43,7 +47,7 @@ class TaskDag:
         # FIXME find root task, here we assume it is the first
         task_dict = list(workflow.keys())[0]
         # TODO call the recursive method on it
-        return cls._create_task_from_dict([task_dict.id], workflow)[0]
+        return cls._create_task_from_dict([task_dict], workflow)[0]
 
 
 @dataclass
@@ -52,14 +56,14 @@ class Workflow:
     tasks_dag: TaskDag = field(default=None)
 
     @classmethod
-    def create_from_new_workflow_command(cls, cmd: InitializeCommand):
-        return Workflow(id=str(uuid.uuid4()), tasks_dag=TaskDag.create_dag_from_workflow(cmd.workflow))
+    def create_from_dict(cls, workflow_dict: Dict) -> "Workflow":
+        return Workflow(id=str(uuid.uuid4()), tasks_dag=TaskDag.create_dag_from_workflow(workflow_dict))
 
 
 @dataclass
 class Workload:
     id: str = field(default=None)
-    workflows: Dict[Workflow] = field(default_factory=dict)
+    workflows: Dict[str, Workflow] = field(default_factory=dict)
 
     @classmethod
     def create(cls):

@@ -4,7 +4,6 @@ from aiohttp import web
 from logfmt_logger import getLogger
 
 from .container import ApplicationContainer
-from .domain.base_event import ApplicationStartupEvent
 from .infrastructure.api.setup import setup as api_setup
 from .version import __version__
 
@@ -16,7 +15,7 @@ def init():
 
     # Override with env variables
     container.configuration.log_level.from_env("LOG_LEVEL", "INFO")
-    # FIXME: Add other configurations here
+    # TODO: Add other configurations here
 
     # Setup logging
     str_level = container.configuration.log_level()
@@ -36,9 +35,9 @@ def init():
 
 async def on_startup(app: web.Application):
     """ Hooks for application startup """
-    container: ApplicationContainer = app["container"]
+    # container: ApplicationContainer = app["container"]
     # FIXME: add initialization hooks here
-    await container.message_bus().handle([ApplicationStartupEvent()])
+    pass
 
 
 async def on_cleanup(app: web.Application):

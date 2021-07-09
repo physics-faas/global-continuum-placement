@@ -2,7 +2,6 @@ from dataclasses import field, dataclass
 from typing import List, Dict
 
 from .platfom_values import SiteType
-from ..events import InitializeCommand
 from ..workload.workload import TaskDag, ResourceRequest
 
 
@@ -46,8 +45,8 @@ class Platform:
     sites: List[Site] = field(default_factory=list)
 
     @classmethod
-    def create_site_from_init_command(cls, cmd: InitializeCommand) -> "Platform":
+    def create_site_from_dict(cls, platform_dict: Dict) -> "Platform":
         sites: List[Site] = []
-        for site in cmd.platform:
+        for site in platform_dict:
             sites.append(Site.create_site_from_dict(site))
         return Platform(sites)

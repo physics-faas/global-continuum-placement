@@ -1,5 +1,5 @@
 import pytest
-from changeme.container import ApplicationContainer
+from global_continuum_placement.container import ApplicationContainer
 
 
 @pytest.fixture(scope="function")

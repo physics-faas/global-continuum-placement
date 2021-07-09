@@ -27,6 +27,7 @@ def setup(app: web.Application, container: ApplicationContainer):
     app.add_routes(
         [
             web.get("/healthz", util_controller.health_check, allow_head=False),
+            web.post("/init", scheduler_controller.initialize),
         ]
     )
 
