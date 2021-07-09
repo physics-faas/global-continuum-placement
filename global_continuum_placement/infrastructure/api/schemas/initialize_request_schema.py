@@ -17,10 +17,11 @@ class SitesSchema(Schema):
     type = fields.String(
         description="Type of the site",
         enum=list(item.value for item in SiteType),
-        example="HPC"
+        example="HPC",
     )
     resources = fields.Nested(
-        ResourcesSchema, description="The entire resources existing on this site",
+        ResourcesSchema,
+        description="The entire resources existing on this site",
     )
 
 

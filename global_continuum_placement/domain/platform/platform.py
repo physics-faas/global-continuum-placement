@@ -1,8 +1,8 @@
-from dataclasses import field, dataclass
-from typing import List, Dict
+from dataclasses import dataclass, field
+from typing import Dict, List
 
+from ..workload.workload import ResourceRequest, TaskDag
 from .platfom_values import SiteType
-from ..workload.workload import TaskDag, ResourceRequest
 
 
 @dataclass
@@ -28,12 +28,13 @@ class Site:
     @classmethod
     def create_site_from_dict(cls, site_dict: Dict) -> "Site":
         resources = site_dict["resources"]
-        return Site(id=site_dict["id"],
-                    type=SiteType[site_dict["type"].to_uppercase()],
-                    total_resources=Resources(**resources),
-                    free_resources=Resources(**resources),
-                    allocated_tasks=[],
-                    )
+        return Site(
+            id=site_dict["id"],
+            type=SiteType[site_dict["type"].to_uppercase()],
+            total_resources=Resources(**resources),
+            free_resources=Resources(**resources),
+            allocated_tasks=[],
+        )
 
     def allocate(self, task: TaskDag):
         self.allocated_tasks.append(task)

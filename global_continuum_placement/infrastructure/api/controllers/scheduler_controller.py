@@ -5,9 +5,12 @@ from dependency_injector.wiring import Provide
 from global_continuum_placement.application.scheduler import SchedulerService
 from global_continuum_placement.container import ApplicationContainer
 from global_continuum_placement.domain.platform.platform import Platform
-from global_continuum_placement.infrastructure.api.schemas.error_schema import ErrorSchema
-from global_continuum_placement.infrastructure.api.schemas.initialize_request_schema import \
-    InitializeRequestSchema
+from global_continuum_placement.infrastructure.api.schemas.error_schema import (
+    ErrorSchema,
+)
+from global_continuum_placement.infrastructure.api.schemas.initialize_request_schema import (
+    InitializeRequestSchema,
+)
 
 
 @docs(
@@ -22,7 +25,7 @@ from global_continuum_placement.infrastructure.api.schemas.initialize_request_sc
 @request_schema(InitializeRequestSchema)
 async def initialize(
     request: Request,
-    scheduler: SchedulerService = Provide[ApplicationContainer.scheduler_service]
+    scheduler: SchedulerService = Provide[ApplicationContainer.scheduler_service],
 ):
     try:
         platform = Platform.create_site_from_dict(request["data"]["platform"])

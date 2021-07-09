@@ -1,4 +1,5 @@
 import pytest
+
 from global_continuum_placement.container import ApplicationContainer
 
 

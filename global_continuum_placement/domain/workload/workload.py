@@ -1,9 +1,9 @@
 import uuid
 from dataclasses import dataclass, field
-from typing import List, Dict
+from typing import Dict, List
 
-from .workload_values import TaskState
 from ..platform.platfom_values import SiteType
+from .workload_values import TaskState
 
 
 @dataclass
@@ -28,15 +28,23 @@ class TaskDag:
     next_task: List["TaskDag"] = field(default_factory=list)
 
     @classmethod
-    def _create_task_from_dict(cls, task_ids: List[str], workflow: Dict) -> List["TaskDag"]:
+    def _create_task_from_dict(
+        cls, task_ids: List[str], workflow: Dict
+    ) -> List["TaskDag"]:
         new_tasks = []
         for task_id in task_ids:
             current_task = workflow[task_id]
             new_tasks.append(
                 TaskDag(
                     id=task_id,
-                    resource_request=ResourceRequest(**current_task.get("resources", {})),
-                    next_task=cls._create_task_from_dict(current_task.get("next_tasks", []), workflow)))
+                    resource_request=ResourceRequest(
+                        **current_task.get("resources", {})
+                    ),
+                    next_task=cls._create_task_from_dict(
+                        current_task.get("next_tasks", []), workflow
+                    ),
+                )
+            )
         return new_tasks
 
     @classmethod
@@ -57,7 +65,10 @@ class Workflow:
 
     @classmethod
     def create_from_dict(cls, workflow_dict: Dict) -> "Workflow":
-        return Workflow(id=str(uuid.uuid4()), tasks_dag=TaskDag.create_dag_from_workflow(workflow_dict))
+        return Workflow(
+            id=str(uuid.uuid4()),
+            tasks_dag=TaskDag.create_dag_from_workflow(workflow_dict),
+        )
 
 
 @dataclass

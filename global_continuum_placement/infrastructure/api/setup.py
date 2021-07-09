@@ -2,7 +2,10 @@ from aiohttp import web
 from aiohttp_apispec import setup_aiohttp_apispec, validation_middleware
 
 from global_continuum_placement.container import ApplicationContainer
-from global_continuum_placement.infrastructure.api.controllers import util_controller, scheduler_controller
+from global_continuum_placement.infrastructure.api.controllers import (
+    scheduler_controller,
+    util_controller,
+)
 from global_continuum_placement.version import __version__
 
 
@@ -39,13 +42,13 @@ def setup(app: web.Application, container: ApplicationContainer):
         url="/docs/swagger.json",
         swagger_path="/docs",
         static_path="/static/swagger",
-        #securityDefinitions={
+        # securityDefinitions={
         #    "bearer": {
         #        "type": "apiKey",
         #        "name": "Authorization",
         #        "in": "header",
         #        "description": "Ryax token",
         #    }
-        #},
-        #security=[{"bearer": []}],
+        # },
+        # security=[{"bearer": []}],
     )
