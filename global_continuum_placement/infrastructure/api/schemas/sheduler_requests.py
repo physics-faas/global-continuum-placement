@@ -10,6 +10,7 @@ class ConstraintsSchema(Schema):
 class TaskSchema(Schema):
     resources = fields.Nested(ResourcesSchema)
     constraints = fields.Nested(ConstraintsSchema, many=True)
+    next_tasks = fields.List(fields.String())
 
 
 class WorkflowScheduleRequestSchema(Schema):
