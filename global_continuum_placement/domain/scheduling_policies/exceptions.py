@@ -1,0 +1,2 @@
+class NotEnoughResourcesException(Exception):
+    pass

@@ -63,3 +63,14 @@ class Platform:
         for site_id, site in platform_dict.items():
             sites.append(Site.create_site_from_dict(site_id, site))
         return Platform(sites)
+
+
+def site_has_enough_resources(site: Site, resource_request: ResourceRequest):
+    """
+    Return True if the given site has enough resource to allocate the given resource request.
+    """
+    return (
+        resource_request.memory_in_MB <= site.free_resources.memory_in_MB
+        and resource_request.nb_gpu <= site.free_resources.nb_gpu
+        and resource_request.nb_cpu <= site.free_resources.nb_cpu
+    )

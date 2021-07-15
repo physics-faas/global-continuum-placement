@@ -4,25 +4,14 @@ from typing import List
 
 from global_continuum_placement.domain.placement.placement import Placement
 from global_continuum_placement.domain.platform.platform import Platform, Site
+from global_continuum_placement.domain.scheduling_policies import first_fit
 from global_continuum_placement.domain.workload.workload import (
     PlacementConstraint,
-    ResourceRequest,
     TaskDag,
     Workload,
 )
 
 logger = logging.getLogger(__name__)
-
-
-def site_has_enough_resources(site: Site, resource_request: ResourceRequest):
-    """
-    Return True if the given site has enough resource to allocate the given resource request.
-    """
-    return (
-        resource_request.memory_in_MB <= site.free_resources.memory_in_MB
-        and resource_request.nb_gpu <= site.free_resources.nb_gpu
-        and resource_request.nb_cpu <= site.free_resources.nb_cpu
-    )
 
 
 @dataclass
@@ -72,11 +61,8 @@ class SchedulerService:
         # FIST FIT
         # TODO Implement smarter scheduling policy!
         # Here we always schedule the task to the first site with enough available Resources
-        for site in valid_sites:
-            if site_has_enough_resources(site, task.resource_request):
-                site.allocate(task)
-                placements.append(Placement(site.id, task.id))
-                break
+        placement = first_fit.apply(task, valid_sites)
+        placements.append(placement)
 
         # Recursion
         for task in task.next_task:
