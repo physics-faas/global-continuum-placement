@@ -26,7 +26,7 @@ class TaskDag:
     # WARNING: Multiple constraints defined are resolved with a logical OR.
     placement_constraints: List[PlacementConstraint] = field(default_factory=list)
     state: TaskState = field(default=TaskState.NONE)
-    next_task: List["TaskDag"] = field(default_factory=list)
+    next_tasks: List["TaskDag"] = field(default_factory=list)
 
     @classmethod
     def _create_task_from_dict(
@@ -45,7 +45,7 @@ class TaskDag:
                         PlacementConstraint(**constraint)
                         for constraint in current_task.get("constraints", [])
                     ],
-                    next_task=cls._create_task_from_dict(
+                    next_tasks=cls._create_task_from_dict(
                         current_task.get("next_tasks", []), workflow
                     ),
                 )

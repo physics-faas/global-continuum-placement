@@ -33,9 +33,37 @@ to the respective T3.1, T4.1 and T4.2.T
 
 ## Setup
 
-TODO: Details about development environment setup.
+Install poetry, then run:
+```
+poetry install
+poetry shell
+./main.py
+```
+
+## Usage
+
+Initialize with a platform description through a REST API:
+```
+curl -X POST -H "Content-Type: application/json" -d '{"platform": {"site1": {"type": "Edge", "resources": {"nb_cpu": 1, "nb_gpu": 0, "memory_in_MB": 1024}}, "site2": {"type": "Edge", "resources": {"nb_cpu": 2, "nb_gpu": 1, "memory_in_MB": 4096}}, "site3": {"type": "HPC", "resources": {"nb_cpu": 1000, "nb_gpu": 50, "memory_in_MB": 16000000} } }}' http://127.0.0.1:8080/init 
+"OK"
+```
+Then, we can ask for the scheduler to allocate our workflow tasks on the sites with different constraints:
+```
+curl -H "Content-Type: application/json" -d '{"name": "test", "workflow": {"task1": {"resources": {"nb_cpu": 2},  "constraints": [{"site": "site3"}], "next_tasks": ["task2"]}, "task2": {"resources": {"nb_cpu": 2, "nb_gpu": 1},  "constraints": [{"site_type": "Edge"}]}}}' http://127.0.0.1:8080/schedule
+[{"task": "task1", "site": "site3"}, {"task": "task2", "site": "site2"}]
+```
+
+The scheduler is pretty simple for now, it allocates with a First Fit policy and if a task does not fit the constraints it is not allocated.
 
 ## Development
+
+Run linter with:
+```shell
+poetry shell
+./lint.sh -f
+```
+
+### Add features
 
 1. Write a FAILING test
 2. Run it

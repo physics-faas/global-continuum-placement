@@ -16,6 +16,7 @@ def init():
     # Override with env variables
     container.configuration.log_level.from_env("LOG_LEVEL", "INFO")
     # TODO: Add other configurations here
+    container.configuration.policy.from_env("POLICY", "first_fit")
 
     # Setup logging
     str_level = container.configuration.log_level()

@@ -11,4 +11,4 @@ class ApplicationContainer(containers.DeclarativeContainer):
     configuration = providers.Configuration()
 
     # TODO Inject scheduling policy here
-    scheduler_service = Singleton(SchedulerService)
+    scheduler_service = Singleton(SchedulerService, configuration.policy)

@@ -17,12 +17,15 @@ logger = logging.getLogger(__name__)
 @dataclass
 class SchedulerService:
     # TODO  move them to a DB
+    policy: str
     platform: Platform = field(default=None)
     workload: Workload = field(default_factory=Workload.create)
 
     def resolve_constraints(self, constraints: List[PlacementConstraint]) -> List[Site]:
         """
         Return a list of sites that fit the constraints
+
+        All constraints are applied with a logical OR
         """
         site_that_fit: List[Site] = []
         platform = self.platform
@@ -57,15 +60,16 @@ class SchedulerService:
         valid_sites: List[Site] = self.resolve_constraints(task.placement_constraints)
 
         # Apply scheduling policy
-        # TODO Make the scheduling policy configurable
-        # FIST FIT
         # TODO Implement smarter scheduling policy!
+        if self.policy == "first_fit":
+            placement = first_fit.apply(task, valid_sites)
+        else:
+            raise Exception(f"Unimplemented policy {self.policy}")
         # Here we always schedule the task to the first site with enough available Resources
-        placement = first_fit.apply(task, valid_sites)
         placements.append(placement)
 
         # Recursion
-        for task in task.next_task:
+        for task in task.next_tasks:
             placements.extend(self.schedule_task(task))
 
         return placements
