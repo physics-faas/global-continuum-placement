@@ -57,11 +57,23 @@ The scheduler is pretty simple for now, it allocates with a First Fit policy and
 
 ## Development
 
-Run linter with:
+Setup the environment:
 ```shell
+poetry install
 poetry shell
+```
+
+In the same terminal run linter with:
+```shell
 ./lint.sh -f
 ```
+
+Run the tests:
+```shell
+./test.sh
+```
+
+
 
 ### Add features
 

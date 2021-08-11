@@ -17,9 +17,9 @@ logger = logging.getLogger(__name__)
 @dataclass
 class SchedulerService:
     # TODO  move them to a DB
-    policy: str
     platform: Platform = field(default=None)
     workload: Workload = field(default_factory=Workload.create)
+    policy: str = "first_fit"
 
     def resolve_constraints(self, constraints: List[PlacementConstraint]) -> List[Site]:
         """
