@@ -1,5 +1,8 @@
-from infrastructure.api.schemas.initialize_request_schema import ResourcesSchema
 from marshmallow import Schema, fields
+
+from global_continuum_placement.infrastructure.api.schemas.initialize_request_schema import (
+    ResourcesSchema,
+)
 
 
 class ConstraintsSchema(Schema):
