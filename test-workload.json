@@ -1,0 +1,48 @@
+{
+  "name": "test",
+  "workflow": {
+    "task1": {
+      "resources": {
+        "nb_cpu": 1
+      },
+      "next_tasks": [
+        "task2"
+      ],
+      "constraints": [
+        {
+          "site": "site3"
+        }
+      ],
+      "architecture": "x86_64"
+    },
+    "task2": {
+      "resources": {
+        "nb_cpu": 2
+      },
+      "next_tasks": [
+        "task3",
+        "task4"
+      ]
+    },
+    "task3": {
+      "resources": {
+        "nb_cpu": 2
+      }
+    },
+    "task4": {
+      "resources": {
+        "nb_cpu": 2
+      },
+      "next_tasks": [
+        "task5"
+      ],
+      "architecture": "arm64"
+    },
+    "task5": {
+      "resources": {
+        "nb_cpu": 2,
+        "memory_in_MB": 1000
+      }
+    }
+  }
+}

@@ -42,15 +42,91 @@ poetry shell
 
 ## Usage
 
-Initialize with a platform description through a REST API:
+Create a platform file like this one in ./test-platform.json:
+```json
+{
+    "platform": {
+        "site1": {
+            "type": "Edge",
+            "resources": {"nb_cpu": 1, "nb_gpu": 0, "memory_in_MB": 1024},
+            "architecture": "x86_64"
+        },
+        "site2": {
+            "type": "Edge",
+            "resources": {"nb_cpu": 2, "nb_gpu": 1, "memory_in_MB": 4096},
+            "architecture": "arm64"
+        },
+        "site3": {
+            "type": "HPC",
+            "resources": {"nb_cpu": 1000, "nb_gpu": 50, "memory_in_MB": 16000000}
+        }
+    }
+}
 ```
-curl -X POST -H "Content-Type: application/json" -d '{"platform": {"site1": {"type": "Edge", "resources": {"nb_cpu": 1, "nb_gpu": 0, "memory_in_MB": 1024}}, "site2": {"type": "Edge", "resources": {"nb_cpu": 2, "nb_gpu": 1, "memory_in_MB": 4096}}, "site3": {"type": "HPC", "resources": {"nb_cpu": 1000, "nb_gpu": 50, "memory_in_MB": 16000000} } }}' http://127.0.0.1:8080/init 
-"OK"
+Initialize with a platform description through a REST API:
+```sh
+curl -X POST -H "Content-Type: application/json" -d @test-platform.json http://127.0.0.1:8080/init 
+```
+
+Create a workload in a file like test-workload.json:
+
+```json
+{
+  "name": "test",
+  "workflow": {
+    "task1": {
+      "resources": {
+        "nb_cpu": 1
+      },
+      "next_tasks": [
+        "task2"
+      ],
+      "constraints": [
+        {
+          "site": "site3"
+        }
+      ],
+      "architecture": "X86_64"
+    },
+    "task2": {
+      "resources": {
+        "nb_cpu": 2
+      },
+      "next_tasks": [
+        "task3",
+        "task4"
+      ]
+    },
+    "task3": {
+      "resources": {
+        "nb_cpu": 2
+      }
+    },
+    "task4": {
+      "resources": {
+        "nb_cpu": 2
+      },
+      "next_tasks": [
+        "task5"
+      ]
+    },
+    "task5": {
+      "resources": {
+        "nb_cpu": 2,
+        "memory_in_MB": 1000
+      }
+    }
+  }
+}
 ```
 Then, we can ask for the scheduler to allocate our workflow tasks on the sites with different constraints:
+```sh
+curl -H "Content-Type: application/json" -d @test-workload.json http://127.0.0.1:8080/schedule
 ```
-curl -H "Content-Type: application/json" -d '{"name": "test", "workflow": {"task1": {"resources": {"nb_cpu": 2},  "constraints": [{"site": "site3"}], "next_tasks": ["task2"]}, "task2": {"resources": {"nb_cpu": 2, "nb_gpu": 1},  "constraints": [{"site_type": "Edge"}]}}}' http://127.0.0.1:8080/schedule
-[{"task": "task1", "site": "site3"}, {"task": "task2", "site": "site2"}]
+
+The result should be:
+```json
+[{"task": "task1", "site": "site3"}, {"task": "task2", "site": "site3"}, {"task": "task3", "site": "site3"}, {"task": "task4", "site": "site2"}, {"task": "task5", "site": "site3"}]
 ```
 
 The scheduler is pretty simple for now, it allocates with a First Fit policy and if a task does not fit the constraints it is not allocated.

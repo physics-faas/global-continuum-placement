@@ -27,7 +27,7 @@ class SitesSchema(Schema):
         ResourcesSchema,
         description="The entire resources existing on this site",
     )
-    architecture = fields.String(validate=OneOf(list(ArchitectureType)))
+    architecture = fields.String(validate=OneOf(ArchitectureType.list()))
 
 
 class InitializeRequestSchema(Schema):

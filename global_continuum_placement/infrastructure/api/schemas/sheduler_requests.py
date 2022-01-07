@@ -16,7 +16,7 @@ class TaskSchema(Schema):
     resources = fields.Nested(ResourcesSchema)
     constraints = fields.Nested(ConstraintsSchema, many=True)
     next_tasks = fields.List(fields.String())
-    architecture = fields.String(validate=OneOf(list(ArchitectureType)))
+    architecture = fields.String(validate=OneOf(ArchitectureType.list()))
 
 
 class WorkflowScheduleRequestSchema(Schema):
