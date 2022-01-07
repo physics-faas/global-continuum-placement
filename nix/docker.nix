@@ -1,7 +1,5 @@
 {
   dockerTools,
-  ryaxBaseImage,
-  ryaxBaseImageConfig,
   global_continuum_placement,
   # Deploy script dependencies
   pythonPackages,
@@ -12,9 +10,7 @@ dockerTools.buildImage {
   inherit tag;
   contents = [ global_continuum_placement ];
 
-  fromImage = ryaxBaseImage;
-
-  config = ryaxBaseImageConfig // {
+  config = {
     EntryPoint = [ "/bin/pgcp" ];
     Env = [
       "TMP_DIR=/tmp"
