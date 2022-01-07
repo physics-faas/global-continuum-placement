@@ -1,8 +1,8 @@
 from dataclasses import dataclass, field
-from typing import Dict, List, Union
+from typing import Dict, List, Optional, Union
 
 from ..workload.workload import ResourceRequest, TaskDag
-from .platfom_values import SiteType
+from .platfom_values import ArchitectureType, SiteType
 
 
 @dataclass
@@ -28,14 +28,22 @@ class Site:
     total_resources: Resources
     free_resources: Resources
     allocated_tasks: List[TaskDag]
+    # Each set of resource is considered homogeneous: Only one architecture per set of resources
+    architecture: ArchitectureType = ArchitectureType.X86_64
 
     @classmethod
     def create_site_from_dict(
         cls, site_id: str, site_dict: Dict[str, Union[str, Dict[str, int]]]
     ) -> "Site":
         try:
-            resources = site_dict["resources"]
-            type = site_dict["type"]
+            resources: Dict[str, int] = site_dict["resources"]
+            type: str = site_dict["type"]
+            architecture_raw: Optional[str] = site_dict.get("architecture")
+            architecture = (
+                ArchitectureType[architecture_raw.upper()]
+                if architecture_raw
+                else ArchitectureType.X86_64
+            )
         except KeyError as err:
             raise InvalidSiteDefinition(
                 f"Missing element in the Site definition: {err}"
@@ -46,6 +54,7 @@ class Site:
             total_resources=Resources(**resources),
             free_resources=Resources(**resources),
             allocated_tasks=[],
+            architecture=architecture,
         )
 
     def allocate(self, task: TaskDag):

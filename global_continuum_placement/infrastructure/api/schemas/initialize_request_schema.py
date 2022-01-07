@@ -1,6 +1,10 @@
 from marshmallow import Schema, fields
+from marshmallow.validate import OneOf
 
-from global_continuum_placement.domain.platform.platfom_values import SiteType
+from global_continuum_placement.domain.platform.platfom_values import (
+    ArchitectureType,
+    SiteType,
+)
 
 
 class ResourcesSchema(Schema):
@@ -23,6 +27,7 @@ class SitesSchema(Schema):
         ResourcesSchema,
         description="The entire resources existing on this site",
     )
+    architecture = fields.String(validate=OneOf(list(ArchitectureType)))
 
 
 class InitializeRequestSchema(Schema):

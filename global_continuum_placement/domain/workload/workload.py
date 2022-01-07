@@ -1,9 +1,13 @@
 import uuid
 from dataclasses import dataclass, field
-from typing import Dict, List
+from typing import Dict, List, Optional
 
-from ..platform.platfom_values import SiteType
+from ..platform.platfom_values import ArchitectureType, SiteType
 from .workload_values import TaskState
+
+
+class UnknownArchitectureError(BaseException):
+    pass
 
 
 @dataclass
@@ -15,15 +19,16 @@ class ResourceRequest:
 
 @dataclass
 class PlacementConstraint:
-    site: str = field(default=None)
-    site_type: SiteType = field(default=None)
+    site: Optional[str] = None
+    site_type: Optional[SiteType] = None
 
 
 @dataclass
 class TaskDag:
-    id: str = field(default=None)
-    resource_request: ResourceRequest = field(default_factory=None)
-    # WARNING: Multiple constraints defined are resolved with a logical OR.
+    id: str
+    architecture_constraint: ArchitectureType
+    resource_request: ResourceRequest
+    # WARNING: Multiple placement constraints defined are resolved with a logical OR.
     placement_constraints: List[PlacementConstraint] = field(default_factory=list)
     state: TaskState = field(default=TaskState.NONE)
     next_tasks: List["TaskDag"] = field(default_factory=list)
@@ -35,6 +40,17 @@ class TaskDag:
         new_tasks = []
         for task_id in task_ids:
             current_task = workflow[task_id]
+            architecture = current_task.get("architecture")
+            try:
+                architecture_constraint = (
+                    ArchitectureType[architecture.upper()]
+                    if architecture
+                    else ArchitectureType.X86_64
+                )
+            except KeyError:
+                raise UnknownArchitectureError(
+                    f"Architecture {architecture} is not recognised. Available architectures are {', '.join(ArchitectureType.list())}."
+                )
             new_tasks.append(
                 TaskDag(
                     id=task_id,
@@ -42,9 +58,15 @@ class TaskDag:
                         **current_task.get("resources", {})
                     ),
                     placement_constraints=[
-                        PlacementConstraint(**constraint)
+                        PlacementConstraint(
+                            site=constraint.get("site"),
+                            site_type=SiteType[constraint["site_type"].upper()]
+                            if constraint.get("site_type")
+                            else None,
+                        )
                         for constraint in current_task.get("constraints", [])
                     ],
+                    architecture_constraint=architecture_constraint,
                     next_tasks=cls._create_task_from_dict(
                         current_task.get("next_tasks", []), workflow
                     ),
@@ -65,8 +87,8 @@ class TaskDag:
 
 @dataclass
 class Workflow:
-    id: str = field(default=None)
-    tasks_dag: TaskDag = field(default=None)
+    id: str
+    tasks_dag: TaskDag
 
     @classmethod
     def create_from_dict(cls, workflow_dict: Dict) -> "Workflow":
@@ -78,7 +100,7 @@ class Workflow:
 
 @dataclass
 class Workload:
-    id: str = field(default=None)
+    id: str
     workflows: Dict[str, Workflow] = field(default_factory=dict)
 
     @classmethod

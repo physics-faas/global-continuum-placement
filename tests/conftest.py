@@ -19,6 +19,7 @@ def platform_dict():
         "site2": {
             "type": "Edge",
             "resources": {"nb_cpu": 2, "nb_gpu": 1, "memory_in_MB": 4096},
+            "architecture": "arm64",
         },
         "site3": {
             "type": "HPC",

@@ -6,10 +6,12 @@ def test_create_platform_from_dict():
         "site1": {
             "type": "Edge",
             "resources": {"nb_cpu": 1, "nb_gpu": 0, "memory_in_MB": 1024},
+            "architecture": "x86_64",
         },
         "site2": {
             "type": "Edge",
             "resources": {"nb_cpu": 2, "nb_gpu": 1, "memory_in_MB": 4096},
+            "architecture": "arm64",
         },
         "site3": {
             "type": "HPC",

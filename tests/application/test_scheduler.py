@@ -8,7 +8,10 @@ from global_continuum_placement.domain.platform.platform import Platform
 from global_continuum_placement.domain.scheduling_policies.exceptions import (
     NotEnoughResourcesException,
 )
-from global_continuum_placement.domain.workload.workload import Workflow
+from global_continuum_placement.domain.workload.workload import (
+    UnknownArchitectureError,
+    Workflow,
+)
 
 
 def test_scheduler_schedule_without_constraints(platform_dict, workflow_dict):
@@ -80,6 +83,38 @@ def test_scheduler_schedule_not_enough_resources(
     ],
 )
 def test_scheduler_schedule_site_constraints(
+    platform_dict, workflow_dict, expected_placements
+):
+    workflow = Workflow.create_from_dict(workflow_dict)
+    platform = Platform.create_from_dict(platform_dict)
+    scheduler = SchedulerService(platform)
+    scheduler.workload.workflows[workflow.id] = workflow
+    placements: List[Placement] = scheduler.schedule()
+    assert placements == expected_placements
+
+
+def test_scheduler_architecture_invalid_constraint():
+    workflow_dict = {"task1": {"resources": {"nb_cpu": 1}, "architecture": "NOTEXITS"}}
+    with pytest.raises(UnknownArchitectureError):
+        Workflow.create_from_dict(workflow_dict)
+
+
+@pytest.mark.parametrize(
+    "workflow_dict,expected_placements",
+    [
+        pytest.param(
+            {"task1": {"resources": {"nb_cpu": 1}, "architecture": "arm64"}},
+            [Placement("site2", "task1")],
+            id="arm64 constraint",
+        ),
+        pytest.param(
+            {"task1": {"resources": {"nb_cpu": 1}, "architecture": "x86_64"}},
+            [Placement("site1", "task1")],
+            id="x86_64 constraint",
+        ),
+    ],
+)
+def test_scheduler_architecture_constraints(
     platform_dict, workflow_dict, expected_placements
 ):
     workflow = Workflow.create_from_dict(workflow_dict)
