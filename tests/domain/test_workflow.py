@@ -8,6 +8,7 @@ def test_create_workload_from_dict():
             "next_tasks": ["task2"],
             "constraints": [{"site": "site3"}],
             "architecture": "X86_64",
+            "profile": {"cpu": "low", "io": "medium", "mem": "high"},
         },
         "task2": {"resources": {"nb_cpu": 2}, "next_tasks": ["task3", "task4"]},
         "task3": {

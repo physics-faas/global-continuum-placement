@@ -3,10 +3,14 @@ from dataclasses import dataclass, field
 from typing import Dict, List, Optional
 
 from ..platform.platfom_values import ArchitectureType, SiteType
-from .workload_values import TaskState
+from .workload_values import TaskProfileLevel, TaskState
 
 
 class UnknownArchitectureError(BaseException):
+    pass
+
+
+class UnknownTaskProfileLevelError(BaseException):
     pass
 
 
@@ -24,10 +28,37 @@ class PlacementConstraint:
 
 
 @dataclass
+class TaskProfile:
+    cpu: Optional[TaskProfileLevel]
+    mem: Optional[TaskProfileLevel]
+    io: Optional[TaskProfileLevel]
+
+    @staticmethod
+    def create_from_dict(profile_dict: Dict):
+        try:
+            return TaskProfile(
+                cpu=TaskProfileLevel[profile_dict["cpu"].upper()]
+                if "cpu" in profile_dict
+                else None,
+                mem=TaskProfileLevel[profile_dict["mem"].upper()]
+                if "cpu" in profile_dict
+                else None,
+                io=TaskProfileLevel[profile_dict["io"].upper()]
+                if "cpu" in profile_dict
+                else None,
+            )
+        except KeyError as err:
+            raise UnknownTaskProfileLevelError(
+                f"Task profile level {err} is not recognised. Available profiles are {', '.join(TaskProfileLevel.list())}."
+            )
+
+
+@dataclass
 class TaskDag:
     id: str
     architecture_constraint: ArchitectureType
     resource_request: ResourceRequest
+    profile: TaskProfile
     # WARNING: Multiple placement constraints defined are resolved with a logical OR.
     placement_constraints: List[PlacementConstraint] = field(default_factory=list)
     state: TaskState = field(default=TaskState.NONE)
@@ -51,11 +82,15 @@ class TaskDag:
                 raise UnknownArchitectureError(
                     f"Architecture {architecture} is not recognised. Available architectures are {', '.join(ArchitectureType.list())}."
                 )
+
             new_tasks.append(
                 TaskDag(
                     id=task_id,
                     resource_request=ResourceRequest(
                         **current_task.get("resources", {})
+                    ),
+                    profile=TaskProfile.create_from_dict(
+                        current_task.get("profile", {})
                     ),
                     placement_constraints=[
                         PlacementConstraint(

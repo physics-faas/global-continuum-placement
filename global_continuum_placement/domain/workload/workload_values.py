@@ -6,3 +6,13 @@ class TaskState(Enum):
     SUBMITTED = "Submitted"
     RUNNING = "Running"
     DONE = "Done"
+
+
+class TaskProfileLevel(Enum):
+    LOW = "Low"
+    MEDIUM = "Medium"
+    HIGH = "High"
+
+    @staticmethod
+    def list():
+        return list(map(lambda c: c.value, TaskProfileLevel))
