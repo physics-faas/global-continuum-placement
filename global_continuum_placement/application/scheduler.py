@@ -1,6 +1,6 @@
 import logging
 from dataclasses import dataclass, field
-from typing import List
+from typing import Dict, List
 
 from global_continuum_placement.domain.placement.placement import Placement
 from global_continuum_placement.domain.platform.platfom_values import ArchitectureType
@@ -10,6 +10,10 @@ from global_continuum_placement.domain.workload.workload import (
     PlacementConstraint,
     TaskDag,
     Workload,
+)
+from global_continuum_placement.domain.workload.workload_values import (
+    Levels,
+    Objectives,
 )
 
 logger = logging.getLogger(__name__)
@@ -22,8 +26,9 @@ class SchedulerService:
     workload: Workload = field(default_factory=Workload.create)
     policy: str = "first_fit"
 
+    @staticmethod
     def resolve_placement_constraints(
-        self, constraints: List[PlacementConstraint], sites: List[Site]
+        constraints: List[PlacementConstraint], sites: List[Site]
     ) -> List[Site]:
         """
         Return a list of sites that fit the constraints
@@ -55,8 +60,9 @@ class SchedulerService:
 
         return site_that_fit
 
+    @staticmethod
     def resolve_architecture_constraints(
-        self, architecture_constraint: ArchitectureType, sites: List[Site]
+        architecture_constraint: ArchitectureType, sites: List[Site]
     ) -> List[Site]:
         site_that_fit: List[Site] = []
 
@@ -65,7 +71,21 @@ class SchedulerService:
                 site_that_fit.append(site)
         return site_that_fit
 
-    def schedule_task(self, task: TaskDag) -> List[Placement]:
+    @staticmethod
+    def score_on_objectives(
+        objectives: Dict[Objectives, Levels], valid_sites
+    ) -> Dict[str, float]:
+        scores: Dict[str, float] = {site.id: 0 for site in valid_sites}
+        for objective, level in objectives.items():
+            for site in valid_sites:
+                scores[site.id] = scores[site.id] + (
+                    site.objective_scores[objective] * level.value
+                )
+        return scores
+
+    def schedule_task(
+        self, task: TaskDag, objectives: Dict[Objectives, Levels]
+    ) -> List[Placement]:
         placements: List[Placement] = []
 
         valid_sites: List[Site] = self.platform.sites
@@ -81,6 +101,12 @@ class SchedulerService:
             task.architecture_constraint, valid_sites
         )
 
+        # Apply scoring functions
+        # 1. Score on objectives
+        scores = self.score_on_objectives(objectives, valid_sites)
+
+        valid_sites = sorted(valid_sites, key=lambda x: scores[x.id])
+
         # Apply scheduling policy
         # TODO Implement smarter scheduling policy!
         if self.policy == "first_fit":
@@ -92,7 +118,7 @@ class SchedulerService:
 
         # Recursion
         for task in task.next_tasks:
-            placements.extend(self.schedule_task(task))
+            placements.extend(self.schedule_task(task, objectives))
 
         return placements
 
@@ -100,6 +126,8 @@ class SchedulerService:
         placements: List[Placement] = []
 
         for workflow in self.workload.workflows.values():
-            placements.extend(self.schedule_task(workflow.tasks_dag))
+            placements.extend(
+                self.schedule_task(workflow.tasks_dag, workflow.objectives)
+            )
 
         return placements

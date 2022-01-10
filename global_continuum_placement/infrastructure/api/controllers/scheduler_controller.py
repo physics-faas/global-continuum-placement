@@ -69,7 +69,7 @@ async def schedule(
     scheduler: SchedulerService = Provide[ApplicationContainer.scheduler_service],
 ):
     try:
-        workflow = Workflow.create_from_dict(request["data"]["workflow"])
+        workflow = Workflow.create_from_dict(request["data"])
         workflow_id = request["data"]["name"]
         scheduler.workload.workflows[workflow_id] = workflow
         placements = scheduler.schedule()

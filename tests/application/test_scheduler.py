@@ -15,7 +15,7 @@ from global_continuum_placement.domain.workload.workload import (
 
 
 def test_scheduler_schedule_without_constraints(platform_dict, workflow_dict):
-    workflow = Workflow.create_from_dict(workflow_dict)
+    workflow = Workflow.create_from_dict({"tasks": workflow_dict})
     platform = Platform.create_from_dict(platform_dict)
     scheduler = SchedulerService(platform)
     scheduler.workload.workflows[workflow.id] = workflow
@@ -44,7 +44,7 @@ def test_scheduler_schedule_not_enough_resources(
     platform_dict,
     workflow_dict,
 ):
-    workflow = Workflow.create_from_dict(workflow_dict)
+    workflow = Workflow.create_from_dict({"tasks": workflow_dict})
     platform = Platform.create_from_dict(platform_dict)
     scheduler = SchedulerService(platform)
     scheduler.workload.workflows[workflow.id] = workflow
@@ -85,7 +85,7 @@ def test_scheduler_schedule_not_enough_resources(
 def test_scheduler_schedule_site_constraints(
     platform_dict, workflow_dict, expected_placements
 ):
-    workflow = Workflow.create_from_dict(workflow_dict)
+    workflow = Workflow.create_from_dict({"tasks": workflow_dict})
     platform = Platform.create_from_dict(platform_dict)
     scheduler = SchedulerService(platform)
     scheduler.workload.workflows[workflow.id] = workflow
@@ -94,7 +94,9 @@ def test_scheduler_schedule_site_constraints(
 
 
 def test_scheduler_architecture_invalid_constraint():
-    workflow_dict = {"task1": {"resources": {"nb_cpu": 1}, "architecture": "NOTEXITS"}}
+    workflow_dict = {
+        "tasks": {"task1": {"resources": {"nb_cpu": 1}, "architecture": "NOTEXITS"}}
+    }
     with pytest.raises(UnknownArchitectureError):
         Workflow.create_from_dict(workflow_dict)
 
@@ -117,9 +119,12 @@ def test_scheduler_architecture_invalid_constraint():
 def test_scheduler_architecture_constraints(
     platform_dict, workflow_dict, expected_placements
 ):
-    workflow = Workflow.create_from_dict(workflow_dict)
+    workflow = Workflow.create_from_dict({"tasks": workflow_dict})
     platform = Platform.create_from_dict(platform_dict)
     scheduler = SchedulerService(platform)
     scheduler.workload.workflows[workflow.id] = workflow
     placements: List[Placement] = scheduler.schedule()
     assert placements == expected_placements
+
+
+# FIXME Add tests for the scoring on objectives function
