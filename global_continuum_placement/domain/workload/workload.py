@@ -41,10 +41,10 @@ class TaskProfile:
                 if "cpu" in profile_dict
                 else None,
                 mem=TaskProfileLevel[profile_dict["mem"].upper()]
-                if "cpu" in profile_dict
+                if "mem" in profile_dict
                 else None,
                 io=TaskProfileLevel[profile_dict["io"].upper()]
-                if "cpu" in profile_dict
+                if "io" in profile_dict
                 else None,
             )
         except KeyError as err:
