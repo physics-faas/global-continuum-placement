@@ -1,6 +1,10 @@
 {
   "name": "test",
-  "workflow": {
+  "objectives": {
+    "Energy": "high",
+    "Resilience": "low"
+  },
+  "tasks": {
     "task1": {
       "resources": {
         "nb_cpu": 1

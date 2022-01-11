@@ -1,4 +1,5 @@
 from enum import Enum
+from typing import List
 
 
 class TaskState(Enum):
@@ -6,3 +7,23 @@ class TaskState(Enum):
     SUBMITTED = "Submitted"
     RUNNING = "Running"
     DONE = "Done"
+
+
+class Levels(Enum):
+    LOW = 0.2
+    MEDIUM = 0.5
+    HIGH = 1
+
+    @classmethod
+    def list(cls) -> List[str]:
+        return list(map(lambda c: c.name.lower(), cls))  # type: ignore
+
+
+class Objectives(Enum):
+    ENERGY = "Energy"
+    PERFORMANCE = "Performance"
+    RESILIENCE = "Resilience"
+
+    @classmethod
+    def list(cls) -> List[str]:
+        return list(map(lambda c: c.value, cls))  # type: ignore

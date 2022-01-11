@@ -1,6 +1,7 @@
 import logging
 
 from aiohttp.web import Request, json_response
+from aiohttp.web_response import Response
 from aiohttp_apispec import docs, request_schema
 from dependency_injector.wiring import Provide
 
@@ -37,7 +38,7 @@ logger = logging.getLogger(__name__)
 async def initialize(
     request: Request,
     scheduler: SchedulerService = Provide[ApplicationContainer.scheduler_service],
-):
+) -> Response:
     try:
         platform = Platform.create_from_dict(request["data"]["platform"])
         scheduler.platform = platform
@@ -53,7 +54,7 @@ async def initialize(
     summary="Schedule the workload",
     description="Run the scheduler on the given workload. Returns placement mapping for each allocatable tasks.",
     responses={
-        201: {
+        200: {
             "description": "Scheduling done successfully",
             "schema": PlacementSchema(many=True),
         },
@@ -67,15 +68,10 @@ async def initialize(
 async def schedule(
     request: Request,
     scheduler: SchedulerService = Provide[ApplicationContainer.scheduler_service],
-):
-    try:
-        workflow = Workflow.create_from_dict(request["data"]["workflow"])
-        workflow_id = request["data"]["name"]
-        scheduler.workload.workflows[workflow_id] = workflow
-        placements = scheduler.schedule()
-        result = [PlacementSchema().dump(placement) for placement in placements]
-        return json_response(result, status=200)
-
-    except Exception as err:
-        logger.exception(err)
-        return json_response(ErrorSchema().dump({"error": str(err)}), status=500)
+) -> Response:
+    workflow = Workflow.create_from_dict(request["data"])
+    workflow_id = request["data"]["name"]
+    scheduler.workload.workflows[workflow_id] = workflow
+    placements = scheduler.schedule()
+    result = [PlacementSchema().dump(placement) for placement in placements]
+    return json_response(result, status=200)

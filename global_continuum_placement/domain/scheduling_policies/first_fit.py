@@ -8,9 +8,10 @@ from global_continuum_placement.domain.platform.platform import (
 from global_continuum_placement.domain.scheduling_policies.exceptions import (
     NotEnoughResourcesException,
 )
+from global_continuum_placement.domain.workload.workload import TaskDag
 
 
-def apply(task, valid_sites: List[Site]):
+def apply(task: TaskDag, valid_sites: List[Site]) -> Placement:
     for site in valid_sites:
         if site_has_enough_resources(site, task.resource_request):
             site.allocate(task)

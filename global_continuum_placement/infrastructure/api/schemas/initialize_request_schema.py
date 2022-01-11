@@ -5,6 +5,7 @@ from global_continuum_placement.domain.platform.platfom_values import (
     ArchitectureType,
     SiteType,
 )
+from global_continuum_placement.domain.workload.workload_values import Objectives
 
 
 class ResourcesSchema(Schema):
@@ -28,6 +29,11 @@ class SitesSchema(Schema):
         description="The entire resources existing on this site",
     )
     architecture = fields.String(validate=OneOf(ArchitectureType.list()))
+    objective_scores = fields.Dict(
+        keys=fields.String(validate=OneOf(Objectives.list())),
+        values=fields.Integer(validate=lambda x: 0 < x <= 100),
+        load_default={},
+    )
 
 
 class InitializeRequestSchema(Schema):
