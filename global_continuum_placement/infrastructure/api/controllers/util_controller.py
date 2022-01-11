@@ -1,4 +1,5 @@
 from aiohttp import web
+from aiohttp.web_response import Response
 from aiohttp_apispec import docs
 
 
@@ -14,5 +15,5 @@ from aiohttp_apispec import docs
 )
 async def health_check(
     _: web.Request,
-):
+) -> Response:
     return web.json_response("Service healthy", status=200)

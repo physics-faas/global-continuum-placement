@@ -9,7 +9,7 @@ from global_continuum_placement.infrastructure.api.controllers import (
 from global_continuum_placement.version import __version__
 
 
-def setup(app: web.Application, container: ApplicationContainer):
+def setup(app: web.Application, container: ApplicationContainer) -> None:
     """ Method to setup api """
     # Configure application container for wiring
     container.wire(

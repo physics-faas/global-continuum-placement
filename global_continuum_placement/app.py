@@ -1,14 +1,14 @@
 import logging
+from logging import getLogger
 
 from aiohttp import web
-from logfmt_logger import getLogger
 
 from .container import ApplicationContainer
 from .infrastructure.api.setup import setup as api_setup
 from .version import __version__
 
 
-def init():
+def init() -> web.Application:
     """ Init application """
     # Init application container
     container = ApplicationContainer()
@@ -23,8 +23,14 @@ def init():
     numeric_level = getattr(logging, str_level.upper(), None)
     if not isinstance(numeric_level, int):
         raise ValueError("Invalid log level: %s" % str_level)
-    logger = getLogger(__name__, numeric_level)
+    logging.basicConfig(
+        level=numeric_level,
+        format="%(asctime)s.%(msecs)03d %(levelname)-7s %(name)-22s %(message)s",
+        datefmt="%Y-%m-%d,%H:%M:%S",
+    )
+    logger = getLogger(__name__)
     logger.info("Logging level is set to %s" % str_level.upper())
+    logger.info("PHYSICS Global Continuum Placement version: %s", __version__)
 
     # Init web app
     app: web.Application = web.Application()
@@ -34,23 +40,22 @@ def init():
     return app
 
 
-async def on_startup(app: web.Application):
+async def on_startup(app: web.Application) -> None:
     """ Hooks for application startup """
     # container: ApplicationContainer = app["container"]
     # FIXME: add initialization hooks here
     pass
 
 
-async def on_cleanup(app: web.Application):
+async def on_cleanup(app: web.Application) -> None:
     """ Define hook when application stop"""
     # container: ApplicationContainer = app["container"]
     # FIXME: add cleaning hooks here
     pass
 
 
-def start():
+def start() -> None:
     """ Start application """
-    print(f"PHYSICS Global Continuum Placement version: {__version__}")
     app: web.Application = init()
     app.on_startup.append(on_startup)
     app.on_cleanup.append(on_cleanup)

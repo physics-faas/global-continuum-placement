@@ -1,7 +1,8 @@
 from dataclasses import dataclass, field
-from typing import Dict, List, Optional, Union
+from typing import Dict, List, Optional, Union, cast
 
 from ..workload.workload import ResourceRequest, TaskDag
+from ..workload.workload_values import Objectives
 from .platfom_values import ArchitectureType, SiteType
 
 
@@ -29,21 +30,32 @@ class Site:
     free_resources: Resources
     allocated_tasks: List[TaskDag]
     # Each set of resource is considered homogeneous: Only one architecture per set of resources
-    architecture: ArchitectureType = ArchitectureType.X86_64
+    architecture: ArchitectureType
+    # A score for each objectives
+    objective_scores: Dict[Objectives, int]
 
     @classmethod
     def create_site_from_dict(
         cls, site_id: str, site_dict: Dict[str, Union[str, Dict[str, int]]]
     ) -> "Site":
         try:
-            resources: Dict[str, int] = site_dict["resources"]
-            type: str = site_dict["type"]
-            architecture_raw: Optional[str] = site_dict.get("architecture")
+            resources = cast(Dict[str, int], site_dict["resources"])
+            type = cast(str, site_dict["type"])
+            architecture_raw = cast(Optional[str], site_dict.get("architecture"))
             architecture = (
                 ArchitectureType[architecture_raw.upper()]
                 if architecture_raw
                 else ArchitectureType.X86_64
             )
+            scores = {objective: 1 for objective in Objectives}
+            objectives_raw = (
+                cast(Dict[str, int], site_dict["objective_scores"])
+                if "objective_scores" in site_dict
+                else {}
+            )
+            for objective, score in objectives_raw.items():
+                scores[Objectives[objective.upper()]] = score
+
         except KeyError as err:
             raise InvalidSiteDefinition(
                 f"Missing element in the Site definition: {err}"
@@ -55,9 +67,10 @@ class Site:
             free_resources=Resources(**resources),
             allocated_tasks=[],
             architecture=architecture,
+            objective_scores=scores,
         )
 
-    def allocate(self, task: TaskDag):
+    def allocate(self, task: TaskDag) -> None:
         self.allocated_tasks.append(task)
         self.free_resources.allocate(task.resource_request)
 
@@ -74,7 +87,7 @@ class Platform:
         return Platform(sites)
 
 
-def site_has_enough_resources(site: Site, resource_request: ResourceRequest):
+def site_has_enough_resources(site: Site, resource_request: ResourceRequest) -> bool:
     """
     Return True if the given site has enough resource to allocate the given resource request.
     """
