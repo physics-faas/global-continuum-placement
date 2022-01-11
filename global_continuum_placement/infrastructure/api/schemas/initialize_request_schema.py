@@ -31,7 +31,7 @@ class SitesSchema(Schema):
     architecture = fields.String(validate=OneOf(ArchitectureType.list()))
     objective_scores = fields.Dict(
         keys=fields.String(validate=OneOf(Objectives.list())),
-        values=fields.Integer(validate=lambda x: 0 > x > 100),
+        values=fields.Integer(validate=lambda x: 0 < x <= 100),
         load_default={},
     )
 

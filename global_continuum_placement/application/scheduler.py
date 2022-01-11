@@ -22,7 +22,7 @@ logger = logging.getLogger(__name__)
 @dataclass
 class SchedulerService:
     # TODO  move them to a DB
-    platform: Platform
+    platform: Platform = None
     workload: Workload = field(default_factory=Workload.create)
     policy: str = "first_fit"
 

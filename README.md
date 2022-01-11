@@ -45,22 +45,25 @@ poetry shell
 Create a platform file like this one in ./test-platform.json:
 ```json
 {
-    "platform": {
-        "site1": {
-            "type": "Edge",
-            "resources": {"nb_cpu": 1, "nb_gpu": 0, "memory_in_MB": 1024},
-            "architecture": "x86_64"
-        },
-        "site2": {
-            "type": "Edge",
-            "resources": {"nb_cpu": 2, "nb_gpu": 1, "memory_in_MB": 4096},
-            "architecture": "arm64"
-        },
-        "site3": {
-            "type": "HPC",
-            "resources": {"nb_cpu": 1000, "nb_gpu": 50, "memory_in_MB": 16000000}
-        }
+  "platform": {
+    "site1": {
+      "type": "Edge",
+      "resources": {"nb_cpu": 4, "nb_gpu": 0, "memory_in_MB": 1024},
+      "architecture": "x86_64",
+      "objective_scores": {"Energy": 60, "Resilience": 5, "Performance": 25}
+    },
+    "site2": {
+      "type": "Edge",
+      "resources": {"nb_cpu": 2, "nb_gpu": 1, "memory_in_MB": 4096},
+      "architecture": "arm64",
+      "objective_scores": {"Energy": 100, "Resilience": 30, "Performance": 50}
+    },
+    "site3": {
+      "type": "HPC",
+      "resources": {"nb_cpu": 1000, "nb_gpu": 50, "memory_in_MB": 16e6},
+      "objective_scores": {"Energy": 10, "Resilience": 80, "Performance": 100}
     }
+  }
 }
 ```
 Initialize with a platform description through a REST API:
@@ -73,7 +76,11 @@ Create a workload in a file like test-workload.json:
 ```json
 {
   "name": "test",
-  "workflow": {
+  "objectives": {
+    "Energy": "high",
+    "Resilience": "low"
+  },
+  "tasks": {
     "task1": {
       "resources": {
         "nb_cpu": 1
@@ -86,7 +93,7 @@ Create a workload in a file like test-workload.json:
           "site": "site3"
         }
       ],
-      "architecture": "X86_64"
+      "architecture": "x86_64"
     },
     "task2": {
       "resources": {
@@ -108,7 +115,8 @@ Create a workload in a file like test-workload.json:
       },
       "next_tasks": [
         "task5"
-      ]
+      ],
+      "architecture": "arm64"
     },
     "task5": {
       "resources": {
@@ -124,12 +132,20 @@ Then, we can ask for the scheduler to allocate our workflow tasks on the sites w
 curl -H "Content-Type: application/json" -d @test-workload.json http://127.0.0.1:8080/schedule
 ```
 
-The result should be:
+The result is should be:
 ```json
-[{"task": "task1", "site": "site3"}, {"task": "task2", "site": "site3"}, {"task": "task3", "site": "site3"}, {"task": "task4", "site": "site2"}, {"task": "task5", "site": "site3"}]
+[{"task": "task1", "site": "site3"}, {"task": "task2", "site": "site1"}, {"task": "task3", "site": "site1"}, {"task": "task4", "site": "site2"}, {"task": "task5", "site": "site3"}]
 ```
 
-The scheduler is pretty simple for now, it allocates with a First Fit policy and if a task does not fit the constraints it is not allocated.
+### Scheduling Algorithm
+
+The scheduling is done task by task in the dependency order of the workflow.
+
+For each task we apply filters to remove sites that do not fit the placement and architecture constraints.
+Then, we apply a scoring function based on the objectives scores of the sites and the objective levels of the workflow.
+Finally, we use a first fit policy on the sorted by highest score and allocate to the first site in the list that has enough resources.
+
+If not site fits the constraints of a task it is not allocated. (Might be rejected with an error in the future.)
 
 ## Development
 
