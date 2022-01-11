@@ -22,7 +22,7 @@ logger = logging.getLogger(__name__)
 @dataclass
 class SchedulerService:
     # TODO  move them to a DB
-    platform: Platform = field(default=None)
+    platform: Platform
     workload: Workload = field(default_factory=Workload.create)
     policy: str = "first_fit"
 
@@ -73,7 +73,7 @@ class SchedulerService:
 
     @staticmethod
     def score_on_objectives(
-        objectives: Dict[Objectives, Levels], valid_sites
+        objectives: Dict[Objectives, Levels], valid_sites: List[Site]
     ) -> Dict[str, float]:
         scores: Dict[str, float] = {site.id: 0 for site in valid_sites}
         for objective, level in objectives.items():
@@ -105,7 +105,8 @@ class SchedulerService:
         # 1. Score on objectives
         scores = self.score_on_objectives(objectives, valid_sites)
 
-        valid_sites = sorted(valid_sites, key=lambda x: scores[x.id])
+        # Sort with the highest score first
+        valid_sites.sort(key=lambda site: scores[site.id], reverse=True)
 
         # Apply scheduling policy
         # TODO Implement smarter scheduling policy!
@@ -122,7 +123,7 @@ class SchedulerService:
 
         return placements
 
-    def schedule(self):
+    def schedule(self) -> List[Placement]:
         placements: List[Placement] = []
 
         for workflow in self.workload.workflows.values():

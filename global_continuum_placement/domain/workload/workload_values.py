@@ -1,4 +1,5 @@
 from enum import Enum
+from typing import List
 
 
 class TaskState(Enum):
@@ -14,8 +15,8 @@ class Levels(Enum):
     HIGH = 1
 
     @classmethod
-    def list(cls):
-        return list(map(lambda c: c.name.lower(), cls))
+    def list(cls) -> List[str]:
+        return list(map(lambda c: c.name.lower(), cls))  # type: ignore
 
 
 class Objectives(Enum):
@@ -24,5 +25,5 @@ class Objectives(Enum):
     RESILIENCE = "Resilience"
 
     @classmethod
-    def list(cls):
-        return list(map(lambda c: c.value, cls))
+    def list(cls) -> List[str]:
+        return list(map(lambda c: c.value, cls))  # type: ignore

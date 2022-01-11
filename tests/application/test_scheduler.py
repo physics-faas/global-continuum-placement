@@ -127,4 +127,168 @@ def test_scheduler_architecture_constraints(
     assert placements == expected_placements
 
 
-# FIXME Add tests for the scoring on objectives function
+@pytest.mark.parametrize(
+    "platform_dict,workflow_dict,expected_placements",
+    [
+        pytest.param(
+            {
+                "site1": {
+                    "type": "Edge",
+                    "resources": {"nb_cpu": 1},
+                    "objective_scores": {
+                        "Energy": 1,
+                        "Resilience": 5,
+                        "Performance": 25,
+                    },
+                },
+                "site2": {
+                    "type": "Edge",
+                    "resources": {"nb_cpu": 1},
+                    "objective_scores": {
+                        "Energy": 100,
+                        "Resilience": 30,
+                        "Performance": 50,
+                    },
+                },
+            },
+            {
+                "tasks": {"task1": {"resources": {"nb_cpu": 1}}},
+                "objectives": {"Energy": "High"},
+            },
+            [Placement("site2", "task1")],
+            id="mono objective",
+        ),
+        pytest.param(
+            {
+                "site1": {
+                    "type": "Edge",
+                    "resources": {"nb_cpu": 1},
+                    "objective_scores": {
+                        "Energy": 100,
+                        "Resilience": 5,
+                        "Performance": 25,
+                    },
+                },
+                "site2": {
+                    "type": "Edge",
+                    "resources": {"nb_cpu": 1},
+                    "objective_scores": {
+                        "Energy": 100,
+                        "Resilience": 30,
+                        "Performance": 50,
+                    },
+                },
+            },
+            {
+                "tasks": {"task1": {"resources": {"nb_cpu": 1}}},
+                "objectives": {"Energy": "Medium"},
+            },
+            [Placement("site1", "task1")],
+            id="mono objective equals",
+        ),
+        pytest.param(
+            {
+                "site1": {
+                    "type": "Edge",
+                    "resources": {"nb_cpu": 1},
+                    "objective_scores": {
+                        "Energy": 100,
+                        "Resilience": 30,
+                        "Performance": 25,
+                    },
+                },
+                "site2": {
+                    "type": "Edge",
+                    "resources": {"nb_cpu": 1},
+                    "objective_scores": {
+                        "Energy": 100,
+                        "Resilience": 100,
+                        "Performance": 50,
+                    },
+                },
+            },
+            {
+                "tasks": {"task1": {"resources": {"nb_cpu": 1}}},
+                "objectives": {"Energy": "High", "Resilience": "High"},
+            },
+            [Placement("site2", "task1")],
+            id="two objectives same level",
+        ),
+        pytest.param(
+            {
+                "site1": {
+                    "type": "Edge",
+                    "resources": {"nb_cpu": 1},
+                    "objective_scores": {
+                        "Energy": 100,
+                        "Resilience": 30,
+                        "Performance": 25,
+                    },
+                },
+                "site2": {
+                    "type": "Edge",
+                    "resources": {"nb_cpu": 1},
+                    "objective_scores": {
+                        "Energy": 100,
+                        "Resilience": 100,
+                        "Performance": 50,
+                    },
+                },
+            },
+            {
+                "tasks": {"task1": {"resources": {"nb_cpu": 1}}},
+                "objectives": {"Energy": "High", "Resilience": "Low"},
+            },
+            [Placement("site2", "task1")],
+            id="two objectives different level",
+        ),
+        pytest.param(
+            {
+                "site1": {
+                    "type": "Edge",
+                    "resources": {"nb_cpu": 1},
+                    "objective_scores": {
+                        "Energy": 100,
+                        "Resilience": 30,
+                        "Performance": 25,
+                    },
+                },
+                "site2": {
+                    "type": "Edge",
+                    "resources": {"nb_cpu": 1},
+                    "objective_scores": {
+                        "Energy": 100,
+                        "Resilience": 100,
+                        "Performance": 50,
+                    },
+                },
+                "site3": {
+                    "type": "Edge",
+                    "resources": {"nb_cpu": 1},
+                    "objective_scores": {
+                        "Energy": 100,
+                        "Resilience": 10,
+                        "Performance": 90,
+                    },
+                },
+            },
+            {
+                "tasks": {"task1": {"resources": {"nb_cpu": 1}}},
+                "objectives": {
+                    "Energy": "High",
+                    "Resilience": "Low",
+                    "Performance": "Medium",
+                },
+            },
+            [Placement("site3", "task1")],
+            id="three objectives different level",
+        ),
+    ],
+)
+def test_objective_scoring(platform_dict, workflow_dict, expected_placements):
+    workflow = Workflow.create_from_dict(workflow_dict)
+    platform = Platform.create_from_dict(platform_dict)
+    scheduler = SchedulerService(platform)
+    scheduler.workload.workflows[workflow.id] = workflow
+    placements: List[Placement] = scheduler.schedule()
+    assert placements == expected_placements

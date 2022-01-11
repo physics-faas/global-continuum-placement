@@ -1,4 +1,5 @@
 from enum import Enum
+from typing import List
 
 
 class SiteType(Enum):
@@ -16,6 +17,6 @@ class ArchitectureType(Enum):
     X86_64 = "x86_64"
     ARM64 = "arm64"
 
-    @staticmethod
-    def list():
-        return list(map(lambda c: c.value, ArchitectureType))
+    @classmethod
+    def list(cls) -> List[str]:
+        return list(map(lambda c: c.value, cls))  # type: ignore

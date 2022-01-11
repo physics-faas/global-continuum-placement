@@ -1,6 +1,7 @@
 import logging
 
 from aiohttp.web import Request, json_response
+from aiohttp.web_response import Response
 from aiohttp_apispec import docs, request_schema
 from dependency_injector.wiring import Provide
 
@@ -37,7 +38,7 @@ logger = logging.getLogger(__name__)
 async def initialize(
     request: Request,
     scheduler: SchedulerService = Provide[ApplicationContainer.scheduler_service],
-):
+) -> Response:
     try:
         platform = Platform.create_from_dict(request["data"]["platform"])
         scheduler.platform = platform
@@ -67,7 +68,7 @@ async def initialize(
 async def schedule(
     request: Request,
     scheduler: SchedulerService = Provide[ApplicationContainer.scheduler_service],
-):
+) -> Response:
     try:
         workflow = Workflow.create_from_dict(request["data"])
         workflow_id = request["data"]["name"]

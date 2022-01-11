@@ -96,9 +96,11 @@ class Workflow:
     def create_from_dict(cls, workflow_dict: Dict) -> "Workflow":
         return Workflow(
             id=str(uuid.uuid4()),
-            name=workflow_dict.get("name"),
+            name=workflow_dict["name"]
+            if "name" in workflow_dict
+            else "Unnamed workflow",
             objectives={
-                Objectives[obj.upper()]: lvl
+                Objectives[obj.upper()]: Levels[lvl.upper()]
                 for obj, lvl in workflow_dict.get("objectives", {}).items()
             },
             tasks_dag=TaskDag.create_dag_from_workflow(workflow_dict["tasks"]),
@@ -111,5 +113,5 @@ class Workload:
     workflows: Dict[str, Workflow] = field(default_factory=dict)
 
     @classmethod
-    def create(cls):
+    def create(cls) -> "Workload":
         return Workload(id=str(uuid.uuid4()))
