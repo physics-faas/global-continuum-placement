@@ -33,6 +33,13 @@ to the respective T3.1, T4.1 and T4.2.T
 
 ## Setup
 
+Using docker:
+```sh
+docker run -ti -p 8080:8080 ryaxtech/global-continuum-placement:main
+```
+
+## For development
+
 Install poetry, then run:
 ```
 poetry install
