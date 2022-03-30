@@ -13,7 +13,7 @@ checks:
     - shell
     - nix
   script:
-    - nix-shell $NIX_OPTS ./release.nix -A shell --command ./lint.sh
+    - cachix watch-exec ryaxtech -- nix-shell $NIX_OPTS ./release.nix -A shell --command ./lint.sh
 
 test:
   stage: test
@@ -26,7 +26,7 @@ test:
     - shell
     - nix
   script:
-    - nix-shell $NIX_OPTS ./release.nix -A shell --command "timeout --preserve-status "$UNIT_TEST_TIMEOUT" bash test.sh --junitxml=./report.xml"
+    - cachix watch-exec ryaxtech -- nix-shell $NIX_OPTS ./release.nix -A shell --command "timeout --preserve-status "$UNIT_TEST_TIMEOUT" bash test.sh --junitxml=./report.xml"
   artifacts:
     when: always
     paths:
@@ -44,8 +44,7 @@ build_package:
   variables:
     TARGET: package
   script:
-    - nix-build $NIX_OPTS release.nix -A $TARGET $NIX_BUILD_EXTRA_OPTS $EXTRA_ARGS
-    - nix-store -qR ./result | cachix push ryaxtech
+    - cachix watch-exec ryaxtech -- nix-build $NIX_OPTS release.nix -A $TARGET $NIX_BUILD_EXTRA_OPTS $EXTRA_ARGS
   except:
     - tags
 
@@ -59,7 +58,7 @@ build_image:
     REGISTRY_PATH: docker.io/ryaxtech
     RELEASE_TARGET: image
   script:
-    - nix-build $NIX_OPTS release.nix -A $RELEASE_TARGET $NIX_BUILD_EXTRA_OPTS $EXTRA_ARGS
+    - cachix watch-exec ryaxtech -- nix-build $NIX_OPTS release.nix -A $RELEASE_TARGET $NIX_BUILD_EXTRA_OPTS $EXTRA_ARGS
     # Push the generated image to the registry
     - export IMAGE_TAG=${CI_COMMIT_SHORT_SHA}
     - >
