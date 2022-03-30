@@ -9,7 +9,7 @@ from .version import __version__
 
 
 def init() -> web.Application:
-    """ Init application """
+    """Init application"""
     # Init application container
     container = ApplicationContainer()
 
@@ -41,21 +41,21 @@ def init() -> web.Application:
 
 
 async def on_startup(app: web.Application) -> None:
-    """ Hooks for application startup """
+    """Hooks for application startup"""
     # container: ApplicationContainer = app["container"]
     # FIXME: add initialization hooks here
     pass
 
 
 async def on_cleanup(app: web.Application) -> None:
-    """ Define hook when application stop"""
+    """Define hook when application stop"""
     # container: ApplicationContainer = app["container"]
     # FIXME: add cleaning hooks here
     pass
 
 
 def start() -> None:
-    """ Start application """
+    """Start application"""
     app: web.Application = init()
     app.on_startup.append(on_startup)
     app.on_cleanup.append(on_cleanup)

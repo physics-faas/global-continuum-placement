@@ -5,7 +5,7 @@ from global_continuum_placement.application.scheduler import SchedulerService
 
 
 class ApplicationContainer(containers.DeclarativeContainer):
-    """ Application container for dependency injection """
+    """Application container for dependency injection"""
 
     # Define configuration provider
     configuration = providers.Configuration()

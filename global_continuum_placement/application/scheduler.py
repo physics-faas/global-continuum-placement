@@ -108,7 +108,9 @@ class SchedulerService:
         # Sort with the highest score first
         valid_sites.sort(key=lambda site: scores[site.id], reverse=True)
         for site in valid_sites:
-            logger.info("Score: function=%s site=%s score=%s", task.id, site.id, scores[site.id])
+            logger.info(
+                "Score: function=%s site=%s score=%s", task.id, site.id, scores[site.id]
+            )
 
         # Apply scheduling policy
         # TODO Implement smarter scheduling policy!

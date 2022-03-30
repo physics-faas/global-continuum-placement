@@ -10,7 +10,7 @@ from global_continuum_placement.version import __version__
 
 
 def setup(app: web.Application, container: ApplicationContainer) -> None:
-    """ Method to setup api """
+    """Method to setup api"""
     # Configure application container for wiring
     container.wire(
         modules=[
