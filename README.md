@@ -75,7 +75,7 @@ Create a platform file like this one in ./test-platform.json:
 ```
 Initialize with a platform description through a REST API:
 ```sh
-curl -X POST -H "Content-Type: application/json" -d @test-platform.json http://127.0.0.1:8080/init 
+curl -H "Content-Type: application/json" -d @test-platform.json http://127.0.0.1:8080/init
 ```
 
 Create a workload in a file like test-workload.json:
@@ -141,8 +141,36 @@ curl -H "Content-Type: application/json" -d @test-workload.json http://127.0.0.1
 
 The result is should be:
 ```json
-[{"task": "task1", "site": "site3"}, {"task": "task2", "site": "site1"}, {"task": "task3", "site": "site1"}, {"task": "task4", "site": "site2"}, {"task": "task5", "site": "site3"}]
+[
+  {
+    "task": "task1",
+    "site": "site3"
+  },
+  {
+    "task": "task2",
+    "site": "site1"
+  },
+  {
+    "task": "task3",
+    "site": "site1"
+  },
+  {
+    "task": "task4",
+    "site": "site2"
+  },
+  {
+    "task": "task5",
+    "site": "site3"
+  }
+]
 ```
+
+Let's explain these decisions:
+- `task1` has an explicit site constraint for the `site3` so it is allocated there.
+- `task2` only requires 2 CPU and all sites have at least 2 CPU. The architecture constraint is not defined but by default it is x86_64, so only the site 1 and 3 can fit the constraint. The scheduler now take into account the objectives and favors the Energy and the Resilience so it choose the `site1`.
+- `task3` has the same constraints as `task2` so it goes on the same site, the `site1`because it still has 2 CPU available.
+- `task4` goes on `site2` because it requires an `arm64` architecture and only the `site2` is providing it.
+- `task5` has only resources constraint and should go to the site1 regarding the objectives but it does not have enough resources. It is finally allocated to `site3` which is the only one that fits the constraints and have available resources.
 
 ### Scheduling Algorithm
 
