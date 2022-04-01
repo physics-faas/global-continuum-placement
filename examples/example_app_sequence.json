@@ -1,0 +1,37 @@
+{
+  "id": "19fe4293742e0b2c",
+  "displayName": "Hello Sequence",
+  "type": "Flow",
+  "executorMode": "NativeSequence",
+  "native": true,
+  "functions": [
+    {
+      "id": "339d2ef8b0b29795",
+      "displayName": "hello",
+      "type": "Function",
+      "code": "function main(msg){\nmsg.payload=msg.payload+' hello';\nreturn msg;}",
+      "sequence": 1,
+      "annotations": {
+        "sizingGB": "512"
+      },
+      "allocations": [
+        "Cluster_1",
+        "Cluster_2"
+      ]
+    },
+    {
+      "id": "3a807141f16764a5",
+      "displayName": "world",
+      "type": "Function",
+      "code": "function main(msg){//implies affinity with the other function in the sequence\n\nmsg.payload=msg.payload+' world';\nreturn msg;}",
+      "sequence": 2,
+      "annotations": {
+        "affinity": "Hello"
+      },
+      "allocations": [
+        "Cluster_1",
+        "Cluster_2"
+      ]
+    }
+  ]
+}

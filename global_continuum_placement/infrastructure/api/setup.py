@@ -30,8 +30,8 @@ def setup(app: web.Application, container: ApplicationContainer) -> None:
     app.add_routes(
         [
             web.get("/healthz", util_controller.health_check, allow_head=False),
-            web.post("/init", scheduler_controller.initialize),
-            web.post("/schedule", scheduler_controller.schedule),
+            web.post("/clusters", scheduler_controller.create_platform),
+            web.post("/applications", scheduler_controller.schedule_application),
         ]
     )
 

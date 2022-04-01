@@ -8,34 +8,33 @@ from dependency_injector.wiring import Provide
 from global_continuum_placement.application.scheduler import SchedulerService
 from global_continuum_placement.container import ApplicationContainer
 from global_continuum_placement.domain.platform.platform import Platform
-from global_continuum_placement.domain.workload.workload import Workflow
+from global_continuum_placement.domain.workload.workload import Application
+from global_continuum_placement.infrastructure.api.schemas.application_schema import (
+    ApplicationSchema,
+)
 from global_continuum_placement.infrastructure.api.schemas.error_schema import (
     ErrorSchema,
-)
-from global_continuum_placement.infrastructure.api.schemas.initialize_request_schema import (
-    InitializeRequestSchema,
 )
 from global_continuum_placement.infrastructure.api.schemas.placement import (
     PlacementSchema,
 )
-from global_continuum_placement.infrastructure.api.schemas.sheduler_requests import (
-    WorkflowScheduleRequestSchema,
+from global_continuum_placement.infrastructure.api.schemas.platform_schema import (
+    PlatformSchema,
 )
 
 logger = logging.getLogger(__name__)
 
 
 @docs(
-    tags=["Scheduler"],
-    summary="Initialize scheduler",
-    description="Provide platform and workload to the scheduler",
+    tags=["Platform"],
+    summary="Initialize platform",
     responses={
-        201: {"description": "Scheduler initialized"},
-        400: {"description": "Scheduler initialization failed!", "schema": ErrorSchema},
+        201: {"description": "Platform initialized"},
+        400: {"description": "Platform initialization failed!", "schema": ErrorSchema},
     },
 )
-@request_schema(InitializeRequestSchema)
-async def initialize(
+@request_schema(PlatformSchema)
+async def create_platform(
     request: Request,
     scheduler: SchedulerService = Provide[ApplicationContainer.scheduler_service],
 ) -> Response:
@@ -50,12 +49,12 @@ async def initialize(
 
 
 @docs(
-    tags=["Scheduler"],
-    summary="Schedule the workload",
-    description="Run the scheduler on the given workload. Returns placement mapping for each allocatable tasks.",
+    tags=["Application"],
+    summary="Schedule the application",
+    description="Run the scheduler on the given application. Returns placement mapping for each allocatable functions.",
     responses={
         200: {
-            "description": "Scheduling done successfully",
+            "description": "Application allocation done successfully",
             "schema": PlacementSchema(many=True),
         },
         400: {
@@ -64,14 +63,15 @@ async def initialize(
         },
     },
 )
-@request_schema(WorkflowScheduleRequestSchema)
-async def schedule(
+@request_schema(ApplicationSchema)
+async def schedule_application(
     request: Request,
     scheduler: SchedulerService = Provide[ApplicationContainer.scheduler_service],
 ) -> Response:
-    workflow = Workflow.create_from_dict(request["data"])
-    workflow_id = request["data"]["name"]
-    scheduler.workload.workflows[workflow_id] = workflow
+    application = Application.create_from_application(request["data"])
+    application_id = request["data"]["id"]
+    scheduler.workload.applications[application_id] = application
     placements = scheduler.schedule()
     result = [PlacementSchema().dump(placement) for placement in placements]
+    # TODO: Send this response to the Orchestrator
     return json_response(result, status=200)

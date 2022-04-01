@@ -41,19 +41,21 @@ class SchedulerService:
             return sites
 
         for constraint in constraints:
-            if constraint.site is not None:
+            if constraint.cluster is not None:
                 for site in sites:
-                    if constraint.site == site.id:
-                        site_that_fit.append(site)
-                        logger.debug(f"Found valid site constraint for site {site.id}")
-            elif constraint.site_type is not None:
-                for site in sites:
-                    # TODO Implement smarter scheduling policy!
-                    # Here we always schedule the task to the first site in the list
-                    if site.type.name == constraint.site_type.name:
+                    if constraint.cluster == site.id:
                         site_that_fit.append(site)
                         logger.debug(
-                            f"Found valid site type constraint for site {site.id}"
+                            f"Found valid cluster constraint for cluster {site.id}"
+                        )
+            elif constraint.cluster_type is not None:
+                for site in sites:
+                    # TODO Implement smarter scheduling policy!
+                    # Here we always schedule the function to the first cluster in the list
+                    if site.type.name == constraint.cluster_type.name:
+                        site_that_fit.append(site)
+                        logger.debug(
+                            f"Found valid cluster type constraint for cluster {site.id}"
                         )
             else:
                 logger.debug("No valid constraints found")
@@ -83,56 +85,61 @@ class SchedulerService:
                 )
         return scores
 
-    def schedule_task(
-        self, task: TaskDag, objectives: Dict[Objectives, Levels]
+    def schedule_function(
+        self, function: TaskDag, objectives: Dict[Objectives, Levels]
     ) -> List[Placement]:
         placements: List[Placement] = []
 
         valid_sites: List[Site] = self.platform.sites
 
         # Apply filters
-        # 1. Filter site that does not fit the constraints
+        # 1. Filter cluster that does not fit the constraints
         valid_sites = self.resolve_placement_constraints(
-            task.placement_constraints, valid_sites
+            function.placement_constraints, valid_sites
         )
 
         # 2. Filter on architecture constraint
         valid_sites = self.resolve_architecture_constraints(
-            task.architecture_constraint, valid_sites
+            function.architecture_constraint, valid_sites
         )
+
+        # 3. TODO Apply affinity constraints
 
         # Apply scoring functions
         # 1. Score on objectives
         scores = self.score_on_objectives(objectives, valid_sites)
 
         # Sort with the highest score first
-        valid_sites.sort(key=lambda site: scores[site.id], reverse=True)
+        valid_sites.sort(key=lambda cluster: scores[cluster.id], reverse=True)
         for site in valid_sites:
             logger.info(
-                "Score: function=%s site=%s score=%s", task.id, site.id, scores[site.id]
+                "Score: function=%s cluster=%s score=%s",
+                function.id,
+                site.id,
+                scores[site.id],
             )
 
         # Apply scheduling policy
         # TODO Implement smarter scheduling policy!
         if self.policy == "first_fit":
-            placement = first_fit.apply(task, valid_sites)
+            placement = first_fit.apply(function, valid_sites)
         else:
             raise Exception(f"Unimplemented policy {self.policy}")
-        # Here we always schedule the task to the first site with enough available Resources
+        # Here we always schedule the function to the first cluster with enough available Resources
         placements.append(placement)
 
         # Recursion
-        for task in task.next_tasks:
-            placements.extend(self.schedule_task(task, objectives))
+        for function in function.next_tasks:
+            placements.extend(self.schedule_function(function, objectives))
 
         return placements
 
     def schedule(self) -> List[Placement]:
         placements: List[Placement] = []
 
-        for workflow in self.workload.workflows.values():
+        for workflow in self.workload.applications.values():
             placements.extend(
-                self.schedule_task(workflow.tasks_dag, workflow.objectives)
+                self.schedule_function(workflow.functions_dag, workflow.objectives)
             )
 
         return placements

@@ -1,0 +1,22 @@
+{
+  "id": "1b3cbb423e3ab1b3",
+  "displayName": "Hello Service",
+  "type": "Flow",
+  "executorMode": "Service",
+  "native": false,
+  "functions": [
+    {
+      "id": "f52b7bec399e315a",
+      "displayName": "hello world",
+      "type": "Function",
+      "code": "function main(msg){\nconsole.log(msg);\nmsg.payload={‘response’:‘hello ’+msg.payload.value.name};\nreturn msg;}",
+      "sequence": 1,
+      "annotations": {
+        "locality": "Edge"
+      },
+      "allocations": [
+        "Cluster_1"
+      ]
+    }
+  ]
+}

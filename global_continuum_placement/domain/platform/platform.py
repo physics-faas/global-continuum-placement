@@ -3,7 +3,7 @@ from typing import Dict, List, Optional, Union, cast
 
 from ..workload.workload import ResourceRequest, TaskDag
 from ..workload.workload_values import Objectives
-from .platfom_values import ArchitectureType, SiteType
+from .platfom_values import ArchitectureType, ClusterType
 
 
 @dataclass
@@ -25,7 +25,7 @@ class InvalidSiteDefinition(Exception):
 @dataclass
 class Site:
     id: str
-    type: SiteType
+    type: ClusterType
     total_resources: Resources
     free_resources: Resources
     allocated_tasks: List[TaskDag]
@@ -62,7 +62,7 @@ class Site:
             )
         return Site(
             id=site_id,
-            type=SiteType[type.upper()],
+            type=ClusterType[type.upper()],
             total_resources=Resources(**resources),
             free_resources=Resources(**resources),
             allocated_tasks=[],
@@ -89,7 +89,7 @@ class Platform:
 
 def site_has_enough_resources(site: Site, resource_request: ResourceRequest) -> bool:
     """
-    Return True if the given site has enough resource to allocate the given resource request.
+    Return True if the given cluster has enough resource to allocate the given resource request.
     """
     return (
         resource_request.memory_in_MB <= site.free_resources.memory_in_MB

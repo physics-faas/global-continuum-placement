@@ -1,0 +1,24 @@
+{
+  "id": "7c6a3de135b840c5",
+  "displayName": "Hello NR Function Annotated",
+  "type": "Flow",
+  "executorMode": "NoderedFunction",
+  "native": false,
+  "functions": [
+    {
+      "id": "247a1728e0231123",
+      "displayName": "hello world",
+      "type": "Function",
+      "code": "function main(msg){\n\nconsole.log(msg);\nmsg.payload={‘response’:‘hello ’+msg.payload.value.name};\nreturn msg;}",
+      "sequence": 1,
+      "annotations": {
+        "optimizationGoal": "Performance",
+        "importance": "High"
+      },
+      "allocations": [
+        "Cluster_1",
+        "Cluster_2"
+      ]
+    }
+  ]
+}

@@ -9,16 +9,16 @@ from global_continuum_placement.domain.scheduling_policies.exceptions import (
     NotEnoughResourcesException,
 )
 from global_continuum_placement.domain.workload.workload import (
+    Application,
     UnknownArchitectureError,
-    Workflow,
 )
 
 
 def test_scheduler_schedule_without_constraints(platform_dict, workflow_dict):
-    workflow = Workflow.create_from_dict({"tasks": workflow_dict})
+    workflow = Application.create_from_dict({"tasks": workflow_dict})
     platform = Platform.create_from_dict(platform_dict)
     scheduler = SchedulerService(platform)
-    scheduler.workload.workflows[workflow.id] = workflow
+    scheduler.workload.applications[workflow.id] = workflow
     placements: List[Placement] = scheduler.schedule()
     assert len(placements) == len(workflow_dict)
 
@@ -44,10 +44,10 @@ def test_scheduler_schedule_not_enough_resources(
     platform_dict,
     workflow_dict,
 ):
-    workflow = Workflow.create_from_dict({"tasks": workflow_dict})
+    workflow = Application.create_from_dict({"tasks": workflow_dict})
     platform = Platform.create_from_dict(platform_dict)
     scheduler = SchedulerService(platform)
-    scheduler.workload.workflows[workflow.id] = workflow
+    scheduler.workload.applications[workflow.id] = workflow
     with pytest.raises(NotEnoughResourcesException):
         scheduler.schedule()
 
@@ -56,39 +56,44 @@ def test_scheduler_schedule_not_enough_resources(
     "workflow_dict,expected_placements",
     [
         pytest.param(
-            {"task1": {"resources": {"nb_cpu": 1}, "constraints": [{"site": "site1"}]}},
+            {
+                "task1": {
+                    "resources": {"nb_cpu": 1},
+                    "constraints": [{"cluster": "site1"}],
+                }
+            },
             [Placement("site1", "task1")],
-            id="site constraints",
+            id="cluster constraints",
         ),
         pytest.param(
             {
                 "task1": {
                     "resources": {"nb_cpu": 1},
-                    "constraints": [{"site_type": "HPC"}],
+                    "constraints": [{"cluster_type": "HPC"}],
                 }
             },
             [Placement("site3", "task1")],
-            id="site type constraints",
+            id="cluster type constraints",
         ),
         pytest.param(
             {
                 "task1": {
                     "resources": {"nb_cpu": 1},
-                    "constraints": [{"site_type": "Cloud"}, {"site_type": "HPC"}],
+                    "constraints": [{"cluster_type": "Cloud"}, {"cluster_type": "HPC"}],
                 }
             },
             [Placement("site3", "task1")],
-            id="multi site type constraints",
+            id="multi cluster type constraints",
         ),
     ],
 )
 def test_scheduler_schedule_site_constraints(
     platform_dict, workflow_dict, expected_placements
 ):
-    workflow = Workflow.create_from_dict({"tasks": workflow_dict})
+    workflow = Application.create_from_dict({"tasks": workflow_dict})
     platform = Platform.create_from_dict(platform_dict)
     scheduler = SchedulerService(platform)
-    scheduler.workload.workflows[workflow.id] = workflow
+    scheduler.workload.applications[workflow.id] = workflow
     placements: List[Placement] = scheduler.schedule()
     assert placements == expected_placements
 
@@ -98,7 +103,7 @@ def test_scheduler_architecture_invalid_constraint():
         "tasks": {"task1": {"resources": {"nb_cpu": 1}, "architecture": "NOTEXITS"}}
     }
     with pytest.raises(UnknownArchitectureError):
-        Workflow.create_from_dict(workflow_dict)
+        Application.create_from_dict(workflow_dict)
 
 
 @pytest.mark.parametrize(
@@ -119,10 +124,10 @@ def test_scheduler_architecture_invalid_constraint():
 def test_scheduler_architecture_constraints(
     platform_dict, workflow_dict, expected_placements
 ):
-    workflow = Workflow.create_from_dict({"tasks": workflow_dict})
+    workflow = Application.create_from_dict({"tasks": workflow_dict})
     platform = Platform.create_from_dict(platform_dict)
     scheduler = SchedulerService(platform)
-    scheduler.workload.workflows[workflow.id] = workflow
+    scheduler.workload.applications[workflow.id] = workflow
     placements: List[Placement] = scheduler.schedule()
     assert placements == expected_placements
 
@@ -286,9 +291,9 @@ def test_scheduler_architecture_constraints(
     ],
 )
 def test_objective_scoring(platform_dict, workflow_dict, expected_placements):
-    workflow = Workflow.create_from_dict(workflow_dict)
+    workflow = Application.create_from_dict(workflow_dict)
     platform = Platform.create_from_dict(platform_dict)
     scheduler = SchedulerService(platform)
-    scheduler.workload.workflows[workflow.id] = workflow
+    scheduler.workload.applications[workflow.id] = workflow
     placements: List[Placement] = scheduler.schedule()
     assert placements == expected_placements

@@ -2,7 +2,7 @@ from enum import Enum
 from typing import List
 
 
-class SiteType(Enum):
+class ClusterType(Enum):
     HPC = "HPC"
     EDGE = "Edge"
     CLOUD = "Cloud"
