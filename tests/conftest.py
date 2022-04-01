@@ -40,6 +40,10 @@ def workflow_dict():
             {"id": "task2", "resources": {"nb_cpu": 2}, "sequence": 2},
             {"id": "task3", "resources": {"nb_cpu": 2}, "sequence": 3},
             {"id": "task4", "resources": {"nb_cpu": 2}, "sequence": 4},
-            {"id": "task5", "resources": {"nb_cpu": 2, "memory_in_MB": 1000}, "sequence": 5},
+            {
+                "id": "task5",
+                "resources": {"nb_cpu": 2, "memory_in_MB": 1000},
+                "sequence": 5,
+            },
         ]
     }

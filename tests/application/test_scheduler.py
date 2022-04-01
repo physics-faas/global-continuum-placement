@@ -37,8 +37,8 @@ def test_scheduler_schedule_without_constraints(platform_dict, workflow_dict):
     ],
 )
 def test_scheduler_schedule_not_enough_resources(
-        platform_dict,
-        workflow_dict,
+    platform_dict,
+    workflow_dict,
 ):
     workflow = Application.create_from_application({"functions": [workflow_dict]})
     platform = Platform.create_from_dict(platform_dict)
@@ -53,7 +53,9 @@ def test_scheduler_schedule_not_enough_resources(
     [
         pytest.param(
             {
-                "id": "task1", "resources": {"nb_cpu": 1}, "allocations": ["site1"],
+                "id": "task1",
+                "resources": {"nb_cpu": 1},
+                "allocations": ["site1"],
             },
             [Placement("site1", "task1")],
             id="cluster constraints",
@@ -70,7 +72,7 @@ def test_scheduler_schedule_not_enough_resources(
     ],
 )
 def test_scheduler_schedule_site_constraints(
-        platform_dict, workflow_dict, expected_placements
+    platform_dict, workflow_dict, expected_placements
 ):
     workflow = Application.create_from_application({"functions": [workflow_dict]})
     platform = Platform.create_from_dict(platform_dict)
@@ -82,7 +84,13 @@ def test_scheduler_schedule_site_constraints(
 
 def test_scheduler_architecture_invalid_constraint():
     workflow_dict = {
-        "functions": [{"id": "task1", "resources": {"nb_cpu": 1}, "annotations": {"architecture": "NOTEXITS"}}]
+        "functions": [
+            {
+                "id": "task1",
+                "resources": {"nb_cpu": 1},
+                "annotations": {"architecture": "NOTEXITS"},
+            }
+        ]
     }
     with pytest.raises(UnknownArchitectureError):
         Application.create_from_application(workflow_dict)
@@ -92,19 +100,27 @@ def test_scheduler_architecture_invalid_constraint():
     "workflow_dict,expected_placements",
     [
         pytest.param(
-            {"id": "taskARM", "resources": {"nb_cpu": 1}, "annotations": {"architecture": "arm64"}},
+            {
+                "id": "taskARM",
+                "resources": {"nb_cpu": 1},
+                "annotations": {"architecture": "arm64"},
+            },
             [Placement("site2", "taskARM")],
             id="arm64 constraint",
         ),
         pytest.param(
-            {"id": "taskX86", "resources": {"nb_cpu": 1}, "annotations": {"architecture": "x86_64"}},
+            {
+                "id": "taskX86",
+                "resources": {"nb_cpu": 1},
+                "annotations": {"architecture": "x86_64"},
+            },
             [Placement("site1", "taskX86")],
             id="x86_64 constraint",
         ),
     ],
 )
 def test_scheduler_architecture_constraints(
-        platform_dict, workflow_dict, expected_placements
+    platform_dict, workflow_dict, expected_placements
 ):
     workflow = Application.create_from_application({"functions": [workflow_dict]})
     platform = Platform.create_from_dict(platform_dict)
