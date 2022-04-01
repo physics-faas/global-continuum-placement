@@ -3,5 +3,5 @@ from dataclasses import dataclass
 
 @dataclass
 class Placement:
-    site: str
-    task: str
+    cluster: str
+    function: str

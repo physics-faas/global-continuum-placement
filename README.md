@@ -4,7 +4,7 @@ This project is a part of the PHISICS project. It is defined as follows.
 
 ## T4.3 Global Continuum Patterns Placement (M4-M30, Leader: RYAX, Participants:ATOS, HUA, BYTE)
 
-This task will be responsible for modelling and deciding on the placement of
+This function will be responsible for modelling and deciding on the placement of
 the various application components to available and suitable candidate cloud
 services and Edge devices. To this end it needs to incorporate aspects such as
 performance of the individual services, network links between the service
@@ -20,13 +20,13 @@ e.g. MINLP optimization for optimal selection, evolutionary optimization
 approaches for non-optimal but more scalable problem solving, with the ability
 to interchange between the main objective to optimize (what aspect e.g. cost or
 performance will be the primary scope of optimization) and the remaining
-parameters set as constraints. This task receives input from T3.1 regarding the
+parameters set as constraints. This function receives input from T3.1 regarding the
 graph of the application to be deployed, T4.1 regarding the candidate service
 types for each component, T4.2 for the evaluated performance and current
 condition of each service type. The selected deployment scheme is then
 forwarded to T4.5 for the final adaptation and deployment realization.
 
-Roles: The task will be led by RYAX, while ATOS will focus in the modelling
+Roles: The function will be led by RYAX, while ATOS will focus in the modelling
 definition and transformation of the decided solution to the platform
 specification, linking with T4.5. Partners HUA and BYTE will provide the links
 to the respective T3.1, T4.1 and T4.2.T
@@ -53,19 +53,19 @@ Create a platform file like this one in ./test-platform.json:
 ```json
 {
   "platform": {
-    "site1": {
+    "cluster1": {
       "type": "Edge",
       "resources": {"nb_cpu": 4, "nb_gpu": 0, "memory_in_MB": 1024},
       "architecture": "x86_64",
       "objective_scores": {"Energy": 60, "Resilience": 5, "Performance": 25}
     },
-    "site2": {
+    "cluster2": {
       "type": "Edge",
       "resources": {"nb_cpu": 2, "nb_gpu": 1, "memory_in_MB": 4096},
       "architecture": "arm64",
       "objective_scores": {"Energy": 100, "Resilience": 30, "Performance": 50}
     },
-    "site3": {
+    "cluster3": {
       "type": "HPC",
       "resources": {"nb_cpu": 1000, "nb_gpu": 50, "memory_in_MB": 16e6},
       "objective_scores": {"Energy": 10, "Resilience": 80, "Performance": 100}
@@ -75,112 +75,109 @@ Create a platform file like this one in ./test-platform.json:
 ```
 Initialize with a platform description through a REST API:
 ```sh
-curl -H "Content-Type: application/json" -d @test-platform.json http://127.0.0.1:8080/init
+curl -H "Content-Type: application/json" -d @test-platform.json http://127.0.0.1:8080/clusters
 ```
 
-Create a workload in a file like test-workload.json:
-
+Here an example application from the workload-test.json file:
 ```json
 {
-  "name": "test",
+  "id": "19fe4293742e0b2c",
+  "displayName": "Full example",
+  "type": "Flow",
+  "executorMode": "NativeSequence",
+  "native": true,
   "objectives": {
     "Energy": "high",
     "Resilience": "low"
   },
-  "tasks": {
-    "task1": {
-      "resources": {
-        "nb_cpu": 1
-      },
-      "next_tasks": [
-        "task2"
-      ],
-      "constraints": [
-        {
-          "site": "site3"
-        }
-      ],
-      "architecture": "x86_64"
-    },
-    "task2": {
-      "resources": {
-        "nb_cpu": 2
-      },
-      "next_tasks": [
-        "task3",
-        "task4"
+  "functions": [
+    {
+      "id": "function1",
+      "sequence": 1,
+      "allocations": [
+        "cluster3"
       ]
     },
-    "task3": {
-      "resources": {
-        "nb_cpu": 2
+    {
+      "id": "function2",
+      "sequence": 2,
+      "annotations": {
+        "sizingCores": "2"
       }
     },
-    "task4": {
-      "resources": {
-        "nb_cpu": 2
-      },
-      "next_tasks": [
-        "task5"
-      ],
-      "architecture": "arm64"
+    {
+      "id": "function3",
+      "sequence": 3,
+      "annotations": {
+        "sizingCores": "2"
+      }
     },
-    "task5": {
-      "resources": {
-        "nb_cpu": 2,
-        "memory_in_MB": 1000
+    {
+      "id": "function4",
+      "sequence": 4,
+      "annotations": {
+        "sizingCores": "2",
+        "architecture": "arm64"
+      }
+    },
+    {
+      "id": "function5",
+      "sequence": 5,
+      "annotations": {
+        "sizingCores": 2,
+        "sizingMB": 1000
       }
     }
-  }
+  ]
 }
 ```
-Then, we can ask for the scheduler to allocate our workflow tasks on the sites with different constraints:
+Then, we can ask for the scheduler to allocate our workflow functions on the clusters with different constraints:
 ```sh
-curl -H "Content-Type: application/json" -d @test-workload.json http://127.0.0.1:8080/schedule
+curl -H "Content-Type: application/json" -d @test-workload.json http://127.0.0.1:8080/applications
 ```
 
 The result is should be:
 ```json
 [
   {
-    "task": "task1",
-    "site": "site3"
+    "function": "function1",
+    "cluster": "cluster3"
   },
   {
-    "task": "task2",
-    "site": "site1"
+    "function": "function2",
+    "cluster": "cluster1"
   },
   {
-    "task": "task3",
-    "site": "site1"
+    "function": "function3",
+    "cluster": "cluster1"
   },
   {
-    "task": "task4",
-    "site": "site2"
+    "function": "function4",
+    "cluster": "cluster2"
   },
   {
-    "task": "task5",
-    "site": "site3"
+    "function": "function5",
+    "cluster": "cluster3"
   }
 ]
 ```
 
 Let's explain these decisions:
-- `task1` has an explicit site constraint for the `site3` so it is allocated there.
-- `task2` only requires 2 CPU and all sites have at least 2 CPU. The architecture constraint is not defined but by default it is x86_64, so only the site 1 and 3 can fit the constraint. The scheduler now take into account the objectives and favors the Energy and the Resilience so it choose the `site1`.
-- `task3` has the same constraints as `task2` so it goes on the same site, the `site1`because it still has 2 CPU available.
-- `task4` goes on `site2` because it requires an `arm64` architecture and only the `site2` is providing it.
-- `task5` has only resources constraint and should go to the site1 regarding the objectives but it does not have enough resources. It is finally allocated to `site3` which is the only one that fits the constraints and have available resources.
+- `function1` has an explicit cluster constraint for the `cluster3` so it is allocated there.
+- `function2` only requires 2 CPU and all clusters have at least 2 CPU. The architecture constraint is not defined but by default it is x86_64, so only the cluster 1 and 3 can fit the constraint. The scheduler now take into account the objectives and favors the Energy and the Resilience so it choose the `cluster1`.
+- `function3` has the same constraints as `function2` so it goes on the same cluster, the `cluster1`because it still has 2 CPU available.
+- `function4` goes on `cluster2` because it requires an `arm64` architecture and only the `cluster2` is providing it.
+- `function5` has only resources constraint and should go to the cluster1 regarding the objectives but it does not have enough resources. It is finally allocated to `cluster3` which is the only one that fits the constraints and have available resources.
 
 ### Scheduling Algorithm
 
-The scheduling is done task by task in the dependency order of the workflow.
+The scheduling is done function by function in the dependency order of the workflow.
 
-For each task we apply filters to remove sites that do not fit the placement and architecture constraints.
-Then, we apply a scoring function based on the objectives scores of the sites and the objective levels of the workflow.
-Finally, we use a first fit policy on the sorted by highest score and allocate to the first site in the list that has enough resources.
+For each function we apply filters to remove clusters that do not fit the placement and architecture constraints.
+Then, we apply a scoring function based on the objectives scores of the clusters and the objective levels of the workflow.
+Finally, we use a first fit policy on the sorted by highest score and allocate to the first cluster in the list that has enough resources.
 
-If not site fits the constraints of a task it is not allocated. (Might be rejected with an error in the future.)
+If not cluster fits the constraints of a function it is not allocated. (Might be rejected with an error in the future.)
 
 ## Development
 

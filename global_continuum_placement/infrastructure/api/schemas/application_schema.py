@@ -18,3 +18,4 @@ class ApplicationSchema(Schema):
     execution_mode = fields.String()
     native = fields.Boolean()
     functions = fields.Nested(FunctionSchema, many=True)
+    objectives = fields.Dict()

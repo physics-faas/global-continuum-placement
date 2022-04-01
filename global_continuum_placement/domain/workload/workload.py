@@ -45,7 +45,7 @@ class TaskDag:
         functions = sorted(functions, key=lambda elem: elem["sequence"], reverse=True)
         next_tasks: List[TaskDag] = []
         for function in functions:
-            annotations = function["annotations"]
+            annotations = function.get("annotations", {})
             architecture = annotations.get("architecture")
             next_tasks = [
                 TaskDag(
@@ -57,8 +57,8 @@ class TaskDag:
                         else ArchitectureType.X86_64
                     ),
                     resource_request=ResourceRequest(
-                        nb_cpu=annotations.get("sizingCores", 0),
-                        memory_in_MB=annotations.get("sizingMB", 0),
+                        nb_cpu=int(annotations.get("sizingCores", 0)),
+                        memory_in_MB=int(annotations.get("sizingMB", 0)),
                     ),
                     cluster_list_placement_constraints=ClusterListPlacementConstraint(
                         clusters=function.get("allocations", [])

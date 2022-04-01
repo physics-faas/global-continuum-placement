@@ -1,52 +1,50 @@
 {
-  "name": "test",
+  "id": "19fe4293742e0b2c",
+  "displayName": "Full example",
+  "type": "Flow",
+  "executorMode": "NativeSequence",
+  "native": true,
   "objectives": {
     "Energy": "high",
     "Resilience": "low"
   },
-  "tasks": {
-    "task1": {
-      "resources": {
-        "nb_cpu": 1
-      },
-      "next_tasks": [
-        "task2"
-      ],
-      "constraints": [
-        {
-          "site": "site3"
-        }
-      ],
-      "architecture": "x86_64"
-    },
-    "task2": {
-      "resources": {
-        "nb_cpu": 2
-      },
-      "next_tasks": [
-        "task3",
-        "task4"
+  "functions": [
+    {
+      "id": "function1",
+      "sequence": 1,
+      "allocations": [
+        "cluster3"
       ]
     },
-    "task3": {
-      "resources": {
-        "nb_cpu": 2
+    {
+      "id": "function2",
+      "sequence": 2,
+      "annotations": {
+        "sizingCores": "2"
       }
     },
-    "task4": {
-      "resources": {
-        "nb_cpu": 2
-      },
-      "next_tasks": [
-        "task5"
-      ],
-      "architecture": "arm64"
+    {
+      "id": "function3",
+      "sequence": 3,
+      "annotations": {
+        "sizingCores": "2"
+      }
     },
-    "task5": {
-      "resources": {
-        "nb_cpu": 2,
-        "memory_in_MB": 1000
+    {
+      "id": "function4",
+      "sequence": 4,
+      "annotations": {
+        "sizingCores": "2",
+        "architecture": "arm64"
+      }
+    },
+    {
+      "id": "function5",
+      "sequence": 5,
+      "annotations": {
+        "sizingCores": 2,
+        "sizingMB": 1000
       }
     }
-  }
+  ]
 }

@@ -105,6 +105,7 @@ class SchedulerService:
 
         # Apply scoring functions
         # 1. Score on objectives
+        # TODO also take into account function level objectives
         scores = self.score_on_objectives(objectives, valid_sites)
 
         # Sort with the highest score first
