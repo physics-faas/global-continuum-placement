@@ -4,10 +4,11 @@ from typing import Dict, List
 
 from global_continuum_placement.domain.placement.placement import Placement
 from global_continuum_placement.domain.platform.platfom_values import ArchitectureType
-from global_continuum_placement.domain.platform.platform import Platform, Site
+from global_continuum_placement.domain.platform.platform import Cluster, Platform
 from global_continuum_placement.domain.scheduling_policies import first_fit
 from global_continuum_placement.domain.workload.workload import (
-    PlacementConstraint,
+    ClusterListPlacementConstraint,
+    ClusterTypePlacementConstraint,
     TaskDag,
     Workload,
 )
@@ -28,45 +29,40 @@ class SchedulerService:
 
     @staticmethod
     def resolve_placement_constraints(
-        constraints: List[PlacementConstraint], sites: List[Site]
-    ) -> List[Site]:
+        list_constraints: ClusterListPlacementConstraint,
+        type_constraint: ClusterTypePlacementConstraint,
+        sites: List[Cluster],
+    ) -> List[Cluster]:
         """
         Return a list of sites that fit the constraints
 
         All constraints are applied with a logical OR
         """
-        site_that_fit: List[Site] = []
+        cluster_that_fit: List[Cluster] = []
 
-        if len(constraints) == 0:
+        if len(list_constraints.clusters) == 0 and type_constraint is None:
             return sites
 
-        for constraint in constraints:
-            if constraint.cluster is not None:
-                for site in sites:
-                    if constraint.cluster == site.id:
-                        site_that_fit.append(site)
-                        logger.debug(
-                            f"Found valid cluster constraint for cluster {site.id}"
-                        )
-            elif constraint.cluster_type is not None:
-                for site in sites:
-                    # TODO Implement smarter scheduling policy!
-                    # Here we always schedule the function to the first cluster in the list
-                    if site.type.name == constraint.cluster_type.name:
-                        site_that_fit.append(site)
-                        logger.debug(
-                            f"Found valid cluster type constraint for cluster {site.id}"
-                        )
+        for constraint_cluster in list_constraints.clusters:
+            for cluster in sites:
+                if constraint_cluster == cluster.id and (
+                    type_constraint is None
+                    or type_constraint.cluster_type == cluster.type
+                ):
+                    cluster_that_fit.append(cluster)
+                    logger.debug(
+                        f"Found valid cluster constraint for cluster {cluster.id}"
+                    )
             else:
                 logger.debug("No valid constraints found")
 
-        return site_that_fit
+        return cluster_that_fit
 
     @staticmethod
     def resolve_architecture_constraints(
-        architecture_constraint: ArchitectureType, sites: List[Site]
-    ) -> List[Site]:
-        site_that_fit: List[Site] = []
+        architecture_constraint: ArchitectureType, sites: List[Cluster]
+    ) -> List[Cluster]:
+        site_that_fit: List[Cluster] = []
 
         for site in sites:
             if site.architecture == architecture_constraint:
@@ -75,7 +71,7 @@ class SchedulerService:
 
     @staticmethod
     def score_on_objectives(
-        objectives: Dict[Objectives, Levels], valid_sites: List[Site]
+        objectives: Dict[Objectives, Levels], valid_sites: List[Cluster]
     ) -> Dict[str, float]:
         scores: Dict[str, float] = {site.id: 0 for site in valid_sites}
         for objective, level in objectives.items():
@@ -90,12 +86,14 @@ class SchedulerService:
     ) -> List[Placement]:
         placements: List[Placement] = []
 
-        valid_sites: List[Site] = self.platform.sites
+        valid_sites: List[Cluster] = self.platform.sites
 
         # Apply filters
         # 1. Filter cluster that does not fit the constraints
         valid_sites = self.resolve_placement_constraints(
-            function.placement_constraints, valid_sites
+            function.cluster_list_placement_constraints,
+            function.cluster_type_placement_constraints,
+            valid_sites,
         )
 
         # 2. Filter on architecture constraint

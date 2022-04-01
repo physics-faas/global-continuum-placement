@@ -23,7 +23,7 @@ class InvalidSiteDefinition(Exception):
 
 
 @dataclass
-class Site:
+class Cluster:
     id: str
     type: ClusterType
     total_resources: Resources
@@ -37,7 +37,7 @@ class Site:
     @classmethod
     def create_site_from_dict(
         cls, site_id: str, site_dict: Dict[str, Union[str, Dict[str, int]]]
-    ) -> "Site":
+    ) -> "Cluster":
         try:
             resources = cast(Dict[str, int], site_dict["resources"])
             type = cast(str, site_dict["type"])
@@ -58,9 +58,9 @@ class Site:
 
         except KeyError as err:
             raise InvalidSiteDefinition(
-                f"Missing element in the Site definition: {err}"
+                f"Missing element in the Cluster definition: {err}"
             )
-        return Site(
+        return Cluster(
             id=site_id,
             type=ClusterType[type.upper()],
             total_resources=Resources(**resources),
@@ -77,17 +77,17 @@ class Site:
 
 @dataclass
 class Platform:
-    sites: List[Site] = field(default_factory=list)
+    sites: List[Cluster] = field(default_factory=list)
 
     @classmethod
     def create_from_dict(cls, platform_dict: Dict) -> "Platform":
-        sites: List[Site] = []
+        sites: List[Cluster] = []
         for site_id, site in platform_dict.items():
-            sites.append(Site.create_site_from_dict(site_id, site))
+            sites.append(Cluster.create_site_from_dict(site_id, site))
         return Platform(sites)
 
 
-def site_has_enough_resources(site: Site, resource_request: ResourceRequest) -> bool:
+def site_has_enough_resources(site: Cluster, resource_request: ResourceRequest) -> bool:
     """
     Return True if the given cluster has enough resource to allocate the given resource request.
     """

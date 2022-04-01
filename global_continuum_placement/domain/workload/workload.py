@@ -18,8 +18,12 @@ class ResourceRequest:
 
 
 @dataclass
-class PlacementConstraint:
-    cluster: Optional[str] = None
+class ClusterListPlacementConstraint:
+    clusters: List[str] = field(default_factory=list)
+
+
+@dataclass
+class ClusterTypePlacementConstraint:
     cluster_type: Optional[ClusterType] = None
 
 
@@ -28,62 +32,12 @@ class TaskDag:
     id: str
     architecture_constraint: ArchitectureType
     resource_request: ResourceRequest
+    # WARNING: a list of cluster placement constraints defined are resolved with a logical OR.
+    cluster_list_placement_constraints: ClusterListPlacementConstraint
+    cluster_type_placement_constraints: Optional[ClusterTypePlacementConstraint] = None
     objective: Optional[Tuple[Objectives, Levels]] = None
-    # WARNING: Multiple placement constraints defined are resolved with a logical OR.
-    placement_constraints: List[PlacementConstraint] = field(default_factory=list)
     state: TaskState = field(default=TaskState.NONE)
     next_tasks: List["TaskDag"] = field(default_factory=list)
-
-    @classmethod
-    def _create_task_from_dict(
-        cls, task_ids: List[str], workflow: Dict
-    ) -> List["TaskDag"]:
-        new_tasks = []
-        for task_id in task_ids:
-            current_task = workflow[task_id]
-            architecture = current_task.get("architecture")
-            try:
-                architecture_constraint = (
-                    ArchitectureType[architecture.upper()]
-                    if architecture
-                    else ArchitectureType.X86_64
-                )
-            except KeyError:
-                raise UnknownArchitectureError(
-                    f"Architecture {architecture} is not recognised. Available architectures are {', '.join(ArchitectureType.list())}."
-                )
-            new_tasks.append(
-                TaskDag(
-                    id=task_id,
-                    resource_request=ResourceRequest(
-                        **current_task.get("resources", {})
-                    ),
-                    placement_constraints=[
-                        PlacementConstraint(
-                            cluster=constraint.get("cluster"),
-                            cluster_type=ClusterType[constraint["cluster_type"].upper()]
-                            if constraint.get("cluster_type")
-                            else None,
-                        )
-                        for constraint in current_task.get("constraints", [])
-                    ],
-                    architecture_constraint=architecture_constraint,
-                    next_tasks=cls._create_task_from_dict(
-                        current_task.get("next_tasks", []), workflow
-                    ),
-                )
-            )
-        return new_tasks
-
-    @classmethod
-    def create_dag_from_workflow(cls, workflow: Dict) -> "TaskDag":
-        """
-        FIXME Define a workflow definition schema and create this function after!
-        """
-        # FIXME find root function, here we assume it is the first
-        task_dict = list(workflow.keys())[0]
-        # TODO call the recursive method on it
-        return cls._create_task_from_dict([task_dict], workflow)[0]
 
     @classmethod
     def create_dag_from_functions_sequence(cls, functions: List[Dict]) -> "TaskDag":
@@ -106,27 +60,20 @@ class TaskDag:
                         nb_cpu=annotations.get("sizingCores", 0),
                         memory_in_MB=annotations.get("sizingMB", 0),
                     ),
-                    placement_constraints=[
-                        PlacementConstraint(
-                            cluster=constraint,
-                        )
-                        for constraint in function.get("allocations", [])
-                    ]
-                    + (
-                        [
-                            PlacementConstraint(
-                                cluster_type=ClusterType[
-                                    annotations["locality"].upper()
-                                ]
-                            )
-                        ]
-                        if annotations.get("locality")
-                        else []
+                    cluster_list_placement_constraints=ClusterListPlacementConstraint(
+                        clusters=function.get("allocations", [])
                     ),
+                    cluster_type_placement_constraints=ClusterTypePlacementConstraint(
+                        cluster_type=ClusterType[annotations["locality"].upper()]
+                    )
+                    if annotations.get("locality")
+                    else None,
                     objective=(
                         Objectives[annotations["optimizationGoal"].upper()],
                         Levels[annotations.get("importance").upper()],
-                    ) if annotations.get("optimizationGoal") else None,
+                    )
+                    if annotations.get("optimizationGoal")
+                    else None,
                 )
             ]
 

@@ -15,7 +15,8 @@
         "locality": "Edge"
       },
       "allocations": [
-        "Cluster_1"
+        "Cluster_1",
+        "Cluster_2"
       ]
     }
   ]
