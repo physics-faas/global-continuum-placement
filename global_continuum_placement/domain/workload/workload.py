@@ -42,20 +42,23 @@ class TaskDag:
     @classmethod
     def create_dag_from_functions_sequence(cls, functions: List[Dict]) -> "TaskDag":
         # Be sure that the functions are sorted in reverse order
-        functions = sorted(functions, key=lambda elem: elem["sequence"], reverse=True)
+        if len(functions) > 1:
+            functions = sorted(functions, key=lambda elem: elem.get("sequence"), reverse=True)
         next_tasks: List[TaskDag] = []
         for function in functions:
             annotations = function.get("annotations", {})
-            architecture = annotations.get("architecture")
+            architecture_raw = annotations.get("architecture")
+            try:
+                architecture = (ArchitectureType[architecture_raw.upper()]
+                if architecture_raw
+                else ArchitectureType.X86_64)
+            except (KeyError, ValueError):
+                raise UnknownArchitectureError
             next_tasks = [
                 TaskDag(
                     id=function["id"],
                     next_tasks=next_tasks,
-                    architecture_constraint=(
-                        ArchitectureType[architecture.upper()]
-                        if architecture
-                        else ArchitectureType.X86_64
-                    ),
+                    architecture_constraint=architecture,
                     resource_request=ResourceRequest(
                         nb_cpu=int(annotations.get("sizingCores", 0)),
                         memory_in_MB=int(annotations.get("sizingMB", 0)),

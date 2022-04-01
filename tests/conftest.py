@@ -35,13 +35,11 @@ def platform_dict():
 @pytest.fixture
 def workflow_dict():
     return {
-        "task1": {"resources": {"nb_cpu": 1}, "next_tasks": ["task2"]},
-        "task2": {"resources": {"nb_cpu": 2}, "next_tasks": ["task3", "task4"]},
-        "task3": {
-            "resources": {"nb_cpu": 2},
-        },
-        "task4": {"resources": {"nb_cpu": 2}, "next_tasks": ["task5"]},
-        "task5": {
-            "resources": {"nb_cpu": 2, "memory_in_MB": 1000},
-        },
+        "functions": [
+            {"id": "task1", "resources": {"nb_cpu": 1}, "sequence": 1},
+            {"id": "task2", "resources": {"nb_cpu": 2}, "sequence": 2},
+            {"id": "task3", "resources": {"nb_cpu": 2}, "sequence": 3},
+            {"id": "task4", "resources": {"nb_cpu": 2}, "sequence": 4},
+            {"id": "task5", "resources": {"nb_cpu": 2, "memory_in_MB": 1000}, "sequence": 5},
+        ]
     }

@@ -31,20 +31,28 @@ class SchedulerService:
     def resolve_placement_constraints(
         list_constraints: ClusterListPlacementConstraint,
         type_constraint: ClusterTypePlacementConstraint,
-        sites: List[Cluster],
+        clusters: List[Cluster],
     ) -> List[Cluster]:
         """
-        Return a list of sites that fit the constraints
+        Return a list of clusters that fit the constraints
 
         All constraints are applied with a logical OR
         """
         cluster_that_fit: List[Cluster] = []
 
-        if len(list_constraints.clusters) == 0 and type_constraint is None:
-            return sites
+        if len(list_constraints.clusters) == 0:
+            if type_constraint is None:
+                return clusters
+            else:
+                for cluster in clusters:
+                    if type_constraint.cluster_type == cluster.type:
+                        cluster_that_fit.append(cluster)
+                        logger.debug(
+                            f"Found valid cluster type constraint for cluster {cluster.id}"
+                        )
 
         for constraint_cluster in list_constraints.clusters:
-            for cluster in sites:
+            for cluster in clusters:
                 if constraint_cluster == cluster.id and (
                     type_constraint is None
                     or type_constraint.cluster_type == cluster.type

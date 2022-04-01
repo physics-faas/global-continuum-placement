@@ -41,5 +41,5 @@ class PlatformSchema(Schema):
     platform = fields.Dict(
         keys=fields.Str(),
         values=fields.Nested(ClusterSchema),
-        description="The entire platform description with all sites",
+        description="The entire platform description with all clusters",
     )
