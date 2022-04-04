@@ -5,6 +5,7 @@ from aiohttp.web_response import Response
 from aiohttp_apispec import docs, request_schema
 from dependency_injector.wiring import Provide
 
+from global_continuum_placement.application.platform_service import IPlatformService
 from global_continuum_placement.application.scheduler import SchedulerService
 from global_continuum_placement.container import ApplicationContainer
 from global_continuum_placement.domain.platform.platform import Platform
@@ -36,11 +37,11 @@ logger = logging.getLogger(__name__)
 @request_schema(PlatformSchema)
 async def create_platform(
     request: Request,
-    scheduler: SchedulerService = Provide[ApplicationContainer.scheduler_service],
+    platform_service: IPlatformService = Provide[ApplicationContainer.platform_service],
 ) -> Response:
     try:
         platform = Platform.create_from_dict(request["data"]["platform"])
-        scheduler.platform = platform
+        platform_service.platform = platform
     except Exception as err:
         logger.exception(err)
         return json_response(ErrorSchema().dump({"error": str(err)}), status=400)
@@ -69,9 +70,8 @@ async def schedule_application(
     scheduler: SchedulerService = Provide[ApplicationContainer.scheduler_service],
 ) -> Response:
     application = Application.create_from_application(request["data"])
-    application_id = request["data"]["id"]
-    scheduler.workload.applications[application_id] = application
-    placements = scheduler.schedule()
+    placements = await scheduler.schedule_application(
+        application, raw_application=request["data"]
+    )
     result = [PlacementSchema().dump(placement) for placement in placements]
-    # TODO: Send this response to the Orchestrator
     return json_response(result, status=200)

@@ -1,12 +1,29 @@
+from unittest.mock import Mock
+
 import pytest
 
 from global_continuum_placement.container import ApplicationContainer
+from global_continuum_placement.application import scheduler
+
+# Define plugins used for tests
+pytest_plugins = ["aiohttp.pytest_plugin"]
 
 
-@pytest.fixture(scope="function")
-def app():
-    container = ApplicationContainer()
-    yield container
+@pytest.fixture()
+def app_container():
+    app_container = ApplicationContainer()
+    yield app_container
+    app_container.unwire()
+
+
+@pytest.fixture()
+def scheduler_service_mock(
+        app_container: ApplicationContainer,
+):
+    app_container.result_publisher.override(Mock())
+    app_container.platform_service.override(Mock())
+    app_container.wire([scheduler])
+    return app_container.scheduler_service()
 
 
 @pytest.fixture

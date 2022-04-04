@@ -22,7 +22,7 @@ rec {
     };
   in envShell.env;
 
-  image = pkgs.callPackage ./nix/docker.nix {
+  image = pkgs.callPackage ./deploy/docker.nix {
     global_continuum_placement = package;
   };
 }

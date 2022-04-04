@@ -105,13 +105,3 @@ class Application:
                 app_dict["functions"]
             ),
         )
-
-
-@dataclass
-class Workload:
-    id: str
-    applications: Dict[str, Application] = field(default_factory=dict)
-
-    @classmethod
-    def create(cls) -> "Workload":
-        return Workload(id=str(uuid.uuid4()))

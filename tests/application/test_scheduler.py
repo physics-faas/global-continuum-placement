@@ -14,12 +14,10 @@ from global_continuum_placement.domain.workload.workload import (
 )
 
 
-def test_scheduler_schedule_without_constraints(platform_dict, workflow_dict):
-    workflow = Application.create_from_application(workflow_dict)
+async def test_scheduler_schedule_without_constraints(platform_dict, workflow_dict, scheduler_service_mock):
+    application = Application.create_from_application(workflow_dict)
     platform = Platform.create_from_dict(platform_dict)
-    scheduler = SchedulerService(platform)
-    scheduler.workload.applications[workflow.id] = workflow
-    placements: List[Placement] = scheduler.schedule()
+    placements: List[Placement] = await scheduler_service_mock.schedule_application(platform, application)
     assert len(placements) == len(workflow_dict["functions"])
 
 
@@ -45,7 +43,7 @@ def test_scheduler_schedule_not_enough_resources(
     scheduler = SchedulerService(platform)
     scheduler.workload.applications[workflow.id] = workflow
     with pytest.raises(NotEnoughResourcesException):
-        scheduler.schedule()
+        scheduler.schedule_application()
 
 
 @pytest.mark.parametrize(
@@ -78,7 +76,7 @@ def test_scheduler_schedule_site_constraints(
     platform = Platform.create_from_dict(platform_dict)
     scheduler = SchedulerService(platform)
     scheduler.workload.applications[workflow.id] = workflow
-    placements: List[Placement] = scheduler.schedule()
+    placements: List[Placement] = scheduler.schedule_application()
     assert placements == expected_placements
 
 
@@ -126,7 +124,7 @@ def test_scheduler_architecture_constraints(
     platform = Platform.create_from_dict(platform_dict)
     scheduler = SchedulerService(platform)
     scheduler.workload.applications[workflow.id] = workflow
-    placements: List[Placement] = scheduler.schedule()
+    placements: List[Placement] = scheduler.schedule_application()
     assert placements == expected_placements
 
 
@@ -293,5 +291,5 @@ def test_objective_scoring(platform_dict, workflow_dict, expected_placements):
     platform = Platform.create_from_dict(platform_dict)
     scheduler = SchedulerService(platform)
     scheduler.workload.applications[workflow.id] = workflow
-    placements: List[Placement] = scheduler.schedule()
+    placements: List[Placement] = scheduler.schedule_application()
     assert placements == expected_placements
