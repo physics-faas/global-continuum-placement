@@ -140,7 +140,7 @@ def test_scheduler_architecture_constraints(
                     "resources": {"nb_cpu": 1},
                     "objective_scores": {
                         "Energy": 1,
-                        "Resilience": 5,
+                        "Availability": 5,
                         "Performance": 25,
                     },
                 },
@@ -149,7 +149,7 @@ def test_scheduler_architecture_constraints(
                     "resources": {"nb_cpu": 1},
                     "objective_scores": {
                         "Energy": 100,
-                        "Resilience": 30,
+                        "Availability": 30,
                         "Performance": 50,
                     },
                 },
@@ -168,7 +168,7 @@ def test_scheduler_architecture_constraints(
                     "resources": {"nb_cpu": 1},
                     "objective_scores": {
                         "Energy": 100,
-                        "Resilience": 5,
+                        "Availability": 5,
                         "Performance": 25,
                     },
                 },
@@ -177,7 +177,7 @@ def test_scheduler_architecture_constraints(
                     "resources": {"nb_cpu": 1},
                     "objective_scores": {
                         "Energy": 100,
-                        "Resilience": 30,
+                        "Availability": 30,
                         "Performance": 50,
                     },
                 },
@@ -196,7 +196,7 @@ def test_scheduler_architecture_constraints(
                     "resources": {"nb_cpu": 1},
                     "objective_scores": {
                         "Energy": 100,
-                        "Resilience": 30,
+                        "Availability": 30,
                         "Performance": 25,
                     },
                 },
@@ -205,14 +205,14 @@ def test_scheduler_architecture_constraints(
                     "resources": {"nb_cpu": 1},
                     "objective_scores": {
                         "Energy": 100,
-                        "Resilience": 100,
+                        "Availability": 100,
                         "Performance": 50,
                     },
                 },
             },
             {
                 "functions": [{"id": "task1", "resources": {"nb_cpu": 1}}],
-                "objectives": {"Energy": "High", "Resilience": "High"},
+                "objectives": {"Energy": "High", "Availability": "High"},
             },
             [Placement("site2", "task1")],
             id="two objectives same level",
@@ -224,7 +224,7 @@ def test_scheduler_architecture_constraints(
                     "resources": {"nb_cpu": 1},
                     "objective_scores": {
                         "Energy": 100,
-                        "Resilience": 30,
+                        "Availability": 30,
                         "Performance": 25,
                     },
                 },
@@ -233,14 +233,14 @@ def test_scheduler_architecture_constraints(
                     "resources": {"nb_cpu": 1},
                     "objective_scores": {
                         "Energy": 100,
-                        "Resilience": 100,
+                        "Availability": 100,
                         "Performance": 50,
                     },
                 },
             },
             {
                 "functions": [{"id": "task1", "resources": {"nb_cpu": 1}}],
-                "objectives": {"Energy": "High", "Resilience": "Low"},
+                "objectives": {"Energy": "High", "Availability": "Low"},
             },
             [Placement("site2", "task1")],
             id="two objectives different level",
@@ -252,7 +252,7 @@ def test_scheduler_architecture_constraints(
                     "resources": {"nb_cpu": 1},
                     "objective_scores": {
                         "Energy": 100,
-                        "Resilience": 30,
+                        "Availability": 30,
                         "Performance": 25,
                     },
                 },
@@ -261,7 +261,7 @@ def test_scheduler_architecture_constraints(
                     "resources": {"nb_cpu": 1},
                     "objective_scores": {
                         "Energy": 100,
-                        "Resilience": 100,
+                        "Availability": 100,
                         "Performance": 50,
                     },
                 },
@@ -270,7 +270,7 @@ def test_scheduler_architecture_constraints(
                     "resources": {"nb_cpu": 1},
                     "objective_scores": {
                         "Energy": 100,
-                        "Resilience": 10,
+                        "Availability": 10,
                         "Performance": 90,
                     },
                 },
@@ -279,7 +279,7 @@ def test_scheduler_architecture_constraints(
                 "functions": [{"id": "task1", "resources": {"nb_cpu": 1}}],
                 "objectives": {
                     "Energy": "High",
-                    "Resilience": "Low",
+                    "Availability": "Low",
                     "Performance": "Medium",
                 },
             },

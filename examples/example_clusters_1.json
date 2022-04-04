@@ -11,7 +11,7 @@
     "architecture": "x86_64",
     "objective_scores": {
       "Energy": "60",
-      "Resilience": "10",
+      "Availability": "10",
       "Performance": "20"
     }
   },
@@ -25,7 +25,7 @@
     "architecture": "x86_64",
     "objective_scores": {
       "Energy": "40",
-      "Resilience": "15",
+      "Availability": "15",
       "Performance": "30"
     }
   }

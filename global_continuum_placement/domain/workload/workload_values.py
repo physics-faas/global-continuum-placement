@@ -22,7 +22,7 @@ class Levels(Enum):
 class Objectives(Enum):
     ENERGY = "Energy"
     PERFORMANCE = "Performance"
-    RESILIENCE = "Resilience"
+    AVAILABILITY = "Availability"
 
     @classmethod
     def list(cls) -> List[str]:

@@ -57,18 +57,18 @@ Create a platform file like this one in ./test-platform.json:
       "type": "Edge",
       "resources": {"nb_cpu": 4, "nb_gpu": 0, "memory_in_MB": 1024},
       "architecture": "x86_64",
-      "objective_scores": {"Energy": 60, "Resilience": 5, "Performance": 25}
+      "objective_scores": {"Energy": 60, "Availability": 5, "Performance": 25}
     },
     "cluster2": {
       "type": "Edge",
       "resources": {"nb_cpu": 2, "nb_gpu": 1, "memory_in_MB": 4096},
       "architecture": "arm64",
-      "objective_scores": {"Energy": 100, "Resilience": 30, "Performance": 50}
+      "objective_scores": {"Energy": 100, "Availability": 30, "Performance": 50}
     },
     "cluster3": {
       "type": "HPC",
       "resources": {"nb_cpu": 1000, "nb_gpu": 50, "memory_in_MB": 16e6},
-      "objective_scores": {"Energy": 10, "Resilience": 80, "Performance": 100}
+      "objective_scores": {"Energy": 10, "Availability": 80, "Performance": 100}
     }
   }
 }
@@ -88,7 +88,7 @@ Here an example application from the workload-test.json file:
   "native": true,
   "objectives": {
     "Energy": "high",
-    "Resilience": "low"
+    "Availability": "low"
   },
   "functions": [
     {
@@ -164,7 +164,7 @@ The result is should be:
 
 Let's explain these decisions:
 - `function1` has an explicit cluster constraint for the `cluster3` so it is allocated there.
-- `function2` only requires 2 CPU and all clusters have at least 2 CPU. The architecture constraint is not defined but by default it is x86_64, so only the cluster 1 and 3 can fit the constraint. The scheduler now take into account the objectives and favors the Energy and the Resilience so it choose the `cluster1`.
+- `function2` only requires 2 CPU and all clusters have at least 2 CPU. The architecture constraint is not defined but by default it is x86_64, so only the cluster 1 and 3 can fit the constraint. The scheduler now take into account the objectives and favors the Energy and the Availability so it choose the `cluster1`.
 - `function3` has the same constraints as `function2` so it goes on the same cluster, the `cluster1`because it still has 2 CPU available.
 - `function4` goes on `cluster2` because it requires an `arm64` architecture and only the `cluster2` is providing it.
 - `function5` has only resources constraint and should go to the cluster1 regarding the objectives but it does not have enough resources. It is finally allocated to `cluster3` which is the only one that fits the constraints and have available resources.
