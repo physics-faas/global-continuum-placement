@@ -16,7 +16,15 @@ class InferenceEngineAPIPlatformService(IPlatformService):
     """
     In memory representation of the platform. Might be updated directly (POST) or using the updated-platform (GET)
     """
-    platform: Platform
+    _platform: Platform = None
+
+    async def set_platform(self, platform: Platform) -> None:
+        self._platform = platform
+
+    async def get_platform(self) -> Platform:
+        if self._platform is None:
+            return await self.update_platform()
+        return self._platform
 
     async def update_platform(self) -> Platform:
         url = urljoin(self.inference_engine_base_api, "/clusters")
@@ -28,5 +36,5 @@ class InferenceEngineAPIPlatformService(IPlatformService):
             ) as response:
                 response_json = await response.json()
                 logger.info("response for platform request %s", response_json)
-                self.platform = Platform.create_from_dict({"platform": response_json})
-        return self.platform
+                self._platform = Platform.create_from_dict({"platform": response_json})
+        return self._platform

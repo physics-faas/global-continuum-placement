@@ -41,7 +41,7 @@ async def create_platform(
 ) -> Response:
     try:
         platform = Platform.create_from_dict(request["data"]["platform"])
-        platform_service.platform = platform
+        await platform_service.set_platform(platform)
     except Exception as err:
         logger.exception(err)
         return json_response(ErrorSchema().dump({"error": str(err)}), status=400)

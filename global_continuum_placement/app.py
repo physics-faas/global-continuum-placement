@@ -48,7 +48,8 @@ async def on_startup(app: web.Application) -> None:
     container: ApplicationContainer = app["container"]
     logger = getLogger(__name__)
     try:
-        container.platform_service.get_platform()
+        platform_service = container.platform_service()
+        await platform_service.update_platform()
     except Exception as err:
         logger.exception(
             "Unable to initialized the platform at startup. Error: %s", err

@@ -26,4 +26,9 @@ class ApplicationContainer(containers.DeclarativeContainer):
     )
 
     # Inject scheduling policy here
-    scheduler_service = Singleton(SchedulerService, policy=configuration.policy)
+    scheduler_service = Singleton(
+        SchedulerService,
+        platform_service=platform_service,
+        result_publisher=result_publisher,
+        policy=configuration.policy,
+    )

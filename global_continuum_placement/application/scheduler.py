@@ -2,10 +2,10 @@ import logging
 from dataclasses import dataclass, field
 from typing import Dict, List
 
-from dependency_injector.wiring import Provide
-
 from global_continuum_placement.application.platform_service import IPlatformService
-from global_continuum_placement.application.schedule_result_publisher import IResultPublisher
+from global_continuum_placement.application.schedule_result_publisher import (
+    IResultPublisher,
+)
 from global_continuum_placement.domain.placement.placement import Placement
 from global_continuum_placement.domain.platform.platfom_values import ArchitectureType
 from global_continuum_placement.domain.platform.platform import Cluster, Platform
@@ -27,7 +27,7 @@ logger = logging.getLogger(__name__)
 @dataclass
 class SchedulerService:
     platform_service: IPlatformService
-    result_publisher = IResultPublisher
+    result_publisher: IResultPublisher
     policy: str = "first_fit"
 
     @staticmethod
@@ -154,7 +154,7 @@ class SchedulerService:
     ) -> List[Placement]:
         placements: List[Placement] = []
 
-        platform = await self.platform_service.update_platform()
+        platform = await self.platform_service.get_platform()
 
         placements.extend(
             self.schedule_function(
