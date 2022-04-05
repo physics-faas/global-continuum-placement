@@ -1,5 +1,6 @@
+import json
 import logging
-from dataclasses import dataclass
+from dataclasses import dataclass, asdict
 from typing import Dict, List
 from urllib.parse import urljoin
 
@@ -24,15 +25,22 @@ class OrchestratorPublishScheduleResultService(IResultPublisher):
         url = urljoin(self.orchestrator_base_api, "/applications")
         data = {
             "application": raw_application,
-            "platform": platform.sites,
-            "allocations": placements,
+            "platform": {cluster.id: asdict(cluster) for cluster in platform.sites},
+            "allocations": [asdict(placement) for placement in placements],
         }
+        # Remove unwanted fields
+        for cluster_id, cluster in data["platform"].items():
+            del cluster["free_resources"]
+            del cluster["allocated_tasks"]
+
+        json_data = json.dumps(data)
+        logger.info("JSON formatted data to send: \n%s", json_data)
         try:
             logger.info("Get platform update from %s", url)
             async with aiohttp.client.ClientSession() as session:
                 async with session.post(
                     url,
-                    data=data
+                    json=json_data
                     # headers={"authorization": authorization_token},
                 ) as response:
                     logger.info("response for post %s", response)
