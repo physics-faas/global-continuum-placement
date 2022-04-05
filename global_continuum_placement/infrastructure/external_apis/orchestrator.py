@@ -1,7 +1,7 @@
 import json
 import logging
-from dataclasses import dataclass, asdict
-from typing import Dict, List
+from dataclasses import asdict, dataclass
+from typing import Dict, List, cast
 from urllib.parse import urljoin
 
 import aiohttp
@@ -29,7 +29,7 @@ class OrchestratorPublishScheduleResultService(IResultPublisher):
             "allocations": [asdict(placement) for placement in placements],
         }
         # Remove unwanted fields
-        for cluster_id, cluster in data["platform"].items():
+        for cluster_id, cluster in cast(dict, data["platform"]).items():
             del cluster["free_resources"]
             del cluster["allocated_tasks"]
 
