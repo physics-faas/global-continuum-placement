@@ -9,7 +9,7 @@ class TaskState(str, Enum):
     DONE = "Done"
 
 
-class Levels(int, Enum):
+class Levels(float, Enum):
     LOW = 0.2
     MEDIUM = 0.5
     HIGH = 1

@@ -14,7 +14,7 @@ from global_continuum_placement.domain.workload.workload import (
 
 
 async def test_scheduler_schedule_without_constraints(
-    platform_dict, application_dict, scheduler_service_mock
+    application_dict, scheduler_service_mock
 ):
     application = Application.create_from_application(application_dict)
     placements: List[Placement] = await scheduler_service_mock.schedule_application(

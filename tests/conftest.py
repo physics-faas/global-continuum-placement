@@ -56,6 +56,7 @@ def scheduler_service_mock(
 
     platform = Platform.create_from_dict(platform_dict)
     mock_platform_service.update_platform = AsyncMock(return_value=platform)
+    mock_platform_service.get_platform = AsyncMock(return_value=platform)
     app_container.platform_service.override(mock_platform_service)
     app_container.wire([scheduler])
     return app_container.scheduler_service()
