@@ -2,15 +2,19 @@ import logging
 from dataclasses import dataclass, field
 from typing import Dict, List
 
+from global_continuum_placement.application.platform_service import IPlatformService
+from global_continuum_placement.application.schedule_result_publisher import (
+    IResultPublisher,
+)
 from global_continuum_placement.domain.placement.placement import Placement
 from global_continuum_placement.domain.platform.platfom_values import ArchitectureType
 from global_continuum_placement.domain.platform.platform import Cluster, Platform
 from global_continuum_placement.domain.scheduling_policies import first_fit
 from global_continuum_placement.domain.workload.workload import (
+    Application,
     ClusterListPlacementConstraint,
     ClusterTypePlacementConstraint,
     TaskDag,
-    Workload,
 )
 from global_continuum_placement.domain.workload.workload_values import (
     Levels,
@@ -22,9 +26,8 @@ logger = logging.getLogger(__name__)
 
 @dataclass
 class SchedulerService:
-    # TODO  move them to a DB
-    platform: Platform = None
-    workload: Workload = field(default_factory=Workload.create)
+    platform_service: IPlatformService
+    result_publisher: IResultPublisher
     policy: str = "first_fit"
 
     @staticmethod
@@ -90,11 +93,14 @@ class SchedulerService:
         return scores
 
     def schedule_function(
-        self, function: TaskDag, objectives: Dict[Objectives, Levels]
+        self,
+        platform: Platform,
+        function: TaskDag,
+        objectives: Dict[Objectives, Levels],
     ) -> List[Placement]:
         placements: List[Placement] = []
 
-        valid_sites: List[Cluster] = self.platform.sites
+        valid_sites: List[Cluster] = platform.sites
 
         # Apply filters
         # 1. Filter cluster that does not fit the constraints
@@ -137,16 +143,28 @@ class SchedulerService:
 
         # Recursion
         for function in function.next_tasks:
-            placements.extend(self.schedule_function(function, objectives))
+            placements.extend(self.schedule_function(platform, function, objectives))
 
         return placements
 
-    def schedule(self) -> List[Placement]:
+    async def schedule_application(
+        self,
+        application: Application,
+        raw_application: Dict = field(default_factory=dict),
+    ) -> List[Placement]:
         placements: List[Placement] = []
 
-        for workflow in self.workload.applications.values():
-            placements.extend(
-                self.schedule_function(workflow.functions_dag, workflow.objectives)
+        platform = await self.platform_service.get_platform()
+
+        placements.extend(
+            self.schedule_function(
+                platform, application.functions_dag, application.objectives
             )
+        )
+
+        # FIXME: Reset resource availability fields because we do not access to the API that updates these values when the application is finished
+        for cluster in platform.sites:
+            cluster.reset_resource_availability()
+        await self.result_publisher.publish(raw_application, platform, placements)
 
         return placements

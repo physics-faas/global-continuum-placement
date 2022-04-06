@@ -15,7 +15,10 @@ def init() -> web.Application:
 
     # Override with env variables
     container.configuration.log_level.from_env("LOG_LEVEL", "INFO")
-    # TODO: Add other configurations here
+    container.configuration.orchestrator_base_api.from_env("ORCHESTRATOR_BASE_API")
+    container.configuration.inference_engine_base_api.from_env(
+        "INFERENCE_ENGINE_BASE_API"
+    )
     container.configuration.policy.from_env("POLICY", "first_fit")
 
     # Setup logging
@@ -42,9 +45,15 @@ def init() -> web.Application:
 
 async def on_startup(app: web.Application) -> None:
     """Hooks for application startup"""
-    # container: ApplicationContainer = app["container"]
-    # FIXME: add initialization hooks here
-    pass
+    container: ApplicationContainer = app["container"]
+    logger = getLogger(__name__)
+    try:
+        platform_service = container.platform_service()
+        await platform_service.update_platform()
+    except Exception as err:
+        logger.exception(
+            "Unable to initialized the platform at startup. Error: %s", err
+        )
 
 
 async def on_cleanup(app: web.Application) -> None:

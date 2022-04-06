@@ -2,14 +2,14 @@ from enum import Enum
 from typing import List
 
 
-class ClusterType(Enum):
+class ClusterType(str, Enum):
     HPC = "HPC"
     EDGE = "Edge"
     CLOUD = "Cloud"
     ON_PREMISE = "On-premise"
 
 
-class ArchitectureType(Enum):
+class ArchitectureType(str, Enum):
     """
     Values are linux defined arch like returned by uname -a
     """

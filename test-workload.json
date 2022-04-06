@@ -6,7 +6,7 @@
   "native": true,
   "objectives": {
     "Energy": "high",
-    "Resilience": "low"
+    "Availability": "low"
   },
   "functions": [
     {

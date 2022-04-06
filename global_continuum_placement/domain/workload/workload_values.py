@@ -2,14 +2,14 @@ from enum import Enum
 from typing import List
 
 
-class TaskState(Enum):
+class TaskState(str, Enum):
     NONE = "None"
     SUBMITTED = "Submitted"
     RUNNING = "Running"
     DONE = "Done"
 
 
-class Levels(Enum):
+class Levels(float, Enum):
     LOW = 0.2
     MEDIUM = 0.5
     HIGH = 1
@@ -19,10 +19,10 @@ class Levels(Enum):
         return list(map(lambda c: c.name.lower(), cls))  # type: ignore
 
 
-class Objectives(Enum):
+class Objectives(str, Enum):
     ENERGY = "Energy"
     PERFORMANCE = "Performance"
-    RESILIENCE = "Resilience"
+    AVAILABILITY = "Availability"
 
     @classmethod
     def list(cls) -> List[str]:
