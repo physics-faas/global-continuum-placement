@@ -16,7 +16,8 @@ spec:
     spec:
       containers:
       - name: app
-        image: ryaxtech/global-continuum-placement:latest
+        image: ryaxtech/global-continuum-placement:main
+        imagePullPolicy: Always
         ports:
         - containerPort: 8080
           name: http-api
