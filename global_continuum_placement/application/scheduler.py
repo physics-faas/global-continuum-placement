@@ -162,6 +162,9 @@ class SchedulerService:
             )
         )
 
+        # FIXME: Reset resource availability fields because we do not access to the API that updates these values when the application is finished
+        for cluster in platform.sites:
+            cluster.reset_resource_availability()
         await self.result_publisher.publish(raw_application, platform, placements)
 
         return placements

@@ -1,3 +1,4 @@
+import copy
 from dataclasses import dataclass, field
 from typing import Dict, List, Optional, Union, cast
 
@@ -73,6 +74,10 @@ class Cluster:
     def allocate(self, task: TaskDag) -> None:
         self.allocated_tasks.append(task)
         self.free_resources.allocate(task.resource_request)
+
+    def reset_resource_availability(self) -> None:
+        self.allocated_tasks = []
+        self.free_resources = copy.deepcopy(self.total_resources)
 
 
 @dataclass
