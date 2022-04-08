@@ -34,6 +34,7 @@ class InferenceEngineAPIPlatformService(IPlatformService):
             async with session.get(
                 url,
                 headers={"X-API-KEY": self.authorization_token},
+                ssl=False,
             ) as response:
                 response_json = await response.json()
                 logger.info("response for platform request %s", response_json)
