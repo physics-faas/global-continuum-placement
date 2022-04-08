@@ -1,6 +1,5 @@
 import logging
 from dataclasses import dataclass
-from urllib.parse import urljoin
 
 import aiohttp
 
@@ -27,7 +26,7 @@ class InferenceEngineAPIPlatformService(IPlatformService):
         return self._platform
 
     async def update_platform(self) -> Platform:
-        url = urljoin(self.inference_engine_base_api, "/clusters")
+        url = self.inference_engine_base_api.rstrip("/") + "/clusters"
         logger.info("Get platform update from %s", url)
         async with aiohttp.client.ClientSession() as session:
             async with session.get(

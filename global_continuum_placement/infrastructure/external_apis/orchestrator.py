@@ -2,7 +2,6 @@ import json
 import logging
 from dataclasses import asdict, dataclass
 from typing import Dict, List, cast
-from urllib.parse import urljoin
 
 import aiohttp
 
@@ -22,7 +21,7 @@ class OrchestratorPublishScheduleResultService(IResultPublisher):
     async def publish(
         self, raw_application: Dict, platform: Platform, placements: List[Placement]
     ) -> None:
-        url = urljoin(self.orchestrator_base_api, "/deploy")
+        url = self.orchestrator_base_api.rstrip("/") + "/deploy"
         data = {
             "application": raw_application,
             "platform": {cluster.id: asdict(cluster) for cluster in platform.sites},
