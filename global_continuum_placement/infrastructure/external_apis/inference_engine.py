@@ -28,7 +28,7 @@ class InferenceEngineAPIPlatformService(IPlatformService):
         return self._platform
 
     async def update_platform(self) -> Platform:
-        url = self.inference_engine_base_api.rstrip("/") + "/clusters"
+        url = self.inference_engine_base_api.rstrip("/") + "/cluster"
         logger.info("Get platform update from %s", url)
         async with aiohttp.client.ClientSession() as session:
             async with session.get(
