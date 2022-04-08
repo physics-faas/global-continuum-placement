@@ -19,6 +19,9 @@ def init() -> web.Application:
     container.configuration.inference_engine_base_api.from_env(
         "INFERENCE_ENGINE_BASE_API"
     )
+    container.configuration.inference_engine_auth_token.from_env(
+        "INFERENCE_ENGINE_AUTH_TOKEN"
+    )
     container.configuration.policy.from_env("POLICY", "first_fit")
 
     # Setup logging

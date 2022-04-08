@@ -18,7 +18,9 @@ class ApplicationContainer(containers.DeclarativeContainer):
 
     # Platform service get updates on the platform state from the outside
     platform_service = Singleton(
-        InferenceEngineAPIPlatformService, configuration.inference_engine_base_api
+        InferenceEngineAPIPlatformService,
+        configuration.inference_engine_base_api,
+        configuration.inference_engine_auth_token,
     )
     # Service to push results of the schedule to
     result_publisher = Factory(

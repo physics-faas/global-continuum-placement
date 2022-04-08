@@ -26,6 +26,11 @@ spec:
             value: http://physics-work-translator.physics-atos/api/v1/
           - name: INFERENCE_ENGINE_BASE_API
             value: http://semantics-block.wp4/api/v1/
+          - name: INFERENCE_ENGINE_AUTH_TOKEN
+            valueFrom:
+              secretKeyRef:
+                name: inference-engine-api-key
+                key: key
 ---
 apiVersion: v1
 kind: Service
@@ -56,4 +61,3 @@ spec:
               name: http
         path: /
         pathType: Exact
-

@@ -12,6 +12,8 @@ logger = logging.getLogger(__name__)
 @dataclass
 class InferenceEngineAPIPlatformService(IPlatformService):
     inference_engine_base_api: str
+    authorization_token: str
+
     """
     In memory representation of the platform. Might be updated directly (POST) or using the updated-platform (GET)
     """
@@ -31,7 +33,7 @@ class InferenceEngineAPIPlatformService(IPlatformService):
         async with aiohttp.client.ClientSession() as session:
             async with session.get(
                 url,
-                # headers={"authorization": authorization_token},
+                headers={"X-API-KEY": self.authorization_token},
             ) as response:
                 response_json = await response.json()
                 logger.info("response for platform request %s", response_json)
