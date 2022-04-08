@@ -1,0 +1,120 @@
+{
+  "application": {
+    "id": "19fe4293742e0b2c",
+    "type": "Flow",
+    "objectives": {
+      "Energy": "high",
+      "Availability": "low"
+    },
+    "displayName": "Full example",
+    "functions": [
+      {
+        "id": "function1",
+        "allocations": [
+          "cluster3"
+        ],
+        "sequence": 1
+      },
+      {
+        "id": "function2",
+        "annotations": {
+          "sizingCores": "2"
+        },
+        "sequence": 2
+      },
+      {
+        "id": "function3",
+        "annotations": {
+          "sizingCores": "2"
+        },
+        "sequence": 3
+      },
+      {
+        "id": "function4",
+        "annotations": {
+          "sizingCores": "2",
+          "architecture": "arm64"
+        },
+        "sequence": 4
+      },
+      {
+        "id": "function5",
+        "annotations": {
+          "sizingCores": 2,
+          "sizingMB": 1000
+        },
+        "sequence": 5
+      }
+    ],
+    "native": true
+  },
+  "platform": {
+    "cluster1": {
+      "id": "cluster1",
+      "type": "Edge",
+      "total_resources": {
+        "nb_cpu": 4,
+        "nb_gpu": 0,
+        "memory_in_MB": 1024
+      },
+      "architecture": "x86_64",
+      "objective_scores": {
+        "Energy": 60,
+        "Performance": 25,
+        "Availability": 5
+      }
+    },
+    "cluster2": {
+      "id": "cluster2",
+      "type": "Edge",
+      "total_resources": {
+        "nb_cpu": 2,
+        "nb_gpu": 1,
+        "memory_in_MB": 4096
+      },
+      "architecture": "arm64",
+      "objective_scores": {
+        "Energy": 100,
+        "Performance": 50,
+        "Availability": 30
+      }
+    },
+    "cluster3": {
+      "id": "cluster3",
+      "type": "HPC",
+      "total_resources": {
+        "nb_cpu": 1000,
+        "nb_gpu": 50,
+        "memory_in_MB": 16000000
+      },
+      "architecture": "x86_64",
+      "objective_scores": {
+        "Energy": 10,
+        "Performance": 100,
+        "Availability": 80
+      }
+    }
+  },
+  "allocations": [
+    {
+      "cluster": "cluster3",
+      "function": "function1"
+    },
+    {
+      "cluster": "cluster1",
+      "function": "function2"
+    },
+    {
+      "cluster": "cluster1",
+      "function": "function3"
+    },
+    {
+      "cluster": "cluster2",
+      "function": "function4"
+    },
+    {
+      "cluster": "cluster3",
+      "function": "function5"
+    }
+  ]
+}

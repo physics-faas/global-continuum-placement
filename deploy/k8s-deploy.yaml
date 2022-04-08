@@ -23,9 +23,9 @@ spec:
           name: http-api
         env:
           - name: ORCHESTRATOR_BASE_API
-            value: http://orchestrator.atos/api/v1/
+            value: http://physics-work-translator.physics-atos/api/v1/
           - name: INFERENCE_ENGINE_BASE_API
-            value: http://inference-engine.innov/api/v1/
+            value: http://semantics-block.wp4/api/v1/
 ---
 apiVersion: v1
 kind: Service
@@ -39,3 +39,21 @@ spec:
     protocol: TCP
     port: 80
     targetPort: http-api
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: global-continuum-placement
+spec:
+  rules:
+  - host: global-continuum-placement.apps.ocphub.physics-faas.eu
+    http:
+      paths:
+      - backend:
+          service:
+            name: global-continuum-placement
+            port:
+              name: http
+        path: /
+        pathType: Exact
+

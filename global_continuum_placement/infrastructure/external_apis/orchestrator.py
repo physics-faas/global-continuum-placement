@@ -22,7 +22,7 @@ class OrchestratorPublishScheduleResultService(IResultPublisher):
     async def publish(
         self, raw_application: Dict, platform: Platform, placements: List[Placement]
     ) -> None:
-        url = urljoin(self.orchestrator_base_api, "/applications")
+        url = urljoin(self.orchestrator_base_api, "/deploy")
         data = {
             "application": raw_application,
             "platform": {cluster.id: asdict(cluster) for cluster in platform.sites},
