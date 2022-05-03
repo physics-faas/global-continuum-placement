@@ -14,8 +14,8 @@ class FunctionSchema(Schema):
 class ApplicationSchema(Schema):
     id = fields.String()
     displayName = fields.String()
+    executorMode = fields.String()
     type = fields.String()
-    execution_mode = fields.String()
     native = fields.Boolean()
     functions = fields.Nested(FunctionSchema, many=True)
     objectives = fields.Dict()
