@@ -38,5 +38,5 @@ class InferenceEngineAPIPlatformService(IPlatformService):
             ) as response:
                 response_json = await response.json()
                 logger.info("response for platform request %s", response_json)
-                self._platform = Platform.create_from_dict(response_json)
+                self._platform = Platform.create_from_dict(response_json["platform"])
         return self._platform
