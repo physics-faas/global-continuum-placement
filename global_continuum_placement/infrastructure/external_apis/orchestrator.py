@@ -39,7 +39,7 @@ class OrchestratorPublishScheduleResultService(IResultPublisher):
             async with aiohttp.client.ClientSession() as session:
                 async with session.post(
                     url,
-                    json=json_data
+                    json=data
                     # headers={"authorization": authorization_token},
                 ) as response:
                     logger.info("response for post %s", response)
