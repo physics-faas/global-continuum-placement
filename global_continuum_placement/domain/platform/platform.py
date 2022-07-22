@@ -2,7 +2,7 @@ import copy
 from dataclasses import dataclass, field
 from typing import Dict, List, Optional, Union, cast
 
-from ..workload.workload import ResourceRequest, TaskDag
+from ..workload.workload import Flow, ResourceRequest, TaskDag
 from ..workload.workload_values import Objectives
 from .platfom_values import ArchitectureType, ClusterType
 
@@ -29,7 +29,7 @@ class Cluster:
     type: ClusterType
     total_resources: Resources
     free_resources: Resources
-    allocated_tasks: List[TaskDag]
+    allocated_tasks: List[Union[TaskDag, Flow]]
     # Each set of resource is considered homogeneous: Only one architecture per set of resources
     architecture: ArchitectureType
     # A score for each objectives
@@ -71,7 +71,7 @@ class Cluster:
             objective_scores=scores,
         )
 
-    def allocate(self, task: TaskDag) -> None:
+    def allocate(self, task: Union[TaskDag, Flow]) -> None:
         self.allocated_tasks.append(task)
         self.free_resources.allocate(task.resource_request)
 

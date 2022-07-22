@@ -9,7 +9,7 @@ from global_continuum_placement.application.platform_service import IPlatformSer
 from global_continuum_placement.application.scheduler import SchedulerService
 from global_continuum_placement.container import ApplicationContainer
 from global_continuum_placement.domain.platform.platform import Platform
-from global_continuum_placement.domain.workload.workload import Application
+from global_continuum_placement.domain.workload.workload import Flow
 from global_continuum_placement.infrastructure.api.schemas.application_schema import (
     ApplicationSchema,
 )
@@ -69,9 +69,11 @@ async def schedule_application(
     request: Request,
     scheduler: SchedulerService = Provide[ApplicationContainer.scheduler_service],
 ) -> Response:
-    application = Application.create_from_application(request["data"])
-    placements = await scheduler.schedule_application(
-        application, raw_application=request["data"]
-    )
-    result = [PlacementSchema().dump(placement) for placement in placements]
+    result = []
+    for flow_dict in request["data"]["flows"]:
+        flow = Flow.create_from_dict(flow_dict)
+        placements = await scheduler.schedule_flow(
+            flow, raw_application=request["data"]
+        )
+        result.append([PlacementSchema().dump(placement) for placement in placements])
     return json_response(result, status=200)

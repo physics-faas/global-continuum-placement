@@ -8,7 +8,7 @@ from global_continuum_placement.domain.scheduling_policies.exceptions import (
     NotEnoughResourcesException,
 )
 from global_continuum_placement.domain.workload.workload import (
-    Application,
+    Flow,
     UnknownArchitectureError,
 )
 
@@ -16,8 +16,8 @@ from global_continuum_placement.domain.workload.workload import (
 async def test_scheduler_schedule_without_constraints(
     application_dict, scheduler_service_mock
 ):
-    application = Application.create_from_application(application_dict)
-    placements: List[Placement] = await scheduler_service_mock.schedule_application(
+    application = Flow.create_from_dict(application_dict)
+    placements: List[Placement] = await scheduler_service_mock.schedule_flow(
         application
     )
     assert len(placements) == len(application_dict["functions"])
@@ -27,11 +27,11 @@ async def test_scheduler_schedule_without_constraints(
     "application_dict",
     [
         pytest.param(
-            {"id": "task1", "annotations": {"sizingCores": 2000}},
+            {"id": "task1", "annotations": {"cores": 2000}},
             id="not enough CPU resources",
         ),
         pytest.param(
-            {"id": "task1", "annotations": {"sizingCores": 1, "sizingMB": 100e6}},
+            {"id": "task1", "annotations": {"cores": 1, "memory": 100e6}},
             id="not enough Memory resources",
         ),
     ],
@@ -40,9 +40,9 @@ async def test_scheduler_schedule_not_enough_resources(
     scheduler_service_mock,
     application_dict,
 ):
-    application = Application.create_from_application({"functions": [application_dict]})
+    application = Flow.create_from_dict({"functions": [application_dict]})
     with pytest.raises(NotEnoughResourcesException):
-        await scheduler_service_mock.schedule_application(application)
+        await scheduler_service_mock.schedule_flow(application)
 
 
 @pytest.mark.parametrize(
@@ -71,8 +71,8 @@ async def test_scheduler_schedule_not_enough_resources(
 async def test_scheduler_schedule_site_constraints(
     scheduler_service_mock, application_dict, expected_placements
 ):
-    application = Application.create_from_application({"functions": [application_dict]})
-    placements: List[Placement] = await scheduler_service_mock.schedule_application(
+    application = Flow.create_from_dict({"functions": [application_dict]})
+    placements: List[Placement] = await scheduler_service_mock.schedule_flow(
         application
     )
     assert placements == expected_placements
@@ -89,7 +89,7 @@ def test_scheduler_architecture_invalid_constraint():
         ]
     }
     with pytest.raises(UnknownArchitectureError):
-        Application.create_from_application(workflow_dict)
+        Flow.create_from_dict(workflow_dict)
 
 
 @pytest.mark.parametrize(
@@ -118,9 +118,9 @@ def test_scheduler_architecture_invalid_constraint():
 async def test_scheduler_architecture_constraints(
     scheduler_service_mock, application_dict, expected_placements
 ):
-    application = Application.create_from_application({"functions": [application_dict]})
-    placements: List[Placement] = await scheduler_service_mock.schedule_application(
-        application
+    application = Flow.create_from_dict({"functions": [application_dict]})
+    placements: List[Placement] = await scheduler_service_mock.schedule_flow(
+        application, {}
     )
     assert placements == expected_placements
 
@@ -150,7 +150,7 @@ async def test_scheduler_architecture_constraints(
                 },
             },
             {
-                "functions": [{"id": "task1", "resources": {"nb_cpu": 1}}],
+                "functions": [{"id": "task1", "annotations": {"cores": 1}}],
                 "objectives": {"Energy": "High"},
             },
             [Placement("site2", "task1")],
@@ -178,7 +178,7 @@ async def test_scheduler_architecture_constraints(
                 },
             },
             {
-                "functions": [{"id": "task1", "resources": {"nb_cpu": 1}}],
+                "functions": [{"id": "task1", "annotations": {"cores": 1}}],
                 "objectives": {"Energy": "Medium"},
             },
             [Placement("site1", "task1")],
@@ -206,7 +206,7 @@ async def test_scheduler_architecture_constraints(
                 },
             },
             {
-                "functions": [{"id": "task1", "resources": {"nb_cpu": 1}}],
+                "functions": [{"id": "task1", "annotations": {"cores": 1}}],
                 "objectives": {"Energy": "High", "Availability": "High"},
             },
             [Placement("site2", "task1")],
@@ -234,7 +234,7 @@ async def test_scheduler_architecture_constraints(
                 },
             },
             {
-                "functions": [{"id": "task1", "resources": {"nb_cpu": 1}}],
+                "functions": [{"id": "task1", "annotations": {"cores": 1}}],
                 "objectives": {"Energy": "High", "Availability": "Low"},
             },
             [Placement("site2", "task1")],
@@ -271,7 +271,7 @@ async def test_scheduler_architecture_constraints(
                 },
             },
             {
-                "functions": [{"id": "task1", "resources": {"nb_cpu": 1}}],
+                "functions": [{"id": "task1", "annotations": {"cores": 1}}],
                 "objectives": {
                     "Energy": "High",
                     "Availability": "Low",
@@ -281,15 +281,59 @@ async def test_scheduler_architecture_constraints(
             [Placement("site3", "task1")],
             id="three objectives different level",
         ),
+        pytest.param(
+            {
+                "site1": {
+                    "type": "Edge",
+                    "resources": {"nb_cpu": 1},
+                    "objective_scores": {
+                        "Energy": 100,
+                        "Availability": 30,
+                        "Performance": 25,
+                    },
+                },
+                "site2": {
+                    "type": "Edge",
+                    "resources": {"nb_cpu": 1},
+                    "objective_scores": {
+                        "Energy": 100,
+                        "Availability": 100,
+                        "Performance": 50,
+                    },
+                },
+                "site3": {
+                    "type": "Edge",
+                    "resources": {"nb_cpu": 1, "nb_gpu": 0, "memory_in_MB": 1024},
+                    "objective_scores": {
+                        "Energy": 100,
+                        "Availability": 10,
+                        "Performance": 90,
+                    },
+                },
+            },
+            {
+                "executorMode": "NoderedService",
+                "flowID": "1234",
+                "annotations": {"memory": 256},
+                "functions": [{"id": "task1", "annotations": {"cores": 1}}],
+                "objectives": {
+                    "Energy": "High",
+                    "Availability": "Low",
+                    "Performance": "Medium",
+                },
+            },
+            [Placement("site3", "1234")],
+            id="three objectives different level",
+        ),
     ],
 )
 async def test_objective_scoring(
     scheduler_service_mock, platform_dict, application_dict, expected_placements
 ):
-    application = Application.create_from_application(application_dict)
+    application = Flow.create_from_dict(application_dict)
     platform = Platform.create_from_dict(platform_dict)
     scheduler_service_mock.platform_service.get_platform.return_values = platform
-    placements: List[Placement] = await scheduler_service_mock.schedule_application(
-        application
+    placements: List[Placement] = await scheduler_service_mock.schedule_flow(
+        application, {}
     )
     assert placements == expected_placements

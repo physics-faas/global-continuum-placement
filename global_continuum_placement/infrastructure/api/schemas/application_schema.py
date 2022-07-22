@@ -11,11 +11,23 @@ class FunctionSchema(Schema):
     allocations = fields.List(fields.String)
 
 
-class ApplicationSchema(Schema):
-    id = fields.String()
-    displayName = fields.String()
-    executorMode = fields.String()
+class FlowSchema(Schema):
+    flowID = fields.String()
+    flowName = fields.String()
     type = fields.String()
+    executorMode = fields.String()
     native = fields.Boolean()
+    artifact = fields.String()
+    memory = fields.String()
+    timeout = fields.String()
+    appID = fields.String()
+    appName = fields.String()
     functions = fields.Nested(FunctionSchema, many=True)
     objectives = fields.Dict()
+
+
+class ApplicationSchema(Schema):
+    appName = fields.String()
+    owner = fields.String()
+    SoftwareImage = fields.String()
+    flows = fields.Nested(FlowSchema, many=True)

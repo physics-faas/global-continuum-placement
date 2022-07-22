@@ -1,6 +1,6 @@
 import logging
-from dataclasses import dataclass, field
-from typing import Dict, List
+from dataclasses import dataclass
+from typing import Dict, List, Union
 
 from global_continuum_placement.application.platform_service import IPlatformService
 from global_continuum_placement.application.schedule_result_publisher import (
@@ -11,9 +11,9 @@ from global_continuum_placement.domain.platform.platfom_values import Architectu
 from global_continuum_placement.domain.platform.platform import Cluster, Platform
 from global_continuum_placement.domain.scheduling_policies import first_fit
 from global_continuum_placement.domain.workload.workload import (
-    Application,
     ClusterListPlacementConstraint,
     ClusterTypePlacementConstraint,
+    Flow,
     TaskDag,
 )
 from global_continuum_placement.domain.workload.workload_values import (
@@ -44,7 +44,7 @@ class SchedulerService:
         cluster_that_fit: List[Cluster] = []
 
         if len(list_constraints.clusters) == 0:
-            if type_constraint is None:
+            if type_constraint is None or type_constraint.cluster_type is None:
                 return clusters
             else:
                 for cluster in clusters:
@@ -92,34 +92,31 @@ class SchedulerService:
                 )
         return scores
 
-    def schedule_function(
+    def schedule_one(
         self,
         platform: Platform,
-        function: TaskDag,
+        to_schedule: Union[TaskDag, Flow],
         objectives: Dict[Objectives, Levels],
-    ) -> List[Placement]:
-        placements: List[Placement] = []
-
-        valid_sites: List[Cluster] = platform.sites
+    ) -> Placement:
+        valid_sites: List[Cluster] = platform.sites.copy()
 
         # Apply filters
         # 1. Filter cluster that does not fit the constraints
         valid_sites = self.resolve_placement_constraints(
-            function.cluster_list_placement_constraints,
-            function.cluster_type_placement_constraints,
+            to_schedule.cluster_list_placement_constraints,
+            to_schedule.cluster_type_placement_constraints,
             valid_sites,
         )
 
         # 2. Filter on architecture constraint
         valid_sites = self.resolve_architecture_constraints(
-            function.architecture_constraint, valid_sites
+            to_schedule.architecture_constraint, valid_sites
         )
 
         # 3. TODO Apply affinity constraints
 
         # Apply scoring functions
         # 1. Score on objectives
-        # TODO also take into account function level objectives
         scores = self.score_on_objectives(objectives, valid_sites)
 
         # Sort with the highest score first
@@ -127,7 +124,7 @@ class SchedulerService:
         for site in valid_sites:
             logger.info(
                 "Score: function=%s cluster=%s score=%s",
-                function.id,
+                to_schedule.id,
                 site.id,
                 scores[site.id],
             )
@@ -135,11 +132,21 @@ class SchedulerService:
         # Apply scheduling policy
         # TODO Implement smarter scheduling policy!
         if self.policy == "first_fit":
-            placement = first_fit.apply(function, valid_sites)
+            placement = first_fit.apply(to_schedule, valid_sites)
         else:
             raise Exception(f"Unimplemented policy {self.policy}")
         # Here we always schedule the function to the first cluster with enough available Resources
-        placements.append(placement)
+        return placement
+
+    def schedule_function(
+        self,
+        platform: Platform,
+        function: TaskDag,
+        objectives: Dict[Objectives, Levels],
+    ) -> List[Placement]:
+        placements: List[Placement] = [
+            self.schedule_one(platform, function, objectives)
+        ]
 
         # Recursion
         for function in function.next_tasks:
@@ -147,24 +154,31 @@ class SchedulerService:
 
         return placements
 
-    async def schedule_application(
+    async def schedule_flow(
         self,
-        application: Application,
-        raw_application: Dict = field(default_factory=dict),
+        flow: Flow,
+        raw_application: dict = None,
     ) -> List[Placement]:
+        if raw_application is None:
+            raw_application = {}
         placements: List[Placement] = []
 
         platform = await self.platform_service.get_platform()
 
-        placements.extend(
-            self.schedule_function(
-                platform, application.functions_dag, application.objectives
+        if flow.executor_mode in ["NoderedFunction", "NoderedService"]:
+            # We need to schedule at the flow level
+            placements.append(self.schedule_one(platform, flow, flow.objectives))
+        else:
+            placements.extend(
+                self.schedule_function(platform, flow.functions_dag, flow.objectives)
             )
-        )
 
         # FIXME: Reset resource availability fields because we do not access to the API that updates these values when the application is finished
         for cluster in platform.sites:
             cluster.reset_resource_availability()
-        await self.result_publisher.publish(raw_application, platform, placements)
+        try:
+            await self.result_publisher.publish(raw_application, platform, placements)
+        except Exception:
+            logger.exception("Error while publishing results")
 
         return placements
