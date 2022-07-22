@@ -21,7 +21,6 @@ class OrchestratorPublishScheduleResultService(IResultPublisher):
     async def publish(
         self, raw_application: Dict, platform: Platform, placements: List[Placement]
     ) -> None:
-        url = self.orchestrator_base_api.rstrip("/") + "/deploy"
         data = {
             "application": raw_application,
             "platform": {cluster.id: asdict(cluster) for cluster in platform.sites},
@@ -35,6 +34,7 @@ class OrchestratorPublishScheduleResultService(IResultPublisher):
         json_data = json.dumps(data)
         logger.info("JSON formatted data to send: \n%s", json_data)
         try:
+            url = self.orchestrator_base_api.rstrip("/") + "/deploy"
             logger.info("Get platform update from %s", url)
             async with aiohttp.client.ClientSession() as session:
                 async with session.post(

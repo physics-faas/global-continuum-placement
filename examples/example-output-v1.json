@@ -1,0 +1,90 @@
+{
+  "appName": "",
+  "owner": "",
+  "SoftwareImage": "",
+  "flows": [
+    {
+      "flowID": "4db7e870886c7c0b",
+      "flowName": "Flow 2",
+      "type": "Flow",
+      "executorMode": "NativeSequence",
+      "artifact": "https://registry.apps.ocphub.physics-faas.eu/custom:339",
+      "memory": "512",
+      "timeout": "120000",
+      "native": true,
+      "appID": "app1",
+      "appName": "",
+      "functions": [
+        {
+          "id": "339d2ef8b0b29795",
+          "displayName": "hello",
+          "type": "Function",
+          "code": "function main(msg){\nmsg.payload=msg.payload+\" hello\";\nreturn msg;}",
+          "sequence": 1,
+          "annotations": {
+            "memory": "512"
+          },
+          "allocations": [
+            "Cluster_1",
+            "Cluster_2"
+          ]
+        },
+        {
+          "id": "3a807141f16764a5",
+          "displayName": "world",
+          "type": "Function",
+          "code": "function main(msg){//implies affinity with the other function in the sequence\n\nmsg.payload=msg.payload+\" world\";\nreturn msg;}",
+          "sequence": 2,
+          "annotations": {
+            "affinity": "Hello"
+          },
+          "allocations": [
+            "Cluster_1",
+            "Cluster_2"
+          ]
+        }
+      ]
+    },
+    {
+      "flowID": "cc2deec41633e5c5",
+      "flowName": "Flow 3",
+      "type": "Flow",
+      "executorMode": "NoderedFunction",
+      "artifact": "https://registry.apps.ocphub.physics-faas.eu/custom:340",
+      "memory": "512",
+      "timeout": "120000",
+      "native": false,
+      "appID": "app1",
+      "appName": "",
+      "functions": [
+        {
+          "id": "4ea933e751def073",
+          "displayName": "hello world",
+          "type": "Function",
+          "code": "function main(msg){\n\nconsole.log(msg);\nmsg.payload={\"response\":\"hello \"+msg.payload.value.name};\nreturn msg;}",
+          "sequence": 1,
+          "annotations": {
+            "optimizationGoal": "Performance",
+            "importance": "High"
+          },
+          "allocations": [
+            "Cluster_1",
+            "Cluster_2"
+          ]
+        },
+        {
+          "id": "3f041663b504972d",
+          "displayName": "add sizing",
+          "type": "Function",
+          "code": "function main(msg){\nmsg.annotations={};\nmsg.annotations.sizing={};\nmsg.annotations.sizing.memory=env.get(\"memory\");\nmsg.annotations.sizing.timeout=env.get(\"timeout\");\n\nreturn msg;\n}",
+          "sequence": 1,
+          "annotations": {},
+          "allocations": [
+            "Cluster_1",
+            "Cluster_2"
+          ]
+        }
+      ]
+    }
+  ]
+}

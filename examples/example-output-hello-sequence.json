@@ -1,80 +1,123 @@
 {
-  "application": {
-    "type": "Flow",
-    "functions": [
+  "appName": "",
+    "owner": "",
+    "SoftwareImage": "",
+    "app_id": "app0",
+    "flows": [
       {
-        "sequence": 1,
-        "allocations": [
-          "Cluster_1",
-          "Cluster_2"
-        ],
-        "code": "function main(msg){\nmsg.payload=msg.payload+' hello';\nreturn msg;}",
-        "type": "Function",
+        "flowID": "f4a0fb9518d4df8d",
+        "flowName": "Inference",
+        "type": "Flow",
+        "executorMode": "NoderedFunction",
+        "artifact": "registry.apps.ocphub.physics-faas.eu/custom/ehealth:17",
+        "native": false,
         "annotations": {
-          "sizingGB": "512"
+          "memory": "256",
+          "locality": "AWS cluster",
+          "timeout": "60000"
         },
-        "id": "339d2ef8b0b29795",
-        "displayName": "hello"
-      },
-      {
-        "sequence": 2,
-        "allocations": [
-          "Cluster_1",
-          "Cluster_2"
+        "hasAction": "",
+        "functions": [
+          {
+            "id": "79574bee858dc748",
+            "displayName": "",
+            "type": "Function",
+            "code": "function main(msg){\nreturn msg;}",
+            "sequence": 1,
+            "annotations": {},
+            "allocations": [
+              "Cluster_3",
+              "Cluster_4"
+            ]
+          },
+          {
+            "id": "c66966a2d36f06b5",
+            "displayName": "add sizing",
+            "type": "Function",
+            "code": "function main(msg){\nmsg.annotations={};\nmsg.annotations.sizing={};\nmsg.annotations.sizing.memory=env.get('memory');\nmsg.annotations.sizing.timeout=env.get('timeout');\n\nreturn msg;\n}",
+            "sequence": 1,
+            "annotations": {},
+            "allocations": [
+              "Cluster_3",
+              "Cluster_4"
+            ]
+          },
+          {
+            "id": "82b665f654048ecf",
+            "displayName": "",
+            "type": "Function",
+            "code": "function main(msg){msg.annotations={};\nmsg.annotations.executorMode=env.get('Executor Mode');}",
+            "sequence": 1,
+            "annotations": {},
+            "allocations": [
+              "Cluster_3",
+              "Cluster_4"
+            ]
+          },
+          {
+            "id": "6cf5b4224f0daa69",
+            "displayName": "create artificial msg.parts",
+            "type": "Function",
+            "code": "function main(msg){\n//need to push the new parts down a LIFO structure?\nif (msg.hasOwnProperty(\"parts\")){\n    var parts={};\n    parts=msg.parts;\n    delete msg.parts;\n    msg.parts={};\n    msg.parts.parts=parts;\n    msg.parts.id=msg._msgid;\n} else {\n    msg.parts={};\n    msg.parts.id=msg._msgid;\n}\n\nmsg.parts.count=env.get('totalcount');\nmsg.parts.len=1;\nmsg.parts.index=env.get('position')-1;\nmsg.parts.type=\"array\";\n\n//msg.topic='topic2';\n\n\nreturn msg;}",
+            "sequence": 1,
+            "annotations": {},
+            "allocations": [
+              "Cluster_3",
+              "Cluster_4"
+            ]
+          },
+          {
+            "id": "a929760723e0c2c5",
+            "displayName": "final",
+            "type": "Function",
+            "code": "function main(msg){msg.result.predictions = msg.payload;\nmsg.payload = {};\nmsg.payload = msg.result;\nreturn msg;\n}",
+            "sequence": 1,
+            "annotations": {},
+            "allocations": [
+              "Cluster_3",
+              "Cluster_4"
+            ]
+          },
+          {
+            "id": "9e2f3aa450c84658",
+            "displayName": "Prepare CLA",
+            "type": "Function",
+            "code": "function main(msg){msg.cla = \"'\" + msg.payload.value.input + \"' \" + msg.payload.value.model + \" \" + 'out_' + msg._msgid;\nreturn msg;}",
+            "sequence": 1,
+            "annotations": {},
+            "allocations": [
+              "Cluster_3",
+              "Cluster_4"
+            ]
+          },
+          {
+            "id": "a3107530757941c9",
+            "displayName": "Prepare input",
+            "type": "Function",
+            "code": "function main(msg){msg.payload = {};\nmsg.payload.value = {};\nmsg.payload.value.input = \"[{\\\"patient\\\":\\\"4140D\\\",\\\"date\\\":\\\"10-06-2022\\\",\\\"vector\\\":[-0.17563081,0.37319498,0.22020688,0.80695292,-0.14483578,0.82998543,-0.37742864,1.66220971,-0.65614964,-0.14292737,-0.37938052,0.79727469,0.11874357,-1.01171128,0.36931477]},{\\\"patient\\\":\\\"4140D\\\",\\\"date\\\":\\\"10-06-2022\\\",\\\"vector\\\":[-0.17563081,0.38092934,0.77517288,0.60602839,-0.74486557,0.55876642,-0.97958379,0.6130755,-1.33591593,0.23242436,0.20101902,0.57318741,-0.32033507,-0.32264458,0.70643433]},{\\\"patient\\\":\\\"4140D\\\",\\\"date\\\":\\\"10-06-2022\\\",\\\"vector\\\":[-0.17563081,0.40445467,1.08207716,0.75746139,-0.0749294,0.90057979,0.08020928,0.44294563,-0.95483483,0.79288105,0.84270299,1.23749778,0.99690085,-0.08768413,0.79027754]},{\\\"patient\\\":\\\"4140D\\\",\\\"date\\\":\\\"10-06-2022\\\",\\\"vector\\\":[-0.17563081,0.40896638,0.95170053,0.42175769,-1.12061238,0.47985993,-0.97055147,1.12346512,-0.0361204,0.53064902,0.24427862,1.03798781,0.48402748,0.4104772,1.2217207]},{\\\"patient\\\":\\\"4140D\\\",\\\"date\\\":\\\"10-06-2022\\\",\\\"vector\\\":[-0.17563081,0.39253087,-0.00477934,0.53616301,-0.60796557,0.86801974,0.23074807,1.18017507,0.04627552,0.75174661,0.44976169,1.17316305,0.82348324,0.90750891,1.51517193]},{\\\"patient\\\":\\\"4140D\\\",\\\"date\\\":\\\"10-06-2022\\\",\\\"vector\\\":[-0.17563081,0.41380036,0.89401176,0.55280539,-0.40407195,0.74137306,-0.1215127,0.66978546,-0.5119568,1.0756803,0.8210732,0.43006069,-1.13576682,0.33027435,0.62084439]},{\\\"patient\\\":\\\"4140D\\\",\\\"date\\\":\\\"10-06-2022\\\",\\\"vector\\\":[-0.17563081,0.43055813,1.23437552,0.2466346,-1.42354004,0.21542495,-1.64195446,0.69814044,-0.38424313,1.27621067,1.05179103,0.44379507,-1.03614394,-0.47288371,-0.61933637]},{\\\"patient\\\":\\\"4140D\\\",\\\"date\\\":\\\"10-06-2022\\\",\\\"vector\\\":[-0.17563081,0.43378078,1.12476685,0.14893176,-1.64491026,0.27156963,-1.32582301,0.17357333,-1.05988962,1.50245007,1.09865559,0.19585333,-1.66708887,0.46808769,0.83045241]},{\\\"patient\\\":\\\"4140D\\\",\\\"date\\\":\\\"10-06-2022\\\",\\\"vector\\\":[-0.17563081,0.4179898,0.41634871,0.19798855,-1.27207621,0.28847097,-1.13614413,0.42876814,-0.53667557,0.68490315,0.17578426,0.23705648,-1.35346127,0.54038322,0.83743934]},{\\\"patient\\\":\\\"4140D\\\",\\\"date\\\":\\\"10-06-2022\\\",\\\"vector\\\":[-0.17563081,0.37738442,-1.15970858,0.17140037,-1.32159323,0.21450978,-1.34689844,0.18775082,-0.80858208,-0.22005444,-0.85523605,0.39680903,-0.86272633,0.34382976,0.45315798]}]\";\nmsg.payload.value.model = \"benchmark_tristate_NN_no_valid\";\n\nreturn msg;}",
+            "sequence": 1,
+            "annotations": {},
+            "allocations": [
+              "Cluster_3",
+              "Cluster_4"
+            ]
+          },
+          {
+            "id": "8fe0a12ef00c83e0",
+            "displayName": "Prepare response",
+            "type": "Function",
+            "code": "function main(msg){var input = msg.payload;\nmsg.payload = {};\nerrors = input[1];\nif (input[0] == \"\") {\n    msg.payload.errors = JSON.stringify(errors);\n    msg.statusCode = 500;\n} else {\n    msg.payload.out = input[0];\n    msg.payload.errors = JSON.stringify(errors);\n}\nmsg.filename = '/data/scripts/out_' + msg._msgid;\nmsg.result = msg.payload;\nreturn msg;\n}",
+            "sequence": 1,
+            "annotations": {},
+            "allocations": [
+              "Cluster_3",
+              "Cluster_4"
+            ]
+          }
         ],
-        "code": "function main(msg){//implies affinity with the other function in the sequence\n\nmsg.payload=msg.payload+' world';\nreturn msg;}",
-        "type": "Function",
-        "annotations": {
-          "affinity": "Hello"
-        },
-        "id": "3a807141f16764a5",
-        "displayName": "world"
+        "allocations": [
+          "Cluster_3"
+        ]
       }
-    ],
-    "native": true,
-    "id": "19fe4293742e0b2c",
-    "displayName": "Hello Sequence"
-  },
-  "platform": {
-    "Cluster_1": {
-      "id": "Cluster_1",
-      "type": "Edge",
-      "total_resources": {
-        "nb_cpu": 28,
-        "nb_gpu": 0,
-        "memory_in_MB": 106249
-      },
-      "architecture": "x86_64",
-      "objective_scores": {
-        "Energy": 60,
-        "Performance": 20,
-        "Availability": 10
-      }
-    },
-    "Cluster_2": {
-      "id": "Cluster_2",
-      "type": "Cloud",
-      "total_resources": {
-        "nb_cpu": 12,
-        "nb_gpu": 0,
-        "memory_in_MB": 13054
-      },
-      "architecture": "x86_64",
-      "objective_scores": {
-        "Energy": 40,
-        "Performance": 30,
-        "Availability": 15
-      }
-    }
-  },
-  "allocations": [
-    {
-      "cluster": "Cluster_1",
-      "function": "339d2ef8b0b29795"
-    },
-    {
-      "cluster": "Cluster_1",
-      "function": "3a807141f16764a5"
-    }
-  ]
-}
+    ]
+  }
