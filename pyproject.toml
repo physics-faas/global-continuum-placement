@@ -9,7 +9,8 @@ python = "^3.8"
 aiohttp = "^3.5"
 dependency-injector = "^4.32"
 aiohttp-apispec = "^2.2.1"
-logfmt-logger = "^0.1.2"
+# Freeze version to avoir pakaging issues
+platformdirs = "2.5.1"
 
 [tool.poetry.dev-dependencies]
 isort = "^5.5.4"
