@@ -19,14 +19,13 @@ class FlowSchema(Schema):
     native = fields.Boolean()
     artifact = fields.String()
     annotations = fields.Dict()
-    appID = fields.String()
-    appName = fields.String()
+    hasAction = fields.String()
     functions = fields.Nested(FunctionSchema, many=True)
-    objectives = fields.Dict()
 
 
 class ApplicationSchema(Schema):
     appName = fields.String()
     owner = fields.String()
     SoftwareImage = fields.String()
+    app_id = fields.String()
     flows = fields.Nested(FlowSchema, many=True)
