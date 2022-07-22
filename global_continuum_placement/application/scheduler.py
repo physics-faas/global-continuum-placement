@@ -6,7 +6,7 @@ from global_continuum_placement.application.platform_service import IPlatformSer
 from global_continuum_placement.application.schedule_result_publisher import (
     IResultPublisher,
 )
-from global_continuum_placement.domain.placement.placement import Placement
+from global_continuum_placement.domain.placement.placement import Allocation, Placement
 from global_continuum_placement.domain.platform.platfom_values import ArchitectureType
 from global_continuum_placement.domain.platform.platform import Cluster, Platform
 from global_continuum_placement.domain.scheduling_policies import first_fit
@@ -157,25 +157,36 @@ class SchedulerService:
     async def schedule_flow(
         self,
         flow: Flow,
-        raw_application: dict = None,
     ) -> List[Placement]:
-        if raw_application is None:
-            raw_application = {}
-        placements: List[Placement] = []
+        placements: List[Placement]
 
         platform = await self.platform_service.get_platform()
 
         if flow.executor_mode in ["NoderedFunction", "NoderedService"]:
             # We need to schedule at the flow level
-            placements.append(self.schedule_one(platform, flow, flow.objectives))
+            placements = [self.schedule_one(platform, flow, flow.objectives)]
         else:
-            placements.extend(
-                self.schedule_function(platform, flow.functions_dag, flow.objectives)
+            placements = self.schedule_function(
+                platform, flow.functions_dag, flow.objectives
             )
 
+        return placements
+
+    async def schedule_application(self, raw_application: dict) -> list[Allocation]:
+
+        allocations: list[Allocation] = []
+        for flow_dict in raw_application["flows"]:
+            flow = Flow.create_from_dict(flow_dict)
+            placements = await self.schedule_flow(flow)
+            allocations.append(Allocation(flow.id, placements))
+
+        # FIXME: Reset resource availability fields because we do not access to the API that updates these values when the application is finished
+        platform = await self.platform_service.get_platform()
+        for cluster in platform.sites:
+            cluster.reset_resource_availability()
         try:
-            await self.result_publisher.publish(raw_application, platform, placements)
+            await self.result_publisher.publish(raw_application, platform, allocations)
         except Exception:
             logger.exception("Error while publishing results")
 
-        return placements
+        return allocations

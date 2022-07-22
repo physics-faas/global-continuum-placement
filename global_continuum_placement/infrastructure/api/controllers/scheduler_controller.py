@@ -9,7 +9,6 @@ from global_continuum_placement.application.platform_service import IPlatformSer
 from global_continuum_placement.application.scheduler import SchedulerService
 from global_continuum_placement.container import ApplicationContainer
 from global_continuum_placement.domain.platform.platform import Platform
-from global_continuum_placement.domain.workload.workload import Flow
 from global_continuum_placement.infrastructure.api.schemas.application_schema import (
     ApplicationSchema,
 )
@@ -18,7 +17,6 @@ from global_continuum_placement.infrastructure.api.schemas.error_schema import (
 )
 from global_continuum_placement.infrastructure.api.schemas.placement import (
     FlowAllocationSchema,
-    PlacementSchema,
 )
 from global_continuum_placement.infrastructure.api.schemas.platform_schema import (
     PlatformSchema,
@@ -57,10 +55,10 @@ async def create_platform(
     responses={
         200: {
             "description": "Application allocation done successfully",
-            "schema": PlacementSchema(many=True),
+            "schema": FlowAllocationSchema(many=True),
         },
         400: {
-            "description": "Scheduler initialization failed!",
+            "description": "Application scheduling failed!",
             "schema": ErrorSchema(),
         },
     },
@@ -69,28 +67,10 @@ async def create_platform(
 async def schedule_application(
     request: Request,
     scheduler: SchedulerService = Provide[ApplicationContainer.scheduler_service],
-    platform_service: IPlatformService = Provide[ApplicationContainer.platform_service],
 ) -> Response:
-    result = []
-    for flow_dict in request["data"]["flows"]:
-        flow = Flow.create_from_dict(flow_dict)
-        placements = await scheduler.schedule_flow(
-            flow, raw_application=request["data"]
-        )
-        result.append(
-            FlowAllocationSchema().dump(
-                {
-                    "flowID": flow.id,
-                    "allocations": [
-                        PlacementSchema().dump(placement) for placement in placements
-                    ],
-                }
-            )
-        )
+    allocations = await scheduler.schedule_application(request["data"])
+    response = [
+        FlowAllocationSchema().dump(flow_allocation) for flow_allocation in allocations
+    ]
 
-    # FIXME: Reset resource availability fields because we do not access to the API that updates these values when the application is finished
-    platform = await platform_service.get_platform()
-    for cluster in platform.sites:
-        cluster.reset_resource_availability()
-
-    return json_response(result, status=200)
+    return json_response(response, status=200)

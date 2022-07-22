@@ -8,7 +8,7 @@ import aiohttp
 from global_continuum_placement.application.schedule_result_publisher import (
     IResultPublisher,
 )
-from global_continuum_placement.domain.placement.placement import Placement
+from global_continuum_placement.domain.placement.placement import Allocation
 from global_continuum_placement.domain.platform.platform import Platform
 
 logger = logging.getLogger(__name__)
@@ -19,12 +19,12 @@ class OrchestratorPublishScheduleResultService(IResultPublisher):
     orchestrator_base_api: str
 
     async def publish(
-        self, raw_application: Dict, platform: Platform, placements: List[Placement]
+        self, raw_application: Dict, platform: Platform, allocations: List[Allocation]
     ) -> None:
         data = {
             "application": raw_application,
             "platform": {cluster.id: asdict(cluster) for cluster in platform.sites},
-            "allocations": [asdict(placement) for placement in placements],
+            "allocations": [asdict(placement) for placement in allocations],
         }
         # Remove unwanted fields
         for cluster_id, cluster in cast(dict, data["platform"]).items():
@@ -46,5 +46,5 @@ class OrchestratorPublishScheduleResultService(IResultPublisher):
                     response.raise_for_status()
         except Exception as err:
             logger.exception(
-                f"When attempting to get updated platform from: {url}, got an error {err}"
+                f"When attempting to get updated platform from: got an error {err}"
             )

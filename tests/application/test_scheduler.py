@@ -120,7 +120,7 @@ async def test_scheduler_architecture_constraints(
 ):
     application = Flow.create_from_dict({"functions": [application_dict]})
     placements: List[Placement] = await scheduler_service_mock.schedule_flow(
-        application, {}
+        application
     )
     assert placements == expected_placements
 
@@ -334,6 +334,6 @@ async def test_objective_scoring(
     platform = Platform.create_from_dict(platform_dict)
     scheduler_service_mock.platform_service.get_platform.return_values = platform
     placements: List[Placement] = await scheduler_service_mock.schedule_flow(
-        application, {}
+        application
     )
     assert placements == expected_placements
