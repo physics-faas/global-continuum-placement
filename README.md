@@ -194,6 +194,16 @@ Finally, we use a first fit policy on the sorted by highest score and allocate t
 
 If not cluster fits the constraints of a function it is not allocated. (Might be rejected with an error in the future.)
 
+## Supported annotations
+
+for now the component supports these annotations:
+- `cores` : number of CPU cores
+- `memory` : memory in MB
+- `locality` : which is a cluster type defines for each cluster like "HPC", "Cloud", "Edge", and "On-premise".
+- `architecture`: Hardware architecture, one of "x86_64", "arm64" 
+- `optimizationGoal`: Should be "Energy", "Performance", or "Availability"
+- `importance`:  the level associated to this goal : "Low, "Medium", "High"
+
 ## Development
 
 Setup the environment:
@@ -211,7 +221,6 @@ Run the tests:
 ```shell
 ./test.sh
 ```
-
 
 
 ### Add features
