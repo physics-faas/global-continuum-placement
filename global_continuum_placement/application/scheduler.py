@@ -10,6 +10,9 @@ from global_continuum_placement.domain.placement.placement import Allocation, Pl
 from global_continuum_placement.domain.platform.platfom_values import ArchitectureType
 from global_continuum_placement.domain.platform.platform import Cluster, Platform
 from global_continuum_placement.domain.scheduling_policies import first_fit
+from global_continuum_placement.domain.scheduling_policies.exceptions import (
+    NoResourcesFoundWithConstraints,
+)
 from global_continuum_placement.domain.workload.workload import (
     ClusterListPlacementConstraint,
     ClusterTypePlacementConstraint,
@@ -57,7 +60,7 @@ class SchedulerService:
         for constraint_cluster in list_constraints.clusters:
             for cluster in clusters:
                 if constraint_cluster == cluster.id and (
-                    type_constraint is None
+                    (type_constraint is None or type_constraint.cluster_type is None)
                     or type_constraint.cluster_type == cluster.type
                 ):
                     cluster_that_fit.append(cluster)
@@ -66,6 +69,10 @@ class SchedulerService:
                     )
             else:
                 logger.debug("No valid constraints found")
+        if len(cluster_that_fit) == 0:
+            raise NoResourcesFoundWithConstraints(
+                f"No cluster fits the constraints found for cluster name '{list_constraints}' and cluster type: {type_constraint}"
+            )
 
         return cluster_that_fit
 

@@ -1,7 +1,10 @@
-from marshmallow import Schema, fields
+from marshmallow import INCLUDE, Schema, fields
 
 
 class FunctionSchema(Schema):
+    class Meta:
+        unknown = INCLUDE
+
     id = fields.String()
     displayName = fields.String()
     type = fields.String()
@@ -12,6 +15,9 @@ class FunctionSchema(Schema):
 
 
 class FlowSchema(Schema):
+    class Meta:
+        unknown = INCLUDE
+
     flowID = fields.String()
     flowName = fields.String()
     type = fields.String()
@@ -19,11 +25,14 @@ class FlowSchema(Schema):
     native = fields.Boolean()
     artifact = fields.String()
     annotations = fields.Dict()
-    hasAction = fields.String()
     functions = fields.Nested(FunctionSchema, many=True)
+    allocations = fields.List(fields.String())
 
 
 class ApplicationSchema(Schema):
+    class Meta:
+        unknown = INCLUDE
+
     appName = fields.String()
     owner = fields.String()
     SoftwareImage = fields.String()

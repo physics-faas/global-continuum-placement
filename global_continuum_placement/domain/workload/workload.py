@@ -120,7 +120,7 @@ class Flow:
             ),
             cluster_type_placement_constraints=ClusterTypePlacementConstraint(
                 cluster_type=ClusterType[annotations["locality"].upper()]
-                if annotations.get("locality")
+                if annotations.get("locality") in [elem.value for elem in ClusterType]
                 else None,
             ),
             architecture_constraint=get_architecture(annotations.get("architecture")),

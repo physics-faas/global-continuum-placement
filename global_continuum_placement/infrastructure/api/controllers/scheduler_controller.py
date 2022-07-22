@@ -9,6 +9,10 @@ from global_continuum_placement.application.platform_service import IPlatformSer
 from global_continuum_placement.application.scheduler import SchedulerService
 from global_continuum_placement.container import ApplicationContainer
 from global_continuum_placement.domain.platform.platform import Platform
+from global_continuum_placement.domain.scheduling_policies.exceptions import (
+    NoResourcesFoundWithConstraints,
+    NotEnoughResourcesException,
+)
 from global_continuum_placement.infrastructure.api.schemas.application_schema import (
     ApplicationSchema,
 )
@@ -68,9 +72,13 @@ async def schedule_application(
     request: Request,
     scheduler: SchedulerService = Provide[ApplicationContainer.scheduler_service],
 ) -> Response:
-    allocations = await scheduler.schedule_application(request["data"])
-    response = [
-        FlowAllocationSchema().dump(flow_allocation) for flow_allocation in allocations
-    ]
-
-    return json_response(response, status=200)
+    raw_application = request["data"]
+    try:
+        allocations = await scheduler.schedule_application(raw_application)
+        response = [
+            FlowAllocationSchema().dump(flow_allocation)
+            for flow_allocation in allocations
+        ]
+        return json_response(response, status=200)
+    except (NotEnoughResourcesException, NoResourcesFoundWithConstraints) as err:
+        return json_response(ErrorSchema().dump({"error": str(err)}), status=400)
