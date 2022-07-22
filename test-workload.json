@@ -8,43 +8,59 @@
     "Energy": "high",
     "Availability": "low"
   },
-  "functions": [
+  "flows": [
     {
-      "id": "function1",
-      "sequence": 1,
-      "allocations": [
-        "cluster3"
+      "flowID": "flow1",
+      "functions": [
+        {
+          "id": "function1",
+          "sequence": 1,
+          "allocations": [
+            "cluster3"
+          ]
+        },
+        {
+          "id": "function2",
+          "sequence": 2,
+          "annotations": {
+            "cores": "2"
+          }
+        },
+        {
+          "id": "function3",
+          "sequence": 3,
+          "annotations": {
+            "cores": "2"
+          }
+        },
+        {
+          "id": "function4",
+          "sequence": 4,
+          "annotations": {
+            "cores": "2",
+            "architecture": "arm64"
+          }
+        },
+        {
+          "id": "function5",
+          "sequence": 5,
+          "annotations": {
+            "cores": 2,
+            "memory": 1000
+          }
+        }
       ]
     },
     {
-      "id": "function2",
-      "sequence": 2,
-      "annotations": {
-        "sizingCores": "2"
-      }
-    },
-    {
-      "id": "function3",
-      "sequence": 3,
-      "annotations": {
-        "sizingCores": "2"
-      }
-    },
-    {
-      "id": "function4",
-      "sequence": 4,
-      "annotations": {
-        "sizingCores": "2",
-        "architecture": "arm64"
-      }
-    },
-    {
-      "id": "function5",
-      "sequence": 5,
-      "annotations": {
-        "sizingCores": 2,
-        "sizingMB": 1000
-      }
+      "flowID": "flow2",
+      "executorMode": "NoderedFunction",
+      "annotations": {"core": 1, "memory": 1000},
+      "functions": [
+        {
+          "id": "excluded-func",
+          "annotations": { }
+        }
+      ]
     }
   ]
 }

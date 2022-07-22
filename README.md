@@ -90,43 +90,59 @@ Here an example application from the workload-test.json file:
     "Energy": "high",
     "Availability": "low"
   },
-  "functions": [
+  "flows": [
     {
-      "id": "function1",
-      "sequence": 1,
-      "allocations": [
-        "cluster3"
+      "flowID": "flow1",
+      "functions": [
+        {
+          "id": "function1",
+          "sequence": 1,
+          "allocations": [
+            "cluster3"
+          ]
+        },
+        {
+          "id": "function2",
+          "sequence": 2,
+          "annotations": {
+            "cores": "2"
+          }
+        },
+        {
+          "id": "function3",
+          "sequence": 3,
+          "annotations": {
+            "cores": "2"
+          }
+        },
+        {
+          "id": "function4",
+          "sequence": 4,
+          "annotations": {
+            "cores": "2",
+            "architecture": "arm64"
+          }
+        },
+        {
+          "id": "function5",
+          "sequence": 5,
+          "annotations": {
+            "cores": 2,
+            "memory": 1000
+          }
+        }
       ]
     },
     {
-      "id": "function2",
-      "sequence": 2,
-      "annotations": {
-        "sizingCores": "2"
-      }
-    },
-    {
-      "id": "function3",
-      "sequence": 3,
-      "annotations": {
-        "sizingCores": "2"
-      }
-    },
-    {
-      "id": "function4",
-      "sequence": 4,
-      "annotations": {
-        "sizingCores": "2",
-        "architecture": "arm64"
-      }
-    },
-    {
-      "id": "function5",
-      "sequence": 5,
-      "annotations": {
-        "sizingCores": 2,
-        "sizingMB": 1000
-      }
+      "flowID": "flow2",
+      "executorMode": "NoderedFunction",
+      "annotations": {"core": 1, "memory": 1000},
+      "functions": [
+        {
+          "id": "excluded-func",
+          "annotations": { }
+        }
+      ]
     }
   ]
 }
@@ -136,30 +152,26 @@ Then, we can ask for the scheduler to allocate our workflow functions on the clu
 curl -H "Content-Type: application/json" -d @test-workload.json http://127.0.0.1:8080/applications
 ```
 
-The result is should be:
+The result should be:
 ```json
 [
   {
-    "function": "function1",
-    "cluster": "cluster3"
+    "flowID": "1234",
+    "allocations": [
+      {"cluster": "cluster3", "resource_id": "function1"},
+      {"cluster": "cluster1", "resource_id": "function2"},
+      {"cluster": "cluster1", "resource_id": "function3"},
+      {"cluster": "cluster2", "resource_id": "function4"},
+      {"cluster": "cluster3", "resource_id": "function5"}
+    ]
   },
   {
-    "function": "function2",
-    "cluster": "cluster1"
-  },
-  {
-    "function": "function3",
-    "cluster": "cluster1"
-  },
-  {
-    "function": "function4",
-    "cluster": "cluster2"
-  },
-  {
-    "function": "function5",
-    "cluster": "cluster3"
+    "flowID": "flow2",
+    "allocations": [
+      {"cluster": "cluster1", "resource_id": "flow2"}]
   }
 ]
+
 ```
 
 Let's explain these decisions:
@@ -168,6 +180,9 @@ Let's explain these decisions:
 - `function3` has the same constraints as `function2` so it goes on the same cluster, the `cluster1`because it still has 2 CPU available.
 - `function4` goes on `cluster2` because it requires an `arm64` architecture and only the `cluster2` is providing it.
 - `function5` has only resources constraint and should go to the cluster1 regarding the objectives but it does not have enough resources. It is finally allocated to `cluster3` which is the only one that fits the constraints and have available resources.
+- `flow1`: because it is a NoderedFunction, this flow is scheduled at the flow level. It is scheduled on the `cluster1` because it has enough resources.
+
+This also work at the flow level with the same annotations.
 
 ### Scheduling Algorithm
 

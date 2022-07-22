@@ -12,12 +12,12 @@ aiohttp-apispec = "^2.2.1"
 logfmt-logger = "^0.1.2"
 
 [tool.poetry.dev-dependencies]
-black = "^20.8b1"
 isort = "^5.5.4"
 flake8 = "^3.8.3"
 pytest-cov = "^2.10.1"
 pytest = "6.1.0"
 mypy = "^0.812"
+black = "^22.6.0"
 
 [tool.poetry.scripts]
 pgcp = "global_continuum_placement.app:start"

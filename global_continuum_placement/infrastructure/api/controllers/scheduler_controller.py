@@ -17,6 +17,7 @@ from global_continuum_placement.infrastructure.api.schemas.error_schema import (
     ErrorSchema,
 )
 from global_continuum_placement.infrastructure.api.schemas.placement import (
+    FlowAllocationSchema,
     PlacementSchema,
 )
 from global_continuum_placement.infrastructure.api.schemas.platform_schema import (
@@ -68,6 +69,7 @@ async def create_platform(
 async def schedule_application(
     request: Request,
     scheduler: SchedulerService = Provide[ApplicationContainer.scheduler_service],
+    platform_service: IPlatformService = Provide[ApplicationContainer.platform_service],
 ) -> Response:
     result = []
     for flow_dict in request["data"]["flows"]:
@@ -75,5 +77,20 @@ async def schedule_application(
         placements = await scheduler.schedule_flow(
             flow, raw_application=request["data"]
         )
-        result.append([PlacementSchema().dump(placement) for placement in placements])
+        result.append(
+            FlowAllocationSchema().dump(
+                {
+                    "flowID": flow.id,
+                    "allocations": [
+                        PlacementSchema().dump(placement) for placement in placements
+                    ],
+                }
+            )
+        )
+
+    # FIXME: Reset resource availability fields because we do not access to the API that updates these values when the application is finished
+    platform = await platform_service.get_platform()
+    for cluster in platform.sites:
+        cluster.reset_resource_availability()
+
     return json_response(result, status=200)

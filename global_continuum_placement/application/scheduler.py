@@ -123,7 +123,7 @@ class SchedulerService:
         valid_sites.sort(key=lambda cluster: scores[cluster.id], reverse=True)
         for site in valid_sites:
             logger.info(
-                "Score: function=%s cluster=%s score=%s",
+                "Score: resource_id=%s cluster=%s score=%s",
                 to_schedule.id,
                 site.id,
                 scores[site.id],
@@ -135,7 +135,7 @@ class SchedulerService:
             placement = first_fit.apply(to_schedule, valid_sites)
         else:
             raise Exception(f"Unimplemented policy {self.policy}")
-        # Here we always schedule the function to the first cluster with enough available Resources
+        # Here we always schedule the resource_id to the first cluster with enough available Resources
         return placement
 
     def schedule_function(
@@ -173,9 +173,6 @@ class SchedulerService:
                 self.schedule_function(platform, flow.functions_dag, flow.objectives)
             )
 
-        # FIXME: Reset resource availability fields because we do not access to the API that updates these values when the application is finished
-        for cluster in platform.sites:
-            cluster.reset_resource_availability()
         try:
             await self.result_publisher.publish(raw_application, platform, placements)
         except Exception:

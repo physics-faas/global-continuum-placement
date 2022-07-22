@@ -4,4 +4,4 @@ from dataclasses import dataclass
 @dataclass
 class Placement:
     cluster: str
-    function: str
+    resource_id: str
