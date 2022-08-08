@@ -1,0 +1,32 @@
+{
+  "platform": {
+    "Cluster_3": {
+      "id": "202203-2418-0331-485a313b-c454-4542-9e66-495621d75efa",
+      "type": "edge",
+      "resources": {
+        "nb_cpu": 12,
+        "memory_in_MB": 13054
+      },
+      "architecture": "x86_64",
+      "objective_scores": {
+        "Energy": "40",
+        "Availability": "10",
+        "Performance": "30"
+      }
+    },
+    "Cluster_4": {
+      "id": "202203-2418-0700-dec47853-c9e3-4eeb-ba6e-52badfa459ec",
+      "type": "cloud",
+      "resources": {
+        "nb_cpu": 28,
+        "memory_in_MB": 106249
+      },
+      "architecture": "x86_64",
+      "objective_scores": {
+        "Energy": "40",
+        "Availability": "10",
+        "Performance": "30"
+      }
+    }
+  }
+}

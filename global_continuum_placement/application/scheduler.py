@@ -169,7 +169,7 @@ class SchedulerService:
 
         platform = await self.platform_service.get_platform()
 
-        if flow.executor_mode in ["NoderedFunction", "NoderedService"]:
+        if flow.executor_mode in ["NoderedFunction", "Service"]:
             # We need to schedule at the flow level
             placements = [self.schedule_one(platform, flow, flow.objectives)]
         else:
