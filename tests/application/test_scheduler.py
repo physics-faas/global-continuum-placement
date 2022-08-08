@@ -312,7 +312,7 @@ async def test_scheduler_architecture_constraints(
                 },
             },
             {
-                "executorMode": "NoderedService",
+                "executorMode": "Service",
                 "flowID": "1234",
                 "annotations": {"memory": 256},
                 "functions": [{"id": "task1", "annotations": {"cores": 1}}],
