@@ -64,7 +64,7 @@ class Cluster:
             )
         return Cluster(
             id=site_id,
-            name=cast(str, site_dict["name"]),
+            name=cast(str, site_dict.get("name", "Unknown")),
             type=ClusterType[type.upper()],
             total_resources=Resources(**resources),
             free_resources=Resources(**resources),
