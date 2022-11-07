@@ -1,6 +1,6 @@
 # PHYSICS Project: Global Continuum Placement
 
-This project is developed in the context of PHYSICS project to enable the meta-scheduling on a multi-cluster continuum using different algorithms.
+This code is developed in the context of PHYSICS project to enable the meta-scheduling on a multi-cluster continuum using different algorithms.
 
 ## Setup
 
