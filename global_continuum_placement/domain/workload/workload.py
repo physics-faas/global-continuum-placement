@@ -26,6 +26,13 @@ class ClusterListPlacementConstraint:
 class ClusterTypePlacementConstraint:
     cluster_type: Optional[ClusterType] = None
 
+@dataclass
+class PerformanceKnown:
+    archictecture_used: str = field(default='None')
+    cpu_speed: int = field(default=0)
+    memory_in_MB: int = field(default=0)
+    execution_time: int = field(default=0)
+    energy_consumed: int = field(default=0)
 
 def get_architecture(architecture_raw: str) -> ArchitectureType:
     try:
@@ -101,6 +108,7 @@ class Flow:
     resource_request: ResourceRequest
     cluster_list_placement_constraints: ClusterListPlacementConstraint
     cluster_type_placement_constraints: Optional[ClusterTypePlacementConstraint] = None
+    performance_known: Optional[PerformanceKnown] = None
 
     @classmethod
     def create_from_dict(cls, app_dict: Dict) -> "Flow":
@@ -128,4 +136,11 @@ class Flow:
                 nb_cpu=int(annotations.get("cores", 0)),
                 memory_in_MB=int(annotations.get("memory", 0)),
             ),
+            performance_known=PerformanceKnown(
+                archictecture_used=str(annotations.get("archictecture_used", None)),
+                cpu_speed=float(annotations.get("cpu_speed", 0)),
+                memory_in_MB=float(annotations.get("memory_in_MB", 0)),
+                execution_time=float(annotations.get("execution_time", 0)),
+                energy_consumed=float(annotations.get("energy_consumed", 0)),
+            )
         )
