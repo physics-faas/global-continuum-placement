@@ -17,20 +17,43 @@
           "sequence": 1,
           "allocations": [
             "cluster3"
-          ]
+          ],
+          "annotations": {
+            "performance_known" : {
+              "archictecture_used": ["x86_64", "x86_64", "x86_64", "x86_64"],
+              "cpu_speed": [100, 100, 100, 100, 100],
+              "memory_in_MB": [1024, 1024, 1024, 1024, 1024],
+              "execution_time": [50, 50, 50, 50, 50],
+              "energy_consumed": [10, 10, 10, 10, 10]
+            }
+          }
         },
         {
           "id": "function2",
           "sequence": 2,
           "annotations": {
-            "cores": "2"
+            "cores": "2",
+            "performance_known" : {
+              "archictecture_used": ["x86_64", "x86_64", "x86_64", "x86_64"],
+              "cpu_speed": [100, 100, 100, 100, 100],
+              "memory_in_MB": [1024, 1024, 1024, 1024, 1024],
+              "execution_time": [50, 50, 50, 50, 50],
+              "energy_consumed": [10, 10, 10, 10, 10]
+            }
           }
         },
         {
           "id": "function3",
           "sequence": 3,
           "annotations": {
-            "cores": "2"
+            "cores": "2",
+            "performance_known" : {
+              "archictecture_used": ["x86_64", "x86_64", "x86_64", "x86_64"],
+              "cpu_speed": [100, 100, 100, 100, 100],
+              "memory_in_MB": [1024, 1024, 1024, 1024, 1024],
+              "execution_time": [50, 50, 50, 50, 50],
+              "energy_consumed": [10, 10, 10, 10, 10]
+            }
           }
         },
         {
@@ -38,7 +61,14 @@
           "sequence": 4,
           "annotations": {
             "cores": "2",
-            "architecture": "arm64"
+            "architecture": "arm64",
+            "performance_known" : {
+              "archictecture_used": ["arm64", "arm64", "arm64", "arm64"],
+              "cpu_speed": [100, 100, 100, 100, 100],
+              "memory_in_MB": [1024, 1024, 1024, 1024, 1024],
+              "execution_time": [50, 50, 50, 50, 50],
+              "energy_consumed": [10, 10, 10, 10, 10]
+            }
           }
         },
         {
@@ -46,7 +76,14 @@
           "sequence": 5,
           "annotations": {
             "cores": 2,
-            "memory": 1000
+            "memory": 1000,
+            "performance_known" : {
+              "archictecture_used": ["x86_64", "x86_64", "x86_64", "x86_64"],
+              "cpu_speed": [100, 100, 100, 100, 100],
+              "memory_in_MB": [1024, 1024, 1024, 1024, 1024],
+              "execution_time": [50, 50, 50, 50, 50],
+              "energy_consumed": [10, 10, 10, 10, 10]
+            }
           }
         }
       ]

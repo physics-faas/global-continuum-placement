@@ -18,6 +18,7 @@ from global_continuum_placement.domain.workload.workload import (
     ClusterTypePlacementConstraint,
     Flow,
     TaskDag,
+    FunctionsMatrix,
 )
 from global_continuum_placement.domain.workload.workload_values import (
     Levels,
@@ -136,6 +137,18 @@ class SchedulerService:
                 scores[site.id],
             )
 
+        print("\n\n $$$$ **** Checking the queue: ", to_schedule)
+        print(to_schedule.performance_known)
+        print("\n")
+        print(to_schedule.performance_known.execution_time)
+        print(to_schedule.performance_known.energy_consumed)
+
+        #for function in to_schedule:
+        #    print("\n")
+        #    print(function)
+        #    #print(function.performance_known)
+        #    #print(function["performance_known"])
+
         # Apply scheduling policy
         # TODO Implement smarter scheduling policy!
         if self.policy == "first_fit":
@@ -149,6 +162,7 @@ class SchedulerService:
         self,
         platform: Platform,
         function: TaskDag,
+        function_matrix: FunctionsMatrix,
         objectives: Dict[Objectives, Levels],
     ) -> List[Placement]:
         placements: List[Placement] = [
@@ -164,9 +178,11 @@ class SchedulerService:
     async def schedule_flow(
         self,
         flow: Flow,
+        function_matrix: FunctionsMatrix
     ) -> List[Placement]:
         placements: List[Placement]
 
+        print("flow: ", flow)
         platform = await self.platform_service.get_platform()
 
         if flow.executor_mode in ["NoderedFunction", "Service"]:
@@ -174,7 +190,7 @@ class SchedulerService:
             placements = [self.schedule_one(platform, flow, flow.objectives)]
         else:
             placements = self.schedule_function(
-                platform, flow.functions_dag, flow.objectives
+                platform, flow.functions_dag, function_matrix, flow.objectives
             )
 
         return placements
@@ -184,7 +200,9 @@ class SchedulerService:
         allocations: list[Allocation] = []
         for flow_dict in raw_application["flows"]:
             flow = Flow.create_from_dict(flow_dict)
-            placements = await self.schedule_flow(flow)
+            function_matrix = create_matrix_from_functions_sequence(flow_dict)
+            print(function_matrix)
+            placements = await self.schedule_flow(flow, function_matrix)
             allocations.append(Allocation(flow.id, placements))
 
         # FIXME: Reset resource availability fields because we do not access to the API that updates these values when the application is finished
