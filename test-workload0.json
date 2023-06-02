@@ -20,7 +20,6 @@
           ],
           "annotations": {
             "performance_known" : {
-              "container_required": "python3action:matmul",
               "archictecture_used": ["x86_64", "x86_64", "x86_64", "x86_64"],
               "cpu_speed": [100, 200, 300, 400, 500],
               "memory_in_MB": [1024, 1024, 1024, 1024, 1024],
@@ -37,7 +36,6 @@
           "annotations": {
             "cores": "2",
             "performance_known" : {
-              "container_required": "python3action:matmul",
               "archictecture_used": ["x86_64", "x86_64", "x86_64", "x86_64"],
               "cpu_speed": [100, 100, 100, 100, 100],
               "memory_in_MB": [1024, 1024, 1024, 1024, 1024],
@@ -54,7 +52,6 @@
           "annotations": {
             "cores": "2",
             "performance_known" : {
-              "container_required": "python3action:matmul",
               "archictecture_used": ["x86_64", "x86_64", "x86_64", "x86_64"],
               "cpu_speed": [100, 100, 100, 100, 100],
               "memory_in_MB": [1024, 1024, 1024, 1024, 1024],
@@ -72,7 +69,6 @@
             "cores": "2",
             "architecture": "arm64",
             "performance_known" : {
-              "container_required": "python3action:linpack",
               "archictecture_used": ["arm64", "arm64", "arm64", "arm64"],
               "cpu_speed": [100, 100, 100, 100, 100],
               "memory_in_MB": [1024, 1024, 1024, 1024, 1024],
@@ -90,7 +86,6 @@
             "cores": 2,
             "memory": 1000,
             "performance_known" : {
-              "container_required": "python3action:linpack",
               "archictecture_used": ["x86_64", "x86_64", "x86_64", "x86_64"],
               "cpu_speed": [100, 100, 100, 100, 100],
               "memory_in_MB": [1024, 1024, 1024, 1024, 1024],

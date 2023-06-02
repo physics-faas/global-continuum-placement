@@ -202,6 +202,7 @@ class SchedulerService:
             flow = Flow.create_from_dict(flow_dict)
             function_matrix = create_matrix_from_functions_sequence(flow_dict)
             print(function_matrix)
+            #function_matrix = flow
             placements = await self.schedule_flow(flow, function_matrix)
             allocations.append(Allocation(flow.id, placements))
 
