@@ -11,8 +11,9 @@ from global_continuum_placement.domain.scheduling_policies.exceptions import (
 from global_continuum_placement.domain.workload.workload import Flow, TaskDag
 from lp_pulp import *
 
+
 def apply(task: Union[TaskDag, Flow], valid_sites: List[Cluster]) -> Placement:
-    
+    """
     # build mc for the lp: a list with the number of machines per cluster
 
     mc: List[float] = []
@@ -27,6 +28,7 @@ def apply(task: Union[TaskDag, Flow], valid_sites: List[Cluster]) -> Placement:
     solver = 'CBC'
     verbosity = 0
     lp_energy(N, H, K, c, p, c_tilde, p_tilde, mc, env, Tmax, solver, verbosity)
+    """
 
     for site in valid_sites:
         if site_has_enough_resources(site, task.resource_request):

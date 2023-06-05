@@ -102,17 +102,6 @@
           }
         }
       ]
-    },
-    {
-      "flowID": "flow2",
-      "executorMode": "NoderedFunction",
-      "annotations": {"core": 1, "memory": 1000},
-      "functions": [
-        {
-          "id": "excluded-func",
-          "annotations": { }
-        }
-      ]
     }
   ]
 }

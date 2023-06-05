@@ -9,7 +9,7 @@ from global_continuum_placement.application.schedule_result_publisher import (
 from global_continuum_placement.domain.placement.placement import Allocation, Placement
 from global_continuum_placement.domain.platform.platfom_values import ArchitectureType
 from global_continuum_placement.domain.platform.platform import Cluster, Platform
-from global_continuum_placement.domain.scheduling_policies import first_fit
+from global_continuum_placement.domain.scheduling_policies import first_fit, foa_energy
 from global_continuum_placement.domain.scheduling_policies.exceptions import (
     NoResourcesFoundWithConstraints,
 )
@@ -17,8 +17,8 @@ from global_continuum_placement.domain.workload.workload import (
     ClusterListPlacementConstraint,
     ClusterTypePlacementConstraint,
     Flow,
-    TaskDag,
     FunctionsMatrix,
+    TaskDag,
 )
 from global_continuum_placement.domain.workload.workload_values import (
     Levels,
@@ -143,7 +143,7 @@ class SchedulerService:
         print(to_schedule.performance_known.execution_time)
         print(to_schedule.performance_known.energy_consumed)
 
-        #for function in to_schedule:
+        # for function in to_schedule:
         #    print("\n")
         #    print(function)
         #    #print(function.performance_known)
@@ -176,9 +176,7 @@ class SchedulerService:
         return placements
 
     async def schedule_flow(
-        self,
-        flow: Flow,
-        function_matrix: FunctionsMatrix
+        self, flow: Flow, function_matrix: FunctionsMatrix
     ) -> List[Placement]:
         placements: List[Placement]
 
@@ -189,9 +187,13 @@ class SchedulerService:
             # We need to schedule at the flow level
             placements = [self.schedule_one(platform, flow, flow.objectives)]
         else:
-            placements = self.schedule_function(
-                platform, flow.functions_dag, function_matrix, flow.objectives
-            )
+            if self.policy in ["foa_energy"]:
+                # function_matrix = FunctionsMatrix.create_matrix_from_functions_sequence(flow)
+                placements = foa_energy.apply(function_matrix, platform)
+            else:
+                placements = self.schedule_function(
+                    platform, flow.functions_dag, function_matrix, flow.objectives
+                )
 
         return placements
 
@@ -200,9 +202,11 @@ class SchedulerService:
         allocations: list[Allocation] = []
         for flow_dict in raw_application["flows"]:
             flow = Flow.create_from_dict(flow_dict)
-            function_matrix = create_matrix_from_functions_sequence(flow_dict)
+            function_matrix = FunctionsMatrix.create_matrix_from_functions_sequence(
+                flow_dict
+            )
             print(function_matrix)
-            #function_matrix = flow
+            # function_matrix = flow
             placements = await self.schedule_flow(flow, function_matrix)
             allocations.append(Allocation(flow.id, placements))
 

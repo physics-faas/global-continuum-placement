@@ -1,14 +1,14 @@
 import uuid
-import numpy as np
-
 from dataclasses import dataclass, field
 from typing import Dict, List, Optional, Tuple
 
-from ..platform.platfom_values import ArchitectureType, ClusterType
-from .workload_values import Levels, Objectives, TaskState
-from ..platform import platform
+import numpy as np
 
 from lp_pulp import *
+
+from ..platform import platform
+from ..platform.platfom_values import ArchitectureType, ClusterType
+from .workload_values import Levels, Objectives, TaskState
 
 
 class UnknownArchitectureError(BaseException):
@@ -31,16 +31,18 @@ class ClusterListPlacementConstraint:
 class ClusterTypePlacementConstraint:
     cluster_type: Optional[ClusterType] = None
 
+
 @dataclass
 class PerformanceKnown:
-    archictecture_used: List[str] = field(default='None')
+    archictecture_used: List[str] = field(default="None")
     cpu_speed: List[float] = field(default=0)
     memory_in_MB: List[float] = field(default=0)
     function_execution_time: List[float] = field(default=0)
     function_energy_consumed: List[float] = field(default=0)
     container_execution_time: List[float] = field(default=0)
     container_energy_consumed: List[float] = field(default=0)
-    container_required: str = field(default='None')
+    container_required: str = field(default="None")
+
 
 def get_architecture(architecture_raw: str) -> ArchitectureType:
     try:
@@ -77,6 +79,7 @@ class TaskDag:
                 functions, key=lambda elem: elem.get("sequence"), reverse=True
             )
 
+        """
         next_tasks: List[float] = []
         p: List[float] = []
         c: List[float] = []
@@ -129,11 +132,34 @@ class TaskDag:
         Tmax = 200
         solver = 'CBC'
         verbosity = 0
-        lp_energy(N, H, K, c, p, c_tilde, p_tilde, mc, env, Tmax, solver, verbosity)
+        allocation_x, allocation_y = lp_energy(N, H, K, c, p, c_tilde, p_tilde, mc, env, Tmax, solver, verbosity)
+        print("Results of the LP: \n\n", allocation_x, allocation_y)
 
+        
+        #Converting the LP solution into the Global Continuum Solution:
+        solutions: Dict = {}
+        solutions["flowID"] = "FlowID"
+
+        solution_list: List[Dict] = []
+
+        for cluster_id in range(len(allocation_x)): # to take cluster id
+
+            solution_entry: Dict = {}
+            solution_entry["cluster"] = "cluster" + str(cluster_id)
+
+            for function_id in range(len(allocation_x[cluster_id])): # to take the function id
+                print("Function ID: ", function_id)
+                if (allocation_x[cluster_id][function_id] == 1):
+                    solution_entry["resource_id"] = "function" + str(function_id)
+                
+                    solution_list.append(solution_entry)
+        
+        solutions["allocations"] = solution_list
+        print("\n\nSolutions: ", solutions)
+        
         #print("Reverting Matrix dimensions")
         #return next_tasks[0]
-
+        """
         next_tasks: List[TaskDag] = []
         for function in functions:
             print("Function here: ", function)
@@ -158,10 +184,18 @@ class TaskDag:
                         archictecture_used=performance.get("archictecture_used", None),
                         cpu_speed=performance.get("cpu_speed", 0),
                         memory_in_MB=performance.get("memory_in_MB", 0),
-                        function_execution_time=performance.get("function_execution_time", 0),
-                        function_energy_consumed=performance.get("function_energy_consumed", 0),
-                        container_execution_time=performance.get("container_execution_time", 0),
-                        container_energy_consumed=performance.get("container_energy_consumed", 0),
+                        function_execution_time=performance.get(
+                            "function_execution_time", 0
+                        ),
+                        function_energy_consumed=performance.get(
+                            "function_energy_consumed", 0
+                        ),
+                        container_execution_time=performance.get(
+                            "container_execution_time", 0
+                        ),
+                        container_energy_consumed=performance.get(
+                            "container_energy_consumed", 0
+                        ),
                         container_required=performance.get("container_required", None),
                     ),
                     cluster_type_placement_constraints=ClusterTypePlacementConstraint(
@@ -222,15 +256,18 @@ class Flow:
                 function_execution_time=performance.get("function_execution_time", 0),
                 function_energy_consumed=performance.get("function_energy_consumed", 0),
                 container_execution_time=performance.get("container_execution_time", 0),
-                container_energy_consumed=performance.get("container_energy_consumed", 0),
+                container_energy_consumed=performance.get(
+                    "container_energy_consumed", 0
+                ),
                 container_required=performance.get("container_required", None),
             ),
             architecture_constraint=get_architecture(annotations.get("architecture")),
             resource_request=ResourceRequest(
                 nb_cpu=int(annotations.get("cores", 0)),
                 memory_in_MB=int(annotations.get("memory", 0)),
-            )
+            ),
         )
+
 
 """
     print("Test 11")
@@ -259,6 +296,8 @@ class Flow:
 
     return N, H, K, c, p, c_tilde, p_tilde, mc, env, Tmax 
 """
+
+
 @dataclass
 class FunctionsMatrix:
     id: str
@@ -267,30 +306,27 @@ class FunctionsMatrix:
     functions_energy_consumption: List[float]
     containers_energy_consumption: List[float]
     containers_per_function: List[float]
-    number_of_functions: int
-    number_of_containers: int
+    number_of_functions: List[int]
+    number_of_containers: List[int]
 
     @classmethod
-    #def create_matrix_from_functions_sequence(cls, app_dict: Dict) -> "FunctionsMatrix":
-    def create_matrix_from_functions_sequence(functions: List[Dict]) -> "FunctionsMatrix":
+    # def create_matrix_from_functions_sequence(cls, app_dict: Dict) -> "FunctionsMatrix":
+    def create_matrix_from_functions_sequence(
+        cls, functions: List[Dict]
+    ) -> "FunctionsMatrix":
 
-        print("\n #####  Reading and building the dag")
+        print("\n #####  Reading and building the dag", functions)
 
-        # Be sure that the functions are sorted in reverse order
-        if len(functions) > 1:
-            functions = sorted(
-                functions, key=lambda elem: elem.get("sequence"), reverse=True
-            )
-
-        next_tasks: List[float] = []
+        # next_tasks: List[float] = []
         p: List[float] = []
         c: List[float] = []
         p_tilde: List[float] = []
         c_tilde: List[float] = []
         env: List[float] = []
         container_image_ids = {}
-        
-        for function in functions:
+        list_of_functions = functions.get("functions", [])
+
+        for function in list_of_functions:
             print("Function here: ", function)
             annotations = function.get("annotations", {})
             performance = annotations.get("performance_known", {})
@@ -302,15 +338,19 @@ class FunctionsMatrix:
             container_required = performance.get("container_required", None)
 
             # Computing the list env: env i of task i
-            if (container_required not in container_image_ids):
+            if container_required not in container_image_ids:
                 new_container_id = len(container_image_ids)
                 container_image_ids[container_required] = new_container_id
             env.append(container_image_ids.get(container_required))
 
         p = [[p[j][i] for j in range(len(p))] for i in range(len(p[0]))]
         c = [[c[j][i] for j in range(len(c))] for i in range(len(c[0]))]
-        p_tilde = [[p_tilde[j][i] for j in range(len(p_tilde))] for i in range(len(p_tilde[0]))]
-        c_tilde = [[c_tilde[j][i] for j in range(len(c_tilde))] for i in range(len(c_tilde[0]))]
+        p_tilde = [
+            [p_tilde[j][i] for j in range(len(p_tilde))] for i in range(len(p_tilde[0]))
+        ]
+        c_tilde = [
+            [c_tilde[j][i] for j in range(len(c_tilde))] for i in range(len(c_tilde[0]))
+        ]
         print("p: ", p)
         print("c: ", c)
         print("p_tilde: ", p_tilde)
@@ -318,28 +358,21 @@ class FunctionsMatrix:
         print("env: ", env)
 
         N = list(range(len(functions)))
-        #H = list(range(len(set(env))))
+        # H = list(range(len(set(env))))
         K = list(range(len(set(env))))
 
         print("N: ", N)
         print("K: ", K)
 
-        mc = [1, 2] # number of machines per cluster
-
-        #env = [0, 0, 1, 1, 0] # env i of task i
-
-        Tmax = 6
-
-        #print("Reverting Matrix dimensions")
-        #return next_tasks[0]
-        print("\n\n Matrix Created: ", next_tasks)
+        # print("\n\n Matrix Created: ", next_tasks)
 
         return FunctionsMatrix(
+            id=str(uuid.uuid4()),
             functions_execution_time=p,
             containers_execution_time=c,
             functions_energy_consumption=p_tilde,
             containers_energy_consumption=c_tilde,
             containers_per_function=env,
             number_of_functions=N,
-            number_of_containers=K
+            number_of_containers=K,
         )
