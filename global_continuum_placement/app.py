@@ -22,8 +22,8 @@ def init() -> web.Application:
     container.configuration.inference_engine_auth_token.from_env(
         "INFERENCE_ENGINE_AUTH_TOKEN"
     )
-    container.configuration.policy.from_env("POLICY", "foa_energy")  # "first_fit")
 
+    container.configuration.policy.from_env("POLICY", "foa_energy")#"first_fit")
     # Setup logging
     str_level = container.configuration.log_level()
     numeric_level = getattr(logging, str_level.upper(), None)

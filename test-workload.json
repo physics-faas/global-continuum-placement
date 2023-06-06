@@ -22,12 +22,12 @@
             "performance_known" : {
               "container_required": "python3action:matmul",
               "archictecture_used": ["x86_64", "x86_64", "x86_64", "x86_64"],
-              "cpu_speed": [100, 200, 300, 400, 500],
-              "memory_in_MB": [1024, 1024, 1024, 1024, 1024],
-              "function_execution_time": [100, 200, 300, 400, 500],
-              "function_energy_consumed": [10, 10, 10, 10, 10],
-              "container_execution_time": [50, 50, 50, 50, 50],
-              "container_energy_consumed": [10, 10, 10, 10, 10]
+              "cpu_speed": [100, 200, 300],
+              "memory_in_MB": [1024, 1024, 1024],
+              "function_execution_time": [100, 200, 300],
+              "function_energy_consumed": [10, 10, 10],
+              "container_execution_time": [50, 50, 50],
+              "container_energy_consumed": [10, 10, 10]
             }
           }
         },
@@ -39,12 +39,12 @@
             "performance_known" : {
               "container_required": "python3action:matmul",
               "archictecture_used": ["x86_64", "x86_64", "x86_64", "x86_64"],
-              "cpu_speed": [100, 100, 100, 100, 100],
-              "memory_in_MB": [1024, 1024, 1024, 1024, 1024],
-              "function_execution_time": [50, 50, 50, 50, 50],
-              "function_energy_consumed": [10, 10, 10, 10, 10],
-              "container_execution_time": [50, 50, 50, 50, 50],
-              "container_energy_consumed": [10, 10, 10, 10, 10]
+              "cpu_speed": [100, 100, 100],
+              "memory_in_MB": [1024, 1024, 1024],
+              "function_execution_time": [100, 100, 100],
+              "function_energy_consumed": [10, 10, 10],
+              "container_execution_time": [50, 50, 50],
+              "container_energy_consumed": [10, 10, 10]
             }
           }
         },
@@ -56,12 +56,12 @@
             "performance_known" : {
               "container_required": "python3action:matmul",
               "archictecture_used": ["x86_64", "x86_64", "x86_64", "x86_64"],
-              "cpu_speed": [100, 100, 100, 100, 100],
-              "memory_in_MB": [1024, 1024, 1024, 1024, 1024],
-              "function_execution_time": [50, 50, 50, 50, 50],
-              "function_energy_consumed": [10, 10, 10, 10, 10],
-              "container_execution_time": [50, 50, 50, 50, 50],
-              "container_energy_consumed": [10, 10, 10, 10, 10]
+              "cpu_speed": [100, 100, 100],
+              "memory_in_MB": [1024, 1024, 1024],
+              "function_execution_time": [100, 100, 100],
+              "function_energy_consumed": [10, 10, 10],
+              "container_execution_time": [50, 50, 50],
+              "container_energy_consumed": [10, 10, 10]
             }
           }
         },
@@ -74,12 +74,12 @@
             "performance_known" : {
               "container_required": "python3action:linpack",
               "archictecture_used": ["arm64", "arm64", "arm64", "arm64"],
-              "cpu_speed": [100, 100, 100, 100, 100],
-              "memory_in_MB": [1024, 1024, 1024, 1024, 1024],
-              "function_execution_time": [50, 50, 50, 50, 50],
-              "function_energy_consumed": [10, 10, 10, 10, 10],
-              "container_execution_time": [50, 50, 50, 50, 50],
-              "container_energy_consumed": [10, 10, 10, 10, 10]
+              "cpu_speed": [100, 100, 100],
+              "memory_in_MB": [1024, 1024, 1024],
+              "function_execution_time": [100, 100, 100],
+              "function_energy_consumed": [10, 10, 10],
+              "container_execution_time": [50, 50, 50],
+              "container_energy_consumed": [10, 10, 10]
             }
           }
         },
@@ -92,12 +92,12 @@
             "performance_known" : {
               "container_required": "python3action:linpack",
               "archictecture_used": ["x86_64", "x86_64", "x86_64", "x86_64"],
-              "cpu_speed": [100, 100, 100, 100, 100],
-              "memory_in_MB": [1024, 1024, 1024, 1024, 1024],
-              "function_execution_time": [50, 50, 50, 50, 50],
-              "function_energy_consumed": [10, 10, 10, 10, 10],
-              "container_execution_time": [50, 50, 50, 50, 50],
-              "container_energy_consumed": [10, 10, 10, 10, 10]
+              "cpu_speed": [100, 100, 100],
+              "memory_in_MB": [1024, 1024, 1024],
+              "function_execution_time": [100, 100, 100],
+              "function_energy_consumed": [10, 10, 10],
+              "container_execution_time": [50, 50, 50],
+              "container_energy_consumed": [10, 10, 10]
             }
           }
         }

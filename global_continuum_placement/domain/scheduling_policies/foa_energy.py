@@ -21,14 +21,14 @@ from lp_pulp import *
 def apply(matrix: FunctionsMatrix, platform: Platform) -> List[Placement]:
 
     # To build from the Platform
-    H = [0, 0, 1, 1, 1]
+    H = [0, 1, 2]
 
     #mc = [1, 2]
-    mc = [4, 2, 1000] # number of machines per cluster
+    mc = [1, 1, 1] # number of machines per cluster
 
-    #env = [0, 0, 1, 1, 0] # env i of task i
+    #env = [0, 0, 1, 1, 1] # env i of task i
 
-    Tmax = 200
+    Tmax = 10000
     solver = 'CBC'
     verbosity = 0
     N = matrix.number_of_functions 
@@ -41,7 +41,8 @@ def apply(matrix: FunctionsMatrix, platform: Platform) -> List[Placement]:
     
     allocation_x, allocation_y = lp_energy(N, H, K, c, p, c_tilde, p_tilde, mc, env, Tmax, solver, verbosity)
     
-    print("Results of the LP: \n\n", allocation_x, allocation_y)
+    print("Results of the X: \n\n", allocation_x)
+    print("Results of the Y: \n\n", allocation_y)
 
     
     #Converting the LP solution into the Global Continuum Solution:
@@ -50,14 +51,14 @@ def apply(matrix: FunctionsMatrix, platform: Platform) -> List[Placement]:
 
     solution_list: List[Placement] = []
 
-    for cluster_id in range(len(allocation_x)): # to take cluster id
+    for function_id in range(len(allocation_x)): # to take cluster id
 
         #solution_entry: Dict = {}
         #solution_entry["cluster"] = "cluster" + str(cluster_id)
 
-        for function_id in range(len(allocation_x[cluster_id])): # to take the function id
+        for cluster_id in range(len(allocation_x[function_id])): # to take the function id
             print("Function ID: ", function_id)
-            if (allocation_x[cluster_id][function_id] == 1):
+            if (allocation_x[function_id][cluster_id] == 1):
                 #solution_entry["resource_id"] = "function" + str(function_id)
                 solution_list.append(Placement("cluster" + str(cluster_id), "function" + str(function_id)))
             

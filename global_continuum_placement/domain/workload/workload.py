@@ -357,7 +357,7 @@ class FunctionsMatrix:
         print("c_tilde: ", c_tilde)
         print("env: ", env)
 
-        N = list(range(len(functions)))
+        N = list(range(len(list_of_functions)))
         # H = list(range(len(set(env))))
         K = list(range(len(set(env))))
 
