@@ -2,11 +2,6 @@ import uuid
 from dataclasses import dataclass, field
 from typing import Dict, List, Optional, Tuple
 
-import numpy as np
-
-from lp_pulp import *
-
-from ..platform import platform
 from ..platform.platfom_values import ArchitectureType, ClusterType
 from .workload_values import Levels, Objectives, TaskState
 
@@ -34,13 +29,13 @@ class ClusterTypePlacementConstraint:
 
 @dataclass
 class PerformanceKnown:
-    archictecture_used: List[str] = field(default="None")
-    cpu_speed: List[float] = field(default=0)
-    memory_in_MB: List[float] = field(default=0)
-    function_execution_time: List[float] = field(default=0)
-    function_energy_consumed: List[float] = field(default=0)
-    container_execution_time: List[float] = field(default=0)
-    container_energy_consumed: List[float] = field(default=0)
+    archictecture_used: List[str] = field(default=[])
+    cpu_speed: List[float] = field(default=[])
+    memory_in_MB: List[float] = field(default=[])
+    function_execution_time: List[float] = field(default=[])
+    function_energy_consumed: List[float] = field(default=[])
+    container_execution_time: List[float] = field(default=[])
+    container_energy_consumed: List[float] = field(default=[])
     container_required: str = field(default="None")
 
 
@@ -70,102 +65,16 @@ class TaskDag:
 
     @staticmethod
     def create_dag_from_functions_sequence(functions: List[Dict]) -> "TaskDag":
-
-        print("\n #####  Reading and building the dag")
-
         # Be sure that the functions are sorted in reverse order
         if len(functions) > 1:
             functions = sorted(
                 functions, key=lambda elem: elem.get("sequence"), reverse=True
             )
 
-        """
-        next_tasks: List[float] = []
-        p: List[float] = []
-        c: List[float] = []
-        p_tilde: List[float] = []
-        c_tilde: List[float] = []
-        env: List[float] = []
-        container_image_ids = {}
-        
-        for function in functions:
-            print("Function here: ", function)
-            annotations = function.get("annotations", {})
-            performance = annotations.get("performance_known", {})
-            print("Annotations: ", annotations)
-            p.append(performance.get("function_execution_time", 0))
-            c.append(performance.get("function_energy_consumed", 0))
-            p_tilde.append(performance.get("container_execution_time", 0))
-            c_tilde.append(performance.get("container_energy_consumed", 0))
-            container_required = performance.get("container_required", None)
-
-            # Computing the list env: env i of task i
-            if (container_required not in container_image_ids):
-                new_container_id = len(container_image_ids)
-                container_image_ids[container_required] = new_container_id
-            env.append(container_image_ids.get(container_required))
-
-        p = [[p[j][i] for j in range(len(p))] for i in range(len(p[0]))]
-        c = [[c[j][i] for j in range(len(c))] for i in range(len(c[0]))]
-        p_tilde = [[p_tilde[j][i] for j in range(len(p_tilde))] for i in range(len(p_tilde[0]))]
-        c_tilde = [[c_tilde[j][i] for j in range(len(c_tilde))] for i in range(len(c_tilde[0]))]
-        print("p: ", p)
-        print("c: ", c)
-        print("p_tilde: ", p_tilde)
-        print("c_tilde: ", c_tilde)
-        print("env: ", env)
-
-        N = list(range(len(functions)))
-        #H = list(range(len(set(env))))
-        K = list(range(len(set(env))))
-
-        print("N: ", N)
-        print("K: ", K)
-
-        H = [0, 0, 1, 1, 1]
-
-        #mc = [1, 2]
-        mc = [4, 2, 1000] # number of machines per cluster
-
-        #env = [0, 0, 1, 1, 0] # env i of task i
-
-        Tmax = 200
-        solver = 'CBC'
-        verbosity = 0
-        allocation_x, allocation_y = lp_energy(N, H, K, c, p, c_tilde, p_tilde, mc, env, Tmax, solver, verbosity)
-        print("Results of the LP: \n\n", allocation_x, allocation_y)
-
-        
-        #Converting the LP solution into the Global Continuum Solution:
-        solutions: Dict = {}
-        solutions["flowID"] = "FlowID"
-
-        solution_list: List[Dict] = []
-
-        for cluster_id in range(len(allocation_x)): # to take cluster id
-
-            solution_entry: Dict = {}
-            solution_entry["cluster"] = "cluster" + str(cluster_id)
-
-            for function_id in range(len(allocation_x[cluster_id])): # to take the function id
-                print("Function ID: ", function_id)
-                if (allocation_x[cluster_id][function_id] == 1):
-                    solution_entry["resource_id"] = "function" + str(function_id)
-                
-                    solution_list.append(solution_entry)
-        
-        solutions["allocations"] = solution_list
-        print("\n\nSolutions: ", solutions)
-        
-        #print("Reverting Matrix dimensions")
-        #return next_tasks[0]
-        """
         next_tasks: List[TaskDag] = []
         for function in functions:
-            print("Function here: ", function)
             annotations = function.get("annotations", {})
             performance = annotations.get("performance_known", {})
-            print("Annotations: ", annotations)
             next_tasks = [
                 TaskDag(
                     id=function["id"],
@@ -269,42 +178,13 @@ class Flow:
         )
 
 
-"""
-    print("Test 11")
-    
-    N = list(range(3))
-    H = list(range(2))
-    K = list(range(3))
-
-    c = [[1, 1, 1],
-        [1, 1, 1]]
-
-    p = [[1, 1, 1],
-        [1, 1, 1]]
-
-    c_tilde = [[1, 10, 1],
-            [1, 1, 1]]
-
-    p_tilde = [[1, 1, 1],
-            [1, 1, 1]]
-
-    env = [1, 2, 0]
-
-    mc = [1, 1] #number of machines per class
-
-    Tmax = 12
-
-    return N, H, K, c, p, c_tilde, p_tilde, mc, env, Tmax 
-"""
-
-
 @dataclass
 class FunctionsMatrix:
     id: str
-    functions_execution_time: List[float]
-    containers_execution_time: List[float]
-    functions_energy_consumption: List[float]
-    containers_energy_consumption: List[float]
+    functions_execution_time: List[List[float]]
+    containers_execution_time: List[List[float]]
+    functions_energy_consumption: List[List[float]]
+    containers_energy_consumption: List[List[float]]
     containers_per_function: List[float]
     number_of_functions: List[int]
     number_of_containers: List[int]
@@ -312,25 +192,20 @@ class FunctionsMatrix:
     @classmethod
     # def create_matrix_from_functions_sequence(cls, app_dict: Dict) -> "FunctionsMatrix":
     def create_matrix_from_functions_sequence(
-        cls, functions: List[Dict]
+        cls, functions: Dict
     ) -> "FunctionsMatrix":
 
-        print("\n #####  Reading and building the dag", functions)
-
-        # next_tasks: List[float] = []
-        p: List[float] = []
-        c: List[float] = []
-        p_tilde: List[float] = []
-        c_tilde: List[float] = []
+        p: List[List[float]] = []
+        c: List[List[float]] = []
+        p_tilde: List[List[float]] = []
+        c_tilde: List[List[float]] = []
         env: List[float] = []
-        container_image_ids = {}
+        container_image_ids: Dict = {}
         list_of_functions = functions.get("functions", [])
 
         for function in list_of_functions:
-            print("Function here: ", function)
             annotations = function.get("annotations", {})
             performance = annotations.get("performance_known", {})
-            print("Annotations: ", annotations)
             p.append(performance.get("function_execution_time", 0))
             c.append(performance.get("function_energy_consumed", 0))
             p_tilde.append(performance.get("container_execution_time", 0))
@@ -351,20 +226,9 @@ class FunctionsMatrix:
         c_tilde = [
             [c_tilde[j][i] for j in range(len(c_tilde))] for i in range(len(c_tilde[0]))
         ]
-        print("p: ", p)
-        print("c: ", c)
-        print("p_tilde: ", p_tilde)
-        print("c_tilde: ", c_tilde)
-        print("env: ", env)
 
         N = list(range(len(list_of_functions)))
-        # H = list(range(len(set(env))))
         K = list(range(len(set(env))))
-
-        print("N: ", N)
-        print("K: ", K)
-
-        # print("\n\n Matrix Created: ", next_tasks)
 
         return FunctionsMatrix(
             id=str(uuid.uuid4()),

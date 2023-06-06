@@ -1,7 +1,14 @@
 from numpy import array
-from pulp import *
-
-# class LP_Energy():
+from pulp import (
+    GUROBI_CMD,
+    PULP_CBC_CMD,
+    LpMinimize,
+    LpProblem,
+    LpStatus,
+    LpVariable,
+    lpSum,
+    value,
+)
 
 
 def lp_energy(N, H, K, c, p, c_tilde, p_tilde, mc, env, Tmax, solver, verbose):
@@ -59,8 +66,8 @@ def lp_energy(N, H, K, c, p, c_tilde, p_tilde, mc, env, Tmax, solver, verbose):
     print(LpStatus[status])
     print("Value ", value(prob.objective))
     print("Status: ", status)
-
     # print(prob.constraints())
+
     for v in prob.variables():
         solution_var = v.name.split("_")[0]
         index_i = int(v.name.split("_")[-1])
@@ -73,9 +80,5 @@ def lp_energy(N, H, K, c, p, c_tilde, p_tilde, mc, env, Tmax, solver, verbose):
 
     solution_x = array(solution_x)
     solution_y = array(solution_y)
-
-    print("solution_x\n", solution_x)  # , index_i, index_j))
-    print("solution_y\n", solution_y)  # , index_i, index_j))
-    # LpStatus[status]
 
     return solution_x, solution_y

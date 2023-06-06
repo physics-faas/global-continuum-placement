@@ -137,18 +137,6 @@ class SchedulerService:
                 scores[site.id],
             )
 
-        print("\n\n $$$$ **** Checking the queue: ", to_schedule)
-        print(to_schedule.performance_known)
-        print("\n")
-        print(to_schedule.performance_known.execution_time)
-        print(to_schedule.performance_known.energy_consumed)
-
-        # for function in to_schedule:
-        #    print("\n")
-        #    print(function)
-        #    #print(function.performance_known)
-        #    #print(function["performance_known"])
-
         # Apply scheduling policy
         # TODO Implement smarter scheduling policy!
         if self.policy == "first_fit":
@@ -162,7 +150,6 @@ class SchedulerService:
         self,
         platform: Platform,
         function: TaskDag,
-        function_matrix: FunctionsMatrix,
         objectives: Dict[Objectives, Levels],
     ) -> List[Placement]:
         placements: List[Placement] = [
@@ -180,7 +167,6 @@ class SchedulerService:
     ) -> List[Placement]:
         placements: List[Placement]
 
-        print("flow: ", flow)
         platform = await self.platform_service.get_platform()
 
         if flow.executor_mode in ["NoderedFunction", "Service"]:
@@ -188,11 +174,10 @@ class SchedulerService:
             placements = [self.schedule_one(platform, flow, flow.objectives)]
         else:
             if self.policy in ["foa_energy"]:
-                # function_matrix = FunctionsMatrix.create_matrix_from_functions_sequence(flow)
                 placements = foa_energy.apply(function_matrix, platform)
             else:
                 placements = self.schedule_function(
-                    platform, flow.functions_dag, function_matrix, flow.objectives
+                    platform, flow.functions_dag, flow.objectives
                 )
 
         return placements
@@ -205,8 +190,6 @@ class SchedulerService:
             function_matrix = FunctionsMatrix.create_matrix_from_functions_sequence(
                 flow_dict
             )
-            print(function_matrix)
-            # function_matrix = flow
             placements = await self.schedule_flow(flow, function_matrix)
             allocations.append(Allocation(flow.id, placements))
 
