@@ -20,15 +20,6 @@ from lp_pulp import *
 #def apply(task: Union[TaskDag, Flow], valid_sites: List[Cluster]) -> Placement:
 def apply(matrix: FunctionsMatrix, platform: Platform) -> List[Placement]:
 
-    # To build from the Platform
-    H = [0, 1, 2]
-
-    #mc = [1, 2]
-    mc = [1, 1, 1] # number of machines per cluster
-
-    #env = [0, 0, 1, 1, 1] # env i of task i
-
-    Tmax = 10000
     solver = 'CBC'
     verbosity = 0
     N = matrix.number_of_functions 
@@ -38,6 +29,29 @@ def apply(matrix: FunctionsMatrix, platform: Platform) -> List[Placement]:
     p_tilde = matrix.functions_energy_consumption
     c_tilde = matrix.containers_energy_consumption
     env = matrix.containers_per_function
+
+    # To build from the Platform
+    H = list(range(len(platform.sites)))
+
+    # To retrieve the number of resources per cluster
+    mc: List[int] = [cluster.total_resources.nb_cpu for cluster in platform.sites]
+
+    """
+    Compute the max Cmax and Tmax allowed. Requirement: c and p, and b and d should have the same dimension, then:
+    if we place all jobs and environments on one machine, 
+    get the total cost on the worst machine, 
+    and the total time on the worst machine.
+    The worst cost and the worst time might not be on the same machine.
+    """
+    
+    Tmax: int = 0
+    for i in H:
+        print("Cluster: ", i)
+        curr_time = sum(p[i]) + sum(c[i])
+        print(curr_time)
+        if curr_time > Tmax:
+            Tmax = curr_time
+    print("Computed TMax: ", Tmax)
     
     allocation_x, allocation_y = lp_energy(N, H, K, c, p, c_tilde, p_tilde, mc, env, Tmax, solver, verbosity)
     
