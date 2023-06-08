@@ -29,13 +29,13 @@ class ClusterTypePlacementConstraint:
 
 @dataclass
 class PerformanceKnown:
-    archictecture_used: List[str] = field(default=[])
-    cpu_speed: List[float] = field(default=[])
-    memory_in_MB: List[float] = field(default=[])
-    function_execution_time: List[float] = field(default=[])
-    function_energy_consumed: List[float] = field(default=[])
-    container_execution_time: List[float] = field(default=[])
-    container_energy_consumed: List[float] = field(default=[])
+    archictecture_used: List[str] = field(default_factory=list)
+    cpu_speed: List[float] = field(default_factory=list)
+    memory_in_MB: List[float] = field(default_factory=list)
+    function_execution_time: List[float] = field(default_factory=list)
+    function_energy_consumed: List[float] = field(default_factory=list)
+    container_execution_time: List[float] = field(default_factory=list)
+    container_energy_consumed: List[float] = field(default_factory=list)
     container_required: str = field(default="None")
 
 
