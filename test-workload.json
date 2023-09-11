@@ -17,20 +17,52 @@
           "sequence": 1,
           "allocations": [
             "cluster3"
-          ]
+          ],
+          "annotations": {
+            "performance_known" : {
+              "container_required": "python3action:matmul",
+              "archictecture_used": ["x86_64", "x86_64", "x86_64", "x86_64"],
+              "cpu_speed": [100, 200, 300],
+              "memory_in_MB": [1024, 1024, 1024],
+              "function_execution_time": [100, 200, 300],
+              "function_energy_consumed": [10, 10, 10],
+              "container_execution_time": [50, 50, 50],
+              "container_energy_consumed": [10, 10, 10]
+            }
+          }
         },
         {
           "id": "function2",
           "sequence": 2,
           "annotations": {
-            "cores": "2"
+            "cores": "2",
+            "performance_known" : {
+              "container_required": "python3action:matmul",
+              "archictecture_used": ["x86_64", "x86_64", "x86_64", "x86_64"],
+              "cpu_speed": [100, 100, 100],
+              "memory_in_MB": [1024, 1024, 1024],
+              "function_execution_time": [100, 100, 100],
+              "function_energy_consumed": [10, 10, 10],
+              "container_execution_time": [50, 50, 50],
+              "container_energy_consumed": [10, 10, 10]
+            }
           }
         },
         {
           "id": "function3",
           "sequence": 3,
           "annotations": {
-            "cores": "2"
+            "cores": "2",
+            "performance_known" : {
+              "container_required": "python3action:matmul",
+              "archictecture_used": ["x86_64", "x86_64", "x86_64", "x86_64"],
+              "cpu_speed": [100, 100, 100],
+              "memory_in_MB": [1024, 1024, 1024],
+              "function_execution_time": [100, 100, 100],
+              "function_energy_consumed": [10, 10, 10],
+              "container_execution_time": [50, 50, 50],
+              "container_energy_consumed": [10, 10, 10]
+            }
           }
         },
         {
@@ -38,7 +70,17 @@
           "sequence": 4,
           "annotations": {
             "cores": "2",
-            "architecture": "arm64"
+            "architecture": "arm64",
+            "performance_known" : {
+              "container_required": "python3action:linpack",
+              "archictecture_used": ["arm64", "arm64", "arm64", "arm64"],
+              "cpu_speed": [100, 100, 100],
+              "memory_in_MB": [1024, 1024, 1024],
+              "function_execution_time": [100, 100, 100],
+              "function_energy_consumed": [10, 10, 10],
+              "container_execution_time": [50, 50, 50],
+              "container_energy_consumed": [10, 10, 10]
+            }
           }
         },
         {
@@ -46,19 +88,18 @@
           "sequence": 5,
           "annotations": {
             "cores": 2,
-            "memory": 1000
+            "memory": 1000,
+            "performance_known" : {
+              "container_required": "python3action:linpack",
+              "archictecture_used": ["x86_64", "x86_64", "x86_64", "x86_64"],
+              "cpu_speed": [100, 100, 100],
+              "memory_in_MB": [1024, 1024, 1024],
+              "function_execution_time": [100, 100, 100],
+              "function_energy_consumed": [10, 10, 10],
+              "container_execution_time": [50, 50, 50],
+              "container_energy_consumed": [10, 10, 10]
+            }
           }
-        }
-      ]
-    },
-    {
-      "flowID": "flow2",
-      "executorMode": "NoderedFunction",
-      "annotations": {"core": 1, "memory": 1000},
-      "functions": [
-        {
-          "id": "excluded-func",
-          "annotations": { }
         }
       ]
     }

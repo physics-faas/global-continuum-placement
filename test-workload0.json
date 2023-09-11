@@ -1,0 +1,113 @@
+{
+  "id": "19fe4293742e0b2c",
+  "displayName": "Full example",
+  "type": "Flow",
+  "executorMode": "NativeSequence",
+  "native": true,
+  "objectives": {
+    "Energy": "high",
+    "Availability": "low"
+  },
+  "flows": [
+    {
+      "flowID": "flow1",
+      "functions": [
+        {
+          "id": "function1",
+          "sequence": 1,
+          "allocations": [
+            "cluster3"
+          ],
+          "annotations": {
+            "performance_known" : {
+              "archictecture_used": ["x86_64", "x86_64", "x86_64", "x86_64"],
+              "cpu_speed": [100, 200, 300, 400, 500],
+              "memory_in_MB": [1024, 1024, 1024, 1024, 1024],
+              "function_execution_time": [100, 200, 300, 400, 500],
+              "function_energy_consumed": [10, 10, 10, 10, 10],
+              "container_execution_time": [50, 50, 50, 50, 50],
+              "container_energy_consumed": [10, 10, 10, 10, 10]
+            }
+          }
+        },
+        {
+          "id": "function2",
+          "sequence": 2,
+          "annotations": {
+            "cores": "2",
+            "performance_known" : {
+              "archictecture_used": ["x86_64", "x86_64", "x86_64", "x86_64"],
+              "cpu_speed": [100, 100, 100, 100, 100],
+              "memory_in_MB": [1024, 1024, 1024, 1024, 1024],
+              "function_execution_time": [50, 50, 50, 50, 50],
+              "function_energy_consumed": [10, 10, 10, 10, 10],
+              "container_execution_time": [50, 50, 50, 50, 50],
+              "container_energy_consumed": [10, 10, 10, 10, 10]
+            }
+          }
+        },
+        {
+          "id": "function3",
+          "sequence": 3,
+          "annotations": {
+            "cores": "2",
+            "performance_known" : {
+              "archictecture_used": ["x86_64", "x86_64", "x86_64", "x86_64"],
+              "cpu_speed": [100, 100, 100, 100, 100],
+              "memory_in_MB": [1024, 1024, 1024, 1024, 1024],
+              "function_execution_time": [50, 50, 50, 50, 50],
+              "function_energy_consumed": [10, 10, 10, 10, 10],
+              "container_execution_time": [50, 50, 50, 50, 50],
+              "container_energy_consumed": [10, 10, 10, 10, 10]
+            }
+          }
+        },
+        {
+          "id": "function4",
+          "sequence": 4,
+          "annotations": {
+            "cores": "2",
+            "architecture": "arm64",
+            "performance_known" : {
+              "archictecture_used": ["arm64", "arm64", "arm64", "arm64"],
+              "cpu_speed": [100, 100, 100, 100, 100],
+              "memory_in_MB": [1024, 1024, 1024, 1024, 1024],
+              "function_execution_time": [50, 50, 50, 50, 50],
+              "function_energy_consumed": [10, 10, 10, 10, 10],
+              "container_execution_time": [50, 50, 50, 50, 50],
+              "container_energy_consumed": [10, 10, 10, 10, 10]
+            }
+          }
+        },
+        {
+          "id": "function5",
+          "sequence": 5,
+          "annotations": {
+            "cores": 2,
+            "memory": 1000,
+            "performance_known" : {
+              "archictecture_used": ["x86_64", "x86_64", "x86_64", "x86_64"],
+              "cpu_speed": [100, 100, 100, 100, 100],
+              "memory_in_MB": [1024, 1024, 1024, 1024, 1024],
+              "function_execution_time": [50, 50, 50, 50, 50],
+              "function_energy_consumed": [10, 10, 10, 10, 10],
+              "container_execution_time": [50, 50, 50, 50, 50],
+              "container_energy_consumed": [10, 10, 10, 10, 10]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "flowID": "flow2",
+      "executorMode": "NoderedFunction",
+      "annotations": {"core": 1, "memory": 1000},
+      "functions": [
+        {
+          "id": "excluded-func",
+          "annotations": { }
+        }
+      ]
+    }
+  ]
+}

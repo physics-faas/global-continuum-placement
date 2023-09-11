@@ -12,6 +12,7 @@ from global_continuum_placement.domain.workload.workload import Flow, TaskDag
 
 
 def apply(task: Union[TaskDag, Flow], valid_sites: List[Cluster]) -> Placement:
+
     for site in valid_sites:
         if site_has_enough_resources(site, task.resource_request):
             site.allocate(task)
