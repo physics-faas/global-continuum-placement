@@ -19,7 +19,7 @@ while getopts "fd:" opt; do
   esac
 done
 
-TO_CHECK_DIR=${CHECK_DIR:-"."}
+TO_CHECK_DIR=${CHECK_DIR:-"./global_continuum_placement"}
 CHECK_ONLY=${DO_CHECK_ONLY:-"true"}
 
 if [[ $CHECK_ONLY == "true" ]]
@@ -45,6 +45,6 @@ echo "-- Checking python static checking"
 flake8 $TO_CHECK_DIR --exclude="docs/*,ci/*,ryaxpkgs/*,migrations/*,*pb2.py" --per-file-ignores='*/__init__.py:F401'
 
 echo "-- Checking type annotations"
-mypy $TO_CHECK_DIR/global_continuum_placement --exclude '(/*pb2.py|ryax_runner/infrastructure/execution_trigger/grpcv1/ryax_execution)'
+mypy $TO_CHECK_DIR --exclude '(/*pb2.py|ryax_runner/infrastructure/execution_trigger/grpcv1/ryax_execution)'
 
 

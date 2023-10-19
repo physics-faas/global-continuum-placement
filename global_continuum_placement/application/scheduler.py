@@ -180,7 +180,6 @@ class SchedulerService:
         return placements
 
     async def schedule_application(self, raw_application: dict) -> list[Allocation]:
-
         allocations: list[Allocation] = []
         for flow_dict in raw_application["flows"]:
             flow = Flow.create_from_dict(flow_dict)
