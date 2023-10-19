@@ -1,5 +1,6 @@
 import logging
 from dataclasses import dataclass
+from typing import Optional
 
 import aiohttp
 
@@ -11,7 +12,7 @@ logger = logging.getLogger(__name__)
 
 @dataclass
 class InferenceEngineAPIPlatformService(IPlatformService):
-    inference_engine_base_api: str
+    inference_engine_base_api: Optional[str]
     authorization_token: str
 
     """
@@ -28,6 +29,11 @@ class InferenceEngineAPIPlatformService(IPlatformService):
         return self._platform
 
     async def update_platform(self) -> Platform:
+        if self.inference_engine_base_api is None:
+            logger.warning(
+                "Unable to update platform from the Inference Engine API: URL is not set"
+            )
+            return None
         url = self.inference_engine_base_api.rstrip("/") + "/cluster"
         logger.info("Get platform update from %s", url)
         async with aiohttp.client.ClientSession() as session:

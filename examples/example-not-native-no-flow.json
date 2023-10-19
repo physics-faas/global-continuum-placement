@@ -1,0 +1,100 @@
+{
+    "appName": "",
+    "owner": "",
+    "SoftwareImage": "",
+    "app_id": "app0",
+    "flows": [
+      {
+        "flowID": "39ef55a8.55f96a",
+        "flowName": "HelloFunctionV2",
+        "type": "Flow",
+        "executorMode": "NoderedFunction",
+        "artifact": "registry.apps.ocphub.physics-faas.eu/custom/george:199",
+        "clusterPerformanceScore": "{\"awshub\": 94.99, \"azure4\": 99.98}",
+        "native": false,
+        "annotations": {
+          "memory": 512,
+          "locality": "aws",
+          "timeout": 220000,
+          "goal": "energy",
+          "importance": "high",
+          "loadGenData": [
+            {
+              "achievedAverageRate": 20.09,
+              "averageDuration": 5.36,
+              "averageInitTime": 0,
+              "averageStartLatency": 27.2,
+              "averageUserSideDelay": 32.56,
+              "averageWaitTime": 19.29,
+              "globalStartTime": 1689858679061,
+              "launchGeneratorDelay": 237,
+              "location": "awshub",
+              "memory": 256,
+              "sampleNumber": 55,
+              "setRate": 20.449897750511248,
+              "stdDevDuration": 5.92,
+              "stdDevInitTime": 0,
+              "stdDevStartLatency": 66.66,
+              "stdDevUserSideDelay": 66.56,
+              "stdDevWaitTime": 66.72,
+              "successPercentage": 100
+            },
+            {
+              "achievedAverageRate": 20,
+              "averageDuration": 5.3,
+              "averageInitTime": 0,
+              "averageStartLatency": 29.2,
+              "averageUserSideDelay": 30.56,
+              "averageWaitTime": 15.29,
+              "globalStartTime": 1689858679061,
+              "launchGeneratorDelay": 239,
+              "location": "azure",
+              "memory": 256,
+              "sampleNumber": 55,
+              "setRate": 20.449897750511248,
+              "stdDevDuration": 5.93,
+              "stdDevInitTime": 0,
+              "stdDevStartLatency": 67.66,
+              "stdDevUserSideDelay": 65.56,
+              "stdDevWaitTime": 63.72,
+              "successPercentage": 100
+            }
+          ],
+          "performanceProfile": {
+            "location": "172.30.197.240",
+            "resources": {
+              "cpu": "low",
+              "fsreads": "high",
+              "fswrites": "low",
+              "memory": "high",
+              "networkreceived": "low",
+              "networktransmitted": "low"
+            }
+          }
+        },
+        "hasAction": "",
+        "allocations": [
+          "azure4",
+          "awshub"
+        ]
+      },
+      {
+        "flowID": "a714de618203e22e",
+        "flowName": "orchestrator",
+        "type": "Flow",
+        "executorMode": "NoderedFunction",
+        "artifact": "registry.apps.ocphub.physics-faas.eu/custom/george:200",
+        "clusterPerformanceScore": "",
+        "native": false,
+        "annotations": {
+          "memory": 512,
+          "timeout": 300000
+        },
+        "hasAction": "HelloFunctionV2_george",
+        "allocations": [
+          "azure4",
+          "awshub"
+        ]
+      }
+    ]
+}

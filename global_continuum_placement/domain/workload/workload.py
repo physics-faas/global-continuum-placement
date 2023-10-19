@@ -116,12 +116,16 @@ class Flow:
                 Objectives[obj.upper()]: Levels[lvl.upper()]
                 for obj, lvl in raw_objectives.items()
             }
+
+        functions = app_dict.get("functions")
+        if app_dict.get("native", True) and functions:
+            functions_dag = TaskDag.create_dag_from_functions_sequence(functions)
+        else:
+            functions_dag = None
         return Flow(
             id=app_dict.get("flowID", str(uuid.uuid4())),
             objectives=objectives,
-            functions_dag=TaskDag.create_dag_from_functions_sequence(
-                app_dict["functions"]
-            ),
+            functions_dag=functions_dag,
             executor_mode=app_dict.get("executorMode", "NativeSequence"),
             cluster_list_placement_constraints=ClusterListPlacementConstraint(
                 clusters=app_dict.get("allocations", [])

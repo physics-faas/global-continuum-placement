@@ -1,32 +1,45 @@
 stages:
   - checks
-  - test
   - build
   - package
 
-checks:
-  stage: checks
-  except:
-    - staging
-    - tags
+variables:
+  # Default values to override if needed
+  NIX_OPTS: --extra-experimental-features nix-command --extra-experimental-features flakes --log-format raw
+  # WARNING This assume that the pytest-cov package is available. If not installed you'll have this error:
+  # pytest: error: unrecognized arguments: --cov ...
+  TEST_EXTRA_ARGS: --cov ./ryax --cov-report xml:coverage.xml --cov-report term --cov-config=.coveragerc --cov-branch --junitxml=./report.xml
+  LINT_CMD: ./lint.sh
+
+check:
   tags:
     - shell
-    - nix
+    - vm
+  stage: checks
+  rules:
+    - if: $CI_COMMIT_TAG =~ /^$/
+  image: python:3.10.11-slim-bullseye
+  variables:
+    POETRY_CACHE_DIR: .poetry
+  cache:
+    - key:
+        files:
+          - poetry.lock
+        prefix: poetry
+      paths:
+        - .poetry
   script:
-    - cachix watch-exec ryaxtech-ci -- nix-shell $NIX_OPTS ./release.nix -A shell --command ./lint.sh
+    - export  POETRY_CACHE_DIR=$PWD/$POETRY_CACHE_DIR
+    - cachix watch-exec ryaxtech-ci -- nix run $NIX_OPTS .#lint -- $LINT_EXTRA_ARGS
 
 test:
-  stage: test
-  variables:
-    UNIT_TEST_TIMEOUT: 60
-  except:
-    - staging
-    - tags
   tags:
     - shell
-    - nix
-  script:
-    - cachix watch-exec ryaxtech-ci -- nix-shell $NIX_OPTS ./release.nix -A shell --command "timeout --preserve-status "$UNIT_TEST_TIMEOUT" bash test.sh --junitxml=./report.xml"
+    - vm
+  stage: checks
+  retry: 1
+  rules:
+    - if: $CI_COMMIT_TAG =~ /^$/
   artifacts:
     when: always
     paths:
@@ -35,55 +48,51 @@ test:
       junit: report.xml
       coverage_report:
         coverage_format: cobertura
-        path: cobertura.xml
+        path: "./coverage.xml"
+  variables:
+    POETRY_CACHE_DIR: .poetry
+  cache:
+    - key:
+        files:
+          - poetry.lock
+        prefix: poetry
+      paths:
+        - .poetry
   coverage: '/^TOTAL\s+\d+\s+\d+\s+\d+\s+\d+\s+(\d+\%)/'
-
-build_package:
-  stage: build
-  tags:
-    - shell
-    - nix
-  variables:
-    TARGET: package
   script:
-    - cachix watch-exec ryaxtech-ci -- nix-build $NIX_OPTS release.nix -A $TARGET $NIX_BUILD_EXTRA_OPTS $EXTRA_ARGS
-  except:
-    - tags
+    - export  POETRY_CACHE_DIR=$PWD/$POETRY_CACHE_DIR
+    - cachix watch-exec ryaxtech-ci -- nix run $NIX_OPTS .#test -- $TEST_EXTRA_ARGS
 
-build_image:
+
+package_and_push_image:
   stage: package
+  retry: 2
   tags:
     - shell
-    - nix
+    - vm
   variables:
-    IMAGE_NAME: $CI_PROJECT_NAME
-    REGISTRY_PATH: docker.io/ryaxtech
-    RELEASE_TARGET: image
+    RYAX_TOOL: global-continuum-placement
+    APP_VERSION: $CI_COMMIT_REF_SLUG
+    REGISTRY_PATH: ryaxtech
+    REGISTRY_CREDS: $DOCKERHUB_USER:$DOCKERHUB_PASS
+    REGISTRY_USER: $DOCKERHUB_USER
+    REGISTRY_PASS: $DOCKERHUB_PASS
   script:
-    - cachix watch-exec ryaxtech-ci -- nix-build $NIX_OPTS release.nix -A $RELEASE_TARGET $NIX_BUILD_EXTRA_OPTS $EXTRA_ARGS
-    # Push the generated image to the registry
-    - export IMAGE_TAG=${CI_COMMIT_SHORT_SHA}
-    - >
-        skopeo copy
-        --insecure-policy
-        --dest-creds "$REGISTRY_CREDS"
-        "docker-archive:$PWD/result"
-        "docker://$REGISTRY_PATH/$IMAGE_NAME:$IMAGE_TAG"
-    # Add the current ref tag in the registry
-    - export SRC_IMAGE_TAG=$IMAGE_TAG
-    - TAGS="${CI_COMMIT_REF_NAME}"
+    - set -e
+    - cachix use ryaxtech-ci
     - |
-      for tag in "$TAGS"; do
-        echo "Tagging $IMAGE_NAME:$SRC_IMAGE_TAG with $tag"
-        skopeo copy \
-        --insecure-policy \
-        --src-creds "$REGISTRY_CREDS" \
-        --dest-creds "$REGISTRY_CREDS" \
-        "docker://$REGISTRY_PATH/$IMAGE_NAME:$SRC_IMAGE_TAG" \
-        "docker://$REGISTRY_PATH/$IMAGE_NAME:$tag"
-      done
-  retry: 2
-  except:
-    - tags
-  needs:
-    - build_package
+      cachix watch-exec ryaxtech-ci -- bash -c "
+      set -e
+      set -x
+      nix run $NIX_OPTS .\#install -- $INSTALL_ARGS
+      
+      echo Pushing $REGISTRY_PATH/$RYAX_TOOL:$APP_VERSION
+      nix run $NIX_OPTS --impure .\#image.copyTo -- --dest-creds=\"$REGISTRY_CREDS\" docker://$REGISTRY_PATH/$RYAX_TOOL:$APP_VERSION
+      
+      # Replace with this to have aach64 image
+      #echo Pushing $REGISTRY_PATH/$RYAX_TOOL-amd64:$APP_VERSION
+      #nix run $NIX_OPTS --impure .\#image.copyTo -- --dest-creds=\"$REGISTRY_CREDS\" docker://$REGISTRY_PATH/$RYAX_TOOL-amd64:$APP_VERSION
+      #nix run $NIX_OPTS --option system aarch64-linux --extra-platforms aarch64-linux --option sandbox false .\#install $INSTALL_ARGS
+      #echo Pushing $REGISTRY_PATH/$RYAX_TOOL-arm64:$APP_VERSION
+      #nix run $NIX_OPTS --impure --option system aarch64-linux --extra-platforms aarch64-linux --option sandbox false .\#image.copyTo -- --dest-creds=$REGISTRY_CREDS docker://$REGISTRY_PATH/$RYAX_TOOL-arm64:$APP_VERSION
+      #nix run $NIX_OPTS 'github:NixOS/nixpkgs?rev=db24d86dd8a4769c50d6b7295e81aa280cd93f35#manifest-tool' --  --username $REGISTRY_USER --password $REGISTRY_PASS push from-args --platforms linux/amd64,linux/arm64 --template $REGISTRY_PATH/$RYAX_TOOL-ARCH:$APP_VERSION --target $REGISTRY_PATH/$RYAX_TOOL:$APP_VERSION"
