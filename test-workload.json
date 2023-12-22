@@ -19,86 +19,58 @@
             "cluster3"
           ],
           "annotations": {
-            "performance_known" : {
-              "container_required": "python3action:matmul",
-              "archictecture_used": ["x86_64", "x86_64", "x86_64", "x86_64"],
-              "cpu_speed": [100, 200, 300],
-              "memory_in_MB": [1024, 1024, 1024],
-              "function_execution_time": [100, 200, 300],
-              "function_energy_consumed": [10, 10, 10],
-              "container_execution_time": [50, 50, 50],
-              "container_energy_consumed": [10, 10, 10]
-            }
-          }
-        },
-        {
-          "id": "function2",
-          "sequence": 2,
-          "annotations": {
-            "cores": "2",
-            "performance_known" : {
-              "container_required": "python3action:matmul",
-              "archictecture_used": ["x86_64", "x86_64", "x86_64", "x86_64"],
-              "cpu_speed": [100, 100, 100],
-              "memory_in_MB": [1024, 1024, 1024],
-              "function_execution_time": [100, 100, 100],
-              "function_energy_consumed": [10, 10, 10],
-              "container_execution_time": [50, 50, 50],
-              "container_energy_consumed": [10, 10, 10]
-            }
-          }
-        },
-        {
-          "id": "function3",
-          "sequence": 3,
-          "annotations": {
-            "cores": "2",
-            "performance_known" : {
-              "container_required": "python3action:matmul",
-              "archictecture_used": ["x86_64", "x86_64", "x86_64", "x86_64"],
-              "cpu_speed": [100, 100, 100],
-              "memory_in_MB": [1024, 1024, 1024],
-              "function_execution_time": [100, 100, 100],
-              "function_energy_consumed": [10, 10, 10],
-              "container_execution_time": [50, 50, 50],
-              "container_energy_consumed": [10, 10, 10]
-            }
-          }
-        },
-        {
-          "id": "function4",
-          "sequence": 4,
-          "annotations": {
-            "cores": "2",
-            "architecture": "arm64",
-            "performance_known" : {
-              "container_required": "python3action:linpack",
-              "archictecture_used": ["arm64", "arm64", "arm64", "arm64"],
-              "cpu_speed": [100, 100, 100],
-              "memory_in_MB": [1024, 1024, 1024],
-              "function_execution_time": [100, 100, 100],
-              "function_energy_consumed": [10, 10, 10],
-              "container_execution_time": [50, 50, 50],
-              "container_energy_consumed": [10, 10, 10]
-            }
-          }
-        },
-        {
-          "id": "function5",
-          "sequence": 5,
-          "annotations": {
-            "cores": 2,
-            "memory": 1000,
-            "performance_known" : {
-              "container_required": "python3action:linpack",
-              "archictecture_used": ["x86_64", "x86_64", "x86_64", "x86_64"],
-              "cpu_speed": [100, 100, 100],
-              "memory_in_MB": [1024, 1024, 1024],
-              "function_execution_time": [100, 100, 100],
-              "function_energy_consumed": [10, 10, 10],
-              "container_execution_time": [50, 50, 50],
-              "container_energy_consumed": [10, 10, 10]
-            }
+            "memory": 512,
+            "timeout": 220000,
+            "goal": "energy",
+            "importance": "high",
+            "loadGenData": [
+              {
+                "achievedAverageRate": 20.09,
+                "averageDuration": 5.36,
+                "averageDurationContainer": 1,
+                "averageEnergy": 1,
+                "averageEnergyContainer": 1,
+                "averageInitTime": 0,
+                "averageStartLatency": 27.2,
+                "averageUserSideDelay": 32.56,
+                "averageWaitTime": 19.29,
+                "globalStartTime": 1689858679061,
+                "launchGeneratorDelay": 237,
+                "location": "default",
+                "memory": 256,
+                "sampleNumber": 55,
+                "setRate": 20.449897750511248,
+                "stdDevDuration": 5.92,
+                "stdDevInitTime": 0,
+                "stdDevStartLatency": 66.66,
+                "stdDevUserSideDelay": 66.56,
+                "stdDevWaitTime": 66.72,
+                "successPercentage": 100
+              },
+              {
+                "achievedAverageRate": 20,
+                "averageDuration": 5.3,
+                "averageDurationContainer": 1,
+                "averageEnergy": 1,
+                "averageEnergyContainer": 1,
+                "averageInitTime": 0,
+                "averageStartLatency": 29.2,
+                "averageUserSideDelay": 30.56,
+                "averageWaitTime": 15.29,
+                "globalStartTime": 1689858679061,
+                "launchGeneratorDelay": 239,
+                "location": "azure",
+                "memory": 256,
+                "sampleNumber": 55,
+                "setRate": 20.449897750511248,
+                "stdDevDuration": 5.93,
+                "stdDevInitTime": 0,
+                "stdDevStartLatency": 67.66,
+                "stdDevUserSideDelay": 65.56,
+                "stdDevWaitTime": 63.72,
+                "successPercentage": 100
+              }
+            ]
           }
         }
       ]

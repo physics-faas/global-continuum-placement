@@ -74,7 +74,24 @@ class TaskDag:
         next_tasks: List[TaskDag] = []
         for function in functions:
             annotations = function.get("annotations", {})
-            performance = annotations.get("performance_known", {})
+            print(annotations)
+
+            containerRequired = annotations.get("containerRequired", {})
+            loadGenData = annotations.get("loadGenData", {})
+            print(loadGenData)
+
+            durationAverages = []
+            energyAverages = []
+            containerDurationAverages = []
+            containerEnergyAverages = []
+            
+            for measure in loadGenData:
+                durationAverages.append([measure.get("averageDuration", 0)])
+                energyAverages.append([measure.get("averageEnergy", 0)])
+                containerDurationAverages.append([measure.get("averageDurationContainer", 0)])
+                containerEnergyAverages.append([measure.get("averageEnergyContainer", 0)])
+            print(durationAverages)
+
             next_tasks = [
                 TaskDag(
                     id=function["id"],
@@ -90,22 +107,12 @@ class TaskDag:
                         clusters=function.get("allocations", [])
                     ),
                     performance_known=PerformanceKnown(
-                        archictecture_used=performance.get("archictecture_used", None),
-                        cpu_speed=performance.get("cpu_speed", 0),
-                        memory_in_MB=performance.get("memory_in_MB", 0),
-                        function_execution_time=performance.get(
-                            "function_execution_time", 0
-                        ),
-                        function_energy_consumed=performance.get(
-                            "function_energy_consumed", 0
-                        ),
-                        container_execution_time=performance.get(
-                            "container_execution_time", 0
-                        ),
-                        container_energy_consumed=performance.get(
-                            "container_energy_consumed", 0
-                        ),
-                        container_required=performance.get("container_required", None),
+                        memory_in_MB=annotations.get("memory", 0),
+                        function_execution_time=durationAverages,
+                        function_energy_consumed=energyAverages,
+                        container_execution_time=containerDurationAverages,
+                        container_energy_consumed=containerEnergyAverages,
+                        container_required=containerRequired,
                     ),
                     cluster_type_placement_constraints=ClusterTypePlacementConstraint(
                         cluster_type=ClusterType[annotations["locality"].upper()]
@@ -126,6 +133,7 @@ class TaskDag:
 
 @dataclass
 class Flow:
+    print("Here Flow")
     id: str
     objectives: Dict[Objectives, Levels]
     functions_dag: TaskDag
@@ -180,6 +188,7 @@ class Flow:
 
 @dataclass
 class FunctionsMatrix:
+    print("Here FunctionsMatrix")
     id: str
     functions_execution_time: List[List[float]]
     containers_execution_time: List[List[float]]
@@ -205,20 +214,32 @@ class FunctionsMatrix:
 
         for function in list_of_functions:
             annotations = function.get("annotations", {})
-            performance = annotations.get("performance_known", {})
-            p.append(performance.get("function_execution_time", 0))
-            c.append(performance.get("function_energy_consumed", 0))
-            p_tilde.append(performance.get("container_execution_time", 0))
-            c_tilde.append(performance.get("container_energy_consumed", 0))
-            container_required = performance.get("container_required", None)
+            print(annotations)
+            
+            loadGenData = annotations.get("loadGenData", {})
+            print(loadGenData)
+            
+            for measure in loadGenData:
+                p.append([measure.get("averageDuration", 0)])
+                c.append([measure.get("averageEnergy", 0)])
+                p_tilde.append([measure.get("averageDurationContainer", 0)])
+                c_tilde.append([measure.get("averageEnergyContainer", 0)])
 
+            container_required = annotations.get("containerRequired", None)
             # Computing the list env: env i of task i
             if container_required not in container_image_ids:
                 new_container_id = len(container_image_ids)
                 container_image_ids[container_required] = new_container_id
             env.append(container_image_ids.get(container_required))
 
+        print(p)
+        print(c)
+        print(p_tilde)
+        print(c_tilde)
+        
+        """
         p = [[p[j][i] for j in range(len(p))] for i in range(len(p[0]))]
+        print(p)
         c = [[c[j][i] for j in range(len(c))] for i in range(len(c[0]))]
         p_tilde = [
             [p_tilde[j][i] for j in range(len(p_tilde))] for i in range(len(p_tilde[0]))
@@ -226,6 +247,7 @@ class FunctionsMatrix:
         c_tilde = [
             [c_tilde[j][i] for j in range(len(c_tilde))] for i in range(len(c_tilde[0]))
         ]
+        """
 
         N = list(range(len(list_of_functions)))
         K = list(range(len(set(env))))

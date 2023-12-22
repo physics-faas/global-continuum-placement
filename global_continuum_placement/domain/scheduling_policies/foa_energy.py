@@ -7,7 +7,7 @@ from lp_pulp import lp_energy
 
 
 def apply(matrix: FunctionsMatrix, platform: Platform) -> List[Placement]:
-
+    print("---------- Calling the scheduler !!!!!!")
     solver = 'CBC'
     verbosity = 0
     N = matrix.number_of_functions
@@ -20,7 +20,7 @@ def apply(matrix: FunctionsMatrix, platform: Platform) -> List[Placement]:
 
     # To build from the Platform
     H = list(range(len(platform.sites)))
-
+    
     # To retrieve the number of resources per cluster
     mc: List[int] = [cluster.total_resources.nb_cpu for cluster in platform.sites]
 
