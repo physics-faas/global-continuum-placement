@@ -74,11 +74,9 @@ class TaskDag:
         next_tasks: List[TaskDag] = []
         for function in functions:
             annotations = function.get("annotations", {})
-            print(annotations)
 
             containerRequired = annotations.get("containerRequired", {})
             loadGenData = annotations.get("loadGenData", {})
-            print(loadGenData)
 
             durationAverages = []
             energyAverages = []
@@ -90,7 +88,6 @@ class TaskDag:
                 energyAverages.append([measure.get("averageEnergy", 0)])
                 containerDurationAverages.append([measure.get("averageDurationContainer", 0)])
                 containerEnergyAverages.append([measure.get("averageEnergyContainer", 0)])
-            print(durationAverages)
 
             next_tasks = [
                 TaskDag(
@@ -133,7 +130,6 @@ class TaskDag:
 
 @dataclass
 class Flow:
-    print("Here Flow")
     id: str
     objectives: Dict[Objectives, Levels]
     functions_dag: TaskDag
@@ -188,7 +184,6 @@ class Flow:
 
 @dataclass
 class FunctionsMatrix:
-    print("Here FunctionsMatrix")
     id: str
     functions_execution_time: List[List[float]]
     containers_execution_time: List[List[float]]
@@ -231,28 +226,7 @@ class FunctionsMatrix:
                 new_container_id = len(container_image_ids)
                 container_image_ids[container_required] = new_container_id
             env.append(container_image_ids.get(container_required))
-
-        print(p)
-        print(c)
-        print(p_tilde)
-        print(c_tilde)
         
-        """
-        p = [[p[j][i] for j in range(len(p))] for i in range(len(p[0]))]
-        print(p)
-        c = [[c[j][i] for j in range(len(c))] for i in range(len(c[0]))]
-        p_tilde = [
-            [p_tilde[j][i] for j in range(len(p_tilde))] for i in range(len(p_tilde[0]))
-        ]
-        c_tilde = [
-            [c_tilde[j][i] for j in range(len(c_tilde))] for i in range(len(c_tilde[0]))
-        ]
-        """
-
-        #print("!!!Computing N, k", len(list_of_functions), len(set(env)))
-        #N = list(range(len(list_of_functions)))
-        #K = list(range(len(set(env))))
-
         N = len(list_of_functions)
         K = len(set(env))
 

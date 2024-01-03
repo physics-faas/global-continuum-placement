@@ -19,14 +19,6 @@ def lp_energy(N, H, K, c, p, c_tilde, p_tilde, mc, env, Tmax, solver, verbose):
     H = list(range(H))
     K = list(range(K))
 
-    print(" !!! Calling LP: ", Tmax, H, N, K)
-    print(c)
-    print(p)
-    print(c_tilde)
-    print(p_tilde)
-    print(env)
-    print(mc)
-
     solver = "CBC"
     verbose = 0
     solverTimeLimit = 60
@@ -84,8 +76,7 @@ def lp_energy(N, H, K, c, p, c_tilde, p_tilde, mc, env, Tmax, solver, verbose):
 
     solution_x = np.array(solution_x).transpose()
     solution_y = np.array(solution_y).transpose()
-    print("status here", status)
-    print("solution_x ", solution_x)
+
     return status, solution_x, solution_y
 
 def get_solution_cost(x, e, H, N, K, c, p, c_tilde, p_tilde):
@@ -93,15 +84,9 @@ def get_solution_cost(x, e, H, N, K, c, p, c_tilde, p_tilde):
     return int(np.sum(x * c) + np.sum(e * c_tilde))
 
 def get_solution_makespan(x, e, H, N, K, c, p, c_tilde, p_tilde):
-    #H = len(H)
     x_time = x * p
     e_time = e * p_tilde
-    print(H)
-    print(x_time)
-    print(e_time)
-    #print([sum(x_time[h]) + sum(e_time[h]) for h in range(H)])
-    print([np.sum(x_time[h]) + np.sum(e_time[h]) for h in range(H)])
-    #return int(max([np.sum(x_time) + np.sum(e_time)]))
+
     return int(max([np.sum(x_time[h]) + np.sum(e_time[h]) for h in range(H)]))
 
 def compute_max_cmax_and_tmax(c, p, p_tilde, c_tilde, K, H, N):
@@ -114,7 +99,6 @@ def compute_max_cmax_and_tmax(c, p, p_tilde, c_tilde, K, H, N):
     """
     cmax = 0
     tmax = 0
-    #H = len(H)
     for i in range(0, H):
         curr_cost = sum(c_tilde[i]) + sum(c[i])
         if curr_cost > cmax:
@@ -125,15 +109,6 @@ def compute_max_cmax_and_tmax(c, p, p_tilde, c_tilde, K, H, N):
     return cmax, tmax
 
 def to_integer_solution(x, M, N, K, c, p, d, b, env):
-    print(" @@##@!!! Calling Integral Solution: ", M, N, K)
-    print(x, len(x))
-    print(c)
-    print(p)
-    print(d)
-    print(b)
-    print(env)
-    #try:
-        
     #if the solution given is already integer, assign the environments correctly and return
     if np.all([[not (j%1) for j in i]for i in x]):
         e = np.zeros((M, K))
@@ -217,13 +192,7 @@ def to_integer_solution(x, M, N, K, c, p, d, b, env):
         except:
             pass
     
-    print(True, out, out_e)
     return True, out, out_e
-    """
-    except:
-        #return 1, 1
-        return False, 0, 0
-    """
 
 def minimize_cmax_and_tmax(Cmax, Tmax, H, N, K, c, p, c_tilde, p_tilde, env, mc):#, factor):
     # Initialization
@@ -248,7 +217,6 @@ def minimize_cmax_and_tmax(Cmax, Tmax, H, N, K, c, p, c_tilde, p_tilde, env, mc)
 
     list_of_cmax_used.append(Cmax)
     list_of_tmax_used.append(Tmax)
-
     
     status_valid, x_valid, e_valid = status_tmax, x_new, e_new
     cost_lp = get_solution_cost(x_new, e_new, H, N, K, c, p, c_tilde, p_tilde)
@@ -261,7 +229,6 @@ def minimize_cmax_and_tmax(Cmax, Tmax, H, N, K, c, p, c_tilde, p_tilde, env, mc)
     new_makespan = get_solution_makespan(x_valid2, e_valid2, H, N, K, c, p, c_tilde, p_tilde)
     list_of_valid_cmax.append(new_cost)
     list_of_valid_tmax.append(new_makespan)    
-    print("Integral solution: ", x_valid2, e_valid2)
 
     # Save valid solutions
     list_of_solution.append([Cmax, Tmax, x_valid, e_valid])
@@ -272,12 +239,10 @@ def minimize_cmax_and_tmax(Cmax, Tmax, H, N, K, c, p, c_tilde, p_tilde, env, mc)
     iterations = 0
 
     while (low_tmax <= high_tmax and iterations < 5):
-        print("LP Iteration: ", iterations)
         mid_tmax = int((high_tmax + low_tmax) / 2)
         status_tmax, x_new, e_new = lp_energy(N, H, K, c, p, c_tilde, p_tilde, mc, env, Tmax, solver, verbosity)
 
         if status_tmax == 1: # ==== To use the float solution
-            print("Achou solução, entrou")
             list_of_cmax_used.append(Cmax)
             list_of_tmax_used.append(mid_tmax)
 
@@ -292,7 +257,6 @@ def minimize_cmax_and_tmax(Cmax, Tmax, H, N, K, c, p, c_tilde, p_tilde, env, mc)
             if(status_integral_solution==True):
                 x_valid2 = x_integral_solution
                 e_valid2 = e_integral_solution
-                print("After integral solution: ", x_valid2)
                 status_valid  = status_tmax
 
                 new_cost = get_solution_cost(x_valid2, e_valid, H, N, K, c, p, c_tilde, p_tilde)

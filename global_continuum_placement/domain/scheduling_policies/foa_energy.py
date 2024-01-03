@@ -19,7 +19,6 @@ def apply(matrix: FunctionsMatrix, platform: Platform) -> List[Placement]:
     env = matrix.containers_per_function
 
     # To build from the Platform
-    #H = list(range(len(platform.sites)))
     H = len(platform.sites)
 
     # To retrieve the number of resources per cluster
@@ -27,14 +26,12 @@ def apply(matrix: FunctionsMatrix, platform: Platform) -> List[Placement]:
 
     # Compute the Tmax allowed: the total time on the worst machine.
     Tmax: float = 0
-    for i in range(H):
+    for i in range(0, H):
         curr_time = sum(p[i]) + sum(c[i])
         if curr_time > Tmax:
             Tmax = curr_time
 
-    #allocation_x, allocation_y = lp_energy(N, H, K, c, p, c_tilde, p_tilde, mc, env, Tmax, solver, verbosity)
     Cmax, Tmax = compute_max_cmax_and_tmax(p, c, p_tilde, c_tilde, K, H, N)
-    #status_integral_solution, allocation_x, allocation_y = minimize_cmax_and_tmax(Cmax, Tmax, H, N, K, c, p, c_tilde, p_tilde, env, mc)#, factor):
     status_new, allocation_x, allocation_y = minimize_cmax_and_tmax(Cmax, Tmax, H, N, K, c, p, c_tilde, p_tilde, env, mc)
     solution_list: List[Placement] = []
 
