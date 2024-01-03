@@ -29,7 +29,7 @@ def apply(matrix: FunctionsMatrix, platform: Platform) -> List[Placement]:
         if curr_time > Tmax:
             Tmax = curr_time
 
-    Cmax, Tmax = compute_max_cmax_and_tmax(p, c, p_tilde, c_tilde, K, H, N)
+    Cmax, Tmax = compute_max_cmax_and_tmax(p, c, p_tilde, c_tilde, H, N, K)
     status_new, allocation_x, allocation_y = minimize_cmax_and_tmax(Cmax, Tmax, H, N, K, c, p, c_tilde, p_tilde, env, mc)
     solution_list: List[Placement] = []
 

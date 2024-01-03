@@ -6,7 +6,7 @@ import numpy as np
 from pulp import GUROBI_CMD, PULP_CBC_CMD, LpMinimize, LpProblem, LpVariable, lpSum
 
 
-def lp_energy(N, H, K, c, p, c_tilde, p_tilde, mc, env, Tmax, solver, verbose):
+def lp_energy(H, N, K, c, p, c_tilde, p_tilde, mc, env, Tmax, solver, verbose):
     N = list(range(N))
     H = list(range(H))
     K = list(range(K))
@@ -100,7 +100,7 @@ def get_solution_makespan(x, e, H, N, K, c, p, c_tilde, p_tilde):
     return int(max([np.sum(x_time[h]) + np.sum(e_time[h]) for h in range(H)]))
 
 
-def compute_max_cmax_and_tmax(c, p, p_tilde, c_tilde, K, H, N):
+def compute_max_cmax_and_tmax(p, c, p_tilde, c_tilde, H, N, K):
     """
     Compute the max Cmax and Tmax allowed. Requirement: c and p, and b and d should have the same dimension, then:
     if we place all jobs and environments on one machine,
@@ -120,11 +120,11 @@ def compute_max_cmax_and_tmax(c, p, p_tilde, c_tilde, K, H, N):
     return cmax, tmax
 
 
-def to_integer_solution(x, M, N, K, c, p, d, b, env):
+def to_integer_solution(x, H, N, K, c, p, c_tilde, p_tilde, env):
     # if the solution given is already integer, assign the environments correctly and return
     if np.all([[not (j % 1) for j in i] for i in x]):
-        e = np.zeros((M, K))
-        for m in range(M):
+        e = np.zeros((H, K))
+        for m in range(H):
             for t in range(N):
                 if x[m][t] == 1 and e[m][env[t]] == 0:
                     e[m][env[t]] = 1
@@ -135,7 +135,7 @@ def to_integer_solution(x, M, N, K, c, p, d, b, env):
     k = []
     k_inv = []
     count = 0
-    for i in range(M):
+    for i in range(H):
         k.append(int(np.ceil(np.sum(x[i]))))
         for j in range(k[i]):
             k_inv.append(count)
@@ -153,12 +153,12 @@ def to_integer_solution(x, M, N, K, c, p, d, b, env):
     B.add_nodes_from(range(subM, subM + N), bipartite=1)
 
     # pour chaque machine
-    for i in range(M):
+    for i in range(H):
         # subi the index of the 1st sub-machine of machine i
         subi = int(sum(k[:i]))
         # we order the tasks for machine i by decreasing processing times
         ordered_pi = sorted(
-            [[(p[i][j] + b[i][env[j]]) * np.ceil(x[i][j]), j] for j in range(N)],
+            [[(p[i][j] + p_tilde[i][env[j]]) * np.ceil(x[i][j]), j] for j in range(N)],
             reverse=True,
             key=lambda x: x[0],
         )
@@ -200,8 +200,8 @@ def to_integer_solution(x, M, N, K, c, p, d, b, env):
     match = nx.algorithms.bipartite.matching.minimum_weight_full_matching(B, top_nodes)
 
     # formating the solution
-    out = np.zeros((M, N))
-    out_e = np.zeros((M, K))
+    out = np.zeros((H, N))
+    out_e = np.zeros((H, K))
 
     for i, m in enumerate(k_inv):
         try: # Keep this try, except
@@ -237,7 +237,7 @@ def minimize_cmax_and_tmax(
     # Compute intial solution with the initial Cmax and Tmax
 
     status_tmax, x_new, e_new = lp_energy(
-        N, H, K, c, p, c_tilde, p_tilde, mc, env, Tmax, solver, verbosity
+        H, N, K, c, p, c_tilde, p_tilde, mc, env, Tmax, solver, verbosity
     )
 
     list_of_cmax_used.append(Cmax)
@@ -270,7 +270,7 @@ def minimize_cmax_and_tmax(
     while low_tmax <= high_tmax and iterations < 5:
         mid_tmax = int((high_tmax + low_tmax) / 2)
         status_tmax, x_new, e_new = lp_energy(
-            N, H, K, c, p, c_tilde, p_tilde, mc, env, Tmax, solver, verbosity
+            H, N, K, c, p, c_tilde, p_tilde, mc, env, Tmax, solver, verbosity
         )
 
         if status_tmax == 1:  # ==== To use the float solution
