@@ -32,10 +32,10 @@ class PerformanceKnown:
     archictecture_used: List[str] = field(default_factory=list)
     cpu_speed: List[float] = field(default_factory=list)
     memory_in_MB: List[float] = field(default_factory=list)
-    function_execution_time: List[float] = field(default_factory=list)
-    function_energy_consumed: List[float] = field(default_factory=list)
-    container_execution_time: List[float] = field(default_factory=list)
-    container_energy_consumed: List[float] = field(default_factory=list)
+    function_execution_time: List[List[float]] = field(default_factory=list)
+    function_energy_consumed: List[List[float]] = field(default_factory=list)
+    container_execution_time: List[List[float]] = field(default_factory=list)
+    container_energy_consumed: List[List[float]] = field(default_factory=list)
     container_required: str = field(default="None")
 
 
@@ -78,16 +78,20 @@ class TaskDag:
             containerRequired = annotations.get("containerRequired", {})
             loadGenData = annotations.get("loadGenData", {})
 
-            durationAverages = []
-            energyAverages = []
-            containerDurationAverages = []
-            containerEnergyAverages = []
-            
+            durationAverages: List[List[float]] = []
+            energyAverages: List[List[float]] = []
+            containerDurationAverages: List[List[float]] = []
+            containerEnergyAverages: List[List[float]] = []
+
             for measure in loadGenData:
                 durationAverages.append([measure.get("averageDuration", 0)])
                 energyAverages.append([measure.get("averageEnergy", 0)])
-                containerDurationAverages.append([measure.get("averageDurationContainer", 0)])
-                containerEnergyAverages.append([measure.get("averageEnergyContainer", 0)])
+                containerDurationAverages.append(
+                    [measure.get("averageDurationContainer", 0)]
+                )
+                containerEnergyAverages.append(
+                    [measure.get("averageEnergyContainer", 0)]
+                )
 
             next_tasks = [
                 TaskDag(
@@ -190,8 +194,8 @@ class FunctionsMatrix:
     functions_energy_consumption: List[List[float]]
     containers_energy_consumption: List[List[float]]
     containers_per_function: List[float]
-    number_of_functions: List[int]
-    number_of_containers: List[int]
+    number_of_functions: int
+    number_of_containers: int
 
     @classmethod
     # def create_matrix_from_functions_sequence(cls, app_dict: Dict) -> "FunctionsMatrix":
@@ -210,10 +214,10 @@ class FunctionsMatrix:
         for function in list_of_functions:
             annotations = function.get("annotations", {})
             print(annotations)
-            
+
             loadGenData = annotations.get("loadGenData", {})
             print(loadGenData)
-            
+
             for measure in loadGenData:
                 p.append([measure.get("averageDuration", 0)])
                 c.append([measure.get("averageEnergy", 0)])
@@ -226,7 +230,7 @@ class FunctionsMatrix:
                 new_container_id = len(container_image_ids)
                 container_image_ids[container_required] = new_container_id
             env.append(container_image_ids.get(container_required))
-        
+
         N = len(list_of_functions)
         K = len(set(env))
 

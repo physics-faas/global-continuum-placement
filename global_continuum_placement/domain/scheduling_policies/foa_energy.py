@@ -1,15 +1,13 @@
 from typing import List
 
+from foa_energy_lib import compute_max_cmax_and_tmax, minimize_cmax_and_tmax
 from global_continuum_placement.domain.placement.placement import Placement
 from global_continuum_placement.domain.platform.platform import Platform
 from global_continuum_placement.domain.workload.workload import FunctionsMatrix
-from foa_energy_lib import minimize_cmax_and_tmax, compute_max_cmax_and_tmax
 
 
 def apply(matrix: FunctionsMatrix, platform: Platform) -> List[Placement]:
     print("---------- Calling the scheduler !!!!!!")
-    solver = 'CBC'
-    verbosity = 0
     N = matrix.number_of_functions
     K = matrix.number_of_containers
     p = matrix.functions_execution_time
