@@ -3,7 +3,7 @@ from typing import List
 from global_continuum_placement.domain.placement.placement import Placement
 from global_continuum_placement.domain.platform.platform import Platform
 from global_continuum_placement.domain.workload.workload import FunctionsMatrix
-from lp_pulp import minimize_cmax_and_tmax, compute_max_cmax_and_tmax
+from foa_energy_lib import minimize_cmax_and_tmax, compute_max_cmax_and_tmax
 
 
 def apply(matrix: FunctionsMatrix, platform: Platform) -> List[Placement]:
