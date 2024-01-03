@@ -249,8 +249,12 @@ class FunctionsMatrix:
         ]
         """
 
-        N = list(range(len(list_of_functions)))
-        K = list(range(len(set(env))))
+        #print("!!!Computing N, k", len(list_of_functions), len(set(env)))
+        #N = list(range(len(list_of_functions)))
+        #K = list(range(len(set(env))))
+
+        N = len(list_of_functions)
+        K = len(set(env))
 
         return FunctionsMatrix(
             id=str(uuid.uuid4()),

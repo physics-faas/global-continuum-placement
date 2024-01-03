@@ -1,4 +1,5 @@
-from numpy import array
+#from numpy import * #array, sum
+import numpy as np
 from pulp import (
     GUROBI_CMD,
     PULP_CBC_CMD,
@@ -14,79 +15,96 @@ from pulp import (
 import networkx as nx
 
 def lp_energy(N, H, K, c, p, c_tilde, p_tilde, mc, env, Tmax, solver, verbose):
+    N = list(range(N))
+    H = list(range(H))
+    K = list(range(K))
 
-    x = LpVariable.dicts("x_", (H, N), 0, cat="CONTINUOUS")  # dimension nxh
-    y = LpVariable.dicts("y_", (H, K), 0, cat="CONTINUOUS")  # e in the LP, dimension kxh
+    print(" !!! Calling LP: ", Tmax, H, N, K)
+    print(c)
+    print(p)
+    print(c_tilde)
+    print(p_tilde)
+    print(env)
+    print(mc)
 
+    solver = "CBC"
+    verbose = 0
+    solverTimeLimit = 60
+
+    #x = LpVariable.dicts("x_", (H, N),  0, cat='Binary') # dimension nxh
+    #y = LpVariable.dicts("y_", (H, K),  0, cat='Binary') # e in the LP, dimension kxh
+
+    x = LpVariable.dicts("x_", (H, N),  0, cat='CONTINUOUS') # dimension nxh
+    y = LpVariable.dicts("y_", (H, K),  0, cat='CONTINUOUS') # e in the LP, dimension kxh    
+    
     prob = LpProblem("myProblem", LpMinimize)
 
-    # 3
+    #3
     for i in N:
         prob.addConstraint(lpSum([x[h][i] for h in H]) >= 1)
 
-    # 4
+    #4
     for h in H:
-        prob.addConstraint(
-            (
-                lpSum([p[h][i] * x[h][i] for i in N])
-                + lpSum([p_tilde[h][k] * y[h][k] for k in K])
-            )
-            <= mc[h] * Tmax
-        )
-
-    # 5
+        prob.addConstraint((lpSum([p[h][i]*x[h][i] for i in N]) + lpSum([p_tilde[h][k]*y[h][k] for k in K])) <= mc[h] * Tmax)
+        
+    #5 
     for h in H:
         for k in K:
             task_per_env = [i_env for i_env in N if env[i_env] == k]
-            if len(task_per_env) != 0:
-                prob.addConstraint(
-                    (
-                        lpSum([p[h][i] * x[h][i] for i in task_per_env])
-                        - y[h][k] * (Tmax - p_tilde[h][k])
-                    )
-                    <= 0
-                )
+            if(len(task_per_env) != 0):
+                prob.addConstraint((lpSum([p[h][i]*x[h][i] for i in task_per_env]) - y[h][k] * (Tmax - p_tilde[h][k])) <= 0)
 
-    prob += lpSum([c[h][i] * x[h][i] for i in N] for h in H) + lpSum(
-        [c_tilde[h][k] * y[h][k] for k in K] for h in H
-    )
+    prob += lpSum([c[h][i]*x[h][i] for i in N] for h in H) + lpSum([c_tilde[h][k]*y[h][k] for k in K] for h in H)
 
     solution_x = [[0 for col in H] for row in N]
     solution_y = [[0 for col in H] for row in K]
 
-    if solver == "CBC":
-        if verbose == 1:
-            status = prob.solve(PULP_CBC_CMD())
+    #solver.tmpDir = 'PUT_SOME_PATH_HERE'
+    #prob.solve(use_mps=False)
+    if (solver == "CBC"):
+        if (verbose == 1):
+            status = prob.solve(PULP_CBC_CMD(timeLimit=solverTimeLimit))
         else:
-            status = prob.solve(PULP_CBC_CMD(msg=0))
+            status = prob.solve(PULP_CBC_CMD(msg=0, timeLimit=solverTimeLimit))
     else:
-        if verbose == 1:
+        if (verbose == 1):
             status = prob.solve(GUROBI_CMD())
         else:
             status = prob.solve(GUROBI_CMD(msg=0))
-
-    print(LpStatus[status])
-    print("Value ", value(prob.objective))
-    print("Status: ", status)
-    # print(prob.constraints())
 
     for v in prob.variables():
         solution_var = v.name.split("_")[0]
         index_i = int(v.name.split("_")[-1])
         index_j = int(v.name.split("_")[-2])
 
-        if solution_var == "x":
+        if (solution_var == "x"):
             solution_x[index_i][index_j] = v.varValue
         else:
             solution_y[index_i][index_j] = v.varValue
 
-    solution_x = array(solution_x)
-    solution_y = array(solution_y)
+    solution_x = np.array(solution_x).transpose()
+    solution_y = np.array(solution_y).transpose()
+    print("status here", status)
+    print("solution_x ", solution_x)
+    return status, solution_x, solution_y
 
-    return solution_x, solution_y
+def get_solution_cost(x, e, H, N, K, c, p, c_tilde, p_tilde):
+    
+    return int(np.sum(x * c) + np.sum(e * c_tilde))
 
+def get_solution_makespan(x, e, H, N, K, c, p, c_tilde, p_tilde):
+    #H = len(H)
+    x_time = x * p
+    e_time = e * p_tilde
+    print(H)
+    print(x_time)
+    print(e_time)
+    #print([sum(x_time[h]) + sum(e_time[h]) for h in range(H)])
+    print([np.sum(x_time[h]) + np.sum(e_time[h]) for h in range(H)])
+    #return int(max([np.sum(x_time) + np.sum(e_time)]))
+    return int(max([np.sum(x_time[h]) + np.sum(e_time[h]) for h in range(H)]))
 
-def compute_max_cmax_and_tmax(c, p, b, d, K, M, N):
+def compute_max_cmax_and_tmax(c, p, p_tilde, c_tilde, K, H, N):
     """
     Compute the max Cmax and Tmax allowed. Requirement: c and p, and b and d should have the same dimension, then:
     if we place all jobs and environments on one machine, 
@@ -96,52 +114,24 @@ def compute_max_cmax_and_tmax(c, p, b, d, K, M, N):
     """
     cmax = 0
     tmax = 0
-    
-    for i in range(0, M):
-        curr_cost = sum(d[i]) + sum(c[i])
+    #H = len(H)
+    for i in range(0, H):
+        curr_cost = sum(c_tilde[i]) + sum(c[i])
         if curr_cost > cmax:
             cmax = curr_cost
-        curr_time = sum(b[i]) + sum(p[i])
+        curr_time = sum(p_tilde[i]) + sum(p[i])
         if curr_time > tmax:
             tmax = curr_time
     return cmax, tmax
 
-def get_solution_cost(x, e, M, N, K, c, p, d, b):
-    
-    return int(np.sum(x * c) + np.sum(e * d))
-
-def get_solution_makespan(x, e, M, N, K, c, p, d, b):
-    x_time = x * p
-    e_time = e * b
-
-    return int(max([np.sum(x_time[m]) + np.sum(e_time[m]) for m in range(M)]))
-
-def find_Tmin(Cmax, Tmax, M, N, K, c, p, d, b, env):#, factor):
-
-    low_tmax = 0
-    high_tmax = Tmax
-    mid_tmax = 0
-
-    iterations = 0
-
-    while (low_tmax + 1 < high_tmax and iterations < 2):
-        mid_tmax = round((high_tmax + low_tmax) / 2, 2)
-        status_tmax, x_new, e_new = LP(Cmax, mid_tmax, M, N, K, c, p, d, b, env)
-        
-        # If x is greater, ignore left half
-        if status_tmax == 0:
-            high_tmax = mid_tmax
-
-        # No solution, revert to previous solution
-        else:
-            low_tmax = mid_tmax
-        
-        iterations += 1
-    
-    return high_tmax
-
 def to_integer_solution(x, M, N, K, c, p, d, b, env):
-
+    print(" @@##@!!! Calling Integral Solution: ", M, N, K)
+    print(x, len(x))
+    print(c)
+    print(p)
+    print(d)
+    print(b)
+    print(env)
     #try:
         
     #if the solution given is already integer, assign the environments correctly and return
@@ -227,6 +217,7 @@ def to_integer_solution(x, M, N, K, c, p, d, b, env):
         except:
             pass
     
+    print(True, out, out_e)
     return True, out, out_e
     """
     except:
@@ -234,8 +225,10 @@ def to_integer_solution(x, M, N, K, c, p, d, b, env):
         return False, 0, 0
     """
 
-def minimize_cmax_and_tmax(Cmax, Tmax, M, N, K, c, p, d, b, env, mc):#, factor):
+def minimize_cmax_and_tmax(Cmax, Tmax, H, N, K, c, p, c_tilde, p_tilde, env, mc):#, factor):
     # Initialization
+    solver = 'CBC'
+    verbosity = 0
     new_cost = Cmax
     new_makespan = Tmax
     
@@ -251,20 +244,21 @@ def minimize_cmax_and_tmax(Cmax, Tmax, M, N, K, c, p, d, b, env, mc):#, factor):
 
     # Compute intial solution with the initial Cmax and Tmax
     
-    status_tmax, x_new, e_new = LP(Cmax, Tmax, M, N, K, c, p, d, b, env, mc)
+    status_tmax, x_new, e_new = lp_energy(N, H, K, c, p, c_tilde, p_tilde, mc, env, Tmax, solver, verbosity)
+
     list_of_cmax_used.append(Cmax)
     list_of_tmax_used.append(Tmax)
 
     
     status_valid, x_valid, e_valid = status_tmax, x_new, e_new
-    cost_lp = get_solution_cost(x_new, e_new, M, N, K, c, p, d, b)
-    makespan_lp = get_solution_makespan(x_new, e_new, M, N, K, c, p, d, b)
+    cost_lp = get_solution_cost(x_new, e_new, H, N, K, c, p, c_tilde, p_tilde)
+    makespan_lp = get_solution_makespan(x_new, e_new, H, N, K, c, p, c_tilde, p_tilde)
     list_of_cmax_lp.append(cost_lp)
     list_of_tmax_lp.append(makespan_lp)
     
-    status_integral_solution, x_valid2, e_valid2 = to_integer_solution(x_new, M, N, K, c, p, d, b, env)
-    new_cost = get_solution_cost(x_valid2, e_valid2, M, N, K, c, p, d, b)
-    new_makespan = get_solution_makespan(x_valid2, e_valid2, M, N, K, c, p, d, b)
+    status_integral_solution, x_valid2, e_valid2 = to_integer_solution(x_new, H, N, K, c, p, c_tilde, p_tilde, env)
+    new_cost = get_solution_cost(x_valid2, e_valid2, H, N, K, c, p, c_tilde, p_tilde)
+    new_makespan = get_solution_makespan(x_valid2, e_valid2, H, N, K, c, p, c_tilde, p_tilde)
     list_of_valid_cmax.append(new_cost)
     list_of_valid_tmax.append(new_makespan)    
     print("Integral solution: ", x_valid2, e_valid2)
@@ -280,7 +274,7 @@ def minimize_cmax_and_tmax(Cmax, Tmax, M, N, K, c, p, d, b, env, mc):#, factor):
     while (low_tmax <= high_tmax and iterations < 5):
         print("LP Iteration: ", iterations)
         mid_tmax = int((high_tmax + low_tmax) / 2)
-        status_tmax, x_new, e_new = LP(Cmax, mid_tmax, M, N, K, c, p, d, b, env, mc)
+        status_tmax, x_new, e_new = lp_energy(N, H, K, c, p, c_tilde, p_tilde, mc, env, Tmax, solver, verbosity)
 
         if status_tmax == 1: # ==== To use the float solution
             print("Achou solução, entrou")
@@ -289,26 +283,25 @@ def minimize_cmax_and_tmax(Cmax, Tmax, M, N, K, c, p, d, b, env, mc):#, factor):
 
             high_tmax = mid_tmax
             
-            cost_lp = get_solution_cost(x_new, e_new, M, N, K, c, p, d, b)
-            makespan_lp = get_solution_makespan(x_new, e_new, M, N, K, c, p, d, b)
+            cost_lp = get_solution_cost(x_new, e_new, H, N, K, c, p, c_tilde, p_tilde)
+            makespan_lp = get_solution_makespan(x_new, e_new, H, N, K, c, p, c_tilde, p_tilde)
             list_of_cmax_lp.append(cost_lp)
             list_of_tmax_lp.append(makespan_lp)
                         
-            status_integral_solution, x_integral_solution, e_integral_solution = to_integer_solution(x_new, M, N, K, c, p, d, b, env)
+            status_integral_solution, x_integral_solution, e_integral_solution = to_integer_solution(x_new, H, N, K, c, p, c_tilde, p_tilde, env)
             if(status_integral_solution==True):
                 x_valid2 = x_integral_solution
                 e_valid2 = e_integral_solution
                 print("After integral solution: ", x_valid2)
                 status_valid  = status_tmax
 
-                new_cost = get_solution_cost(x_valid2, e_valid, M, N, K, c, p, d, b)
-                new_makespan = get_solution_makespan(x_valid2, e_valid, M, N, K, c, p, d, b)
+                new_cost = get_solution_cost(x_valid2, e_valid, H, N, K, c, p, c_tilde, p_tilde)
+                new_makespan = get_solution_makespan(x_valid2, e_valid, H, N, K, c, p, c_tilde, p_tilde)
 
                 list_of_solution.append([new_cost, new_makespan, x_valid2, e_valid2])
                 list_of_valid_cmax.append(new_cost)
                 list_of_valid_tmax.append(new_makespan)
             else:
-                print("Não converteu")
                 list_of_valid_cmax.append(None)
                 list_of_valid_tmax.append(None)          
         # No solution, revert to previous solution
@@ -316,12 +309,4 @@ def minimize_cmax_and_tmax(Cmax, Tmax, M, N, K, c, p, d, b, env, mc):#, factor):
             low_tmax = mid_tmax
 
         iterations += 1
-        print(list_of_valid_tmax)
-        print("x_valid: ", x_new)
-    return status_valid, x_valid2, e_valid2, new_cost, new_makespan, list_of_valid_cmax, list_of_valid_tmax, list_of_cmax_used, list_of_tmax_used, list_of_cmax_lp, list_of_tmax_lp
-
-def get_cost(x, e, c, d):
-    tcost = np.sum(x*c)
-    ecost = np.sum(e*d)
-    
-    return tcost + ecost
+    return status_valid, x_valid2, e_valid2 #new_cost, new_makespan, list_of_valid_cmax, list_of_valid_tmax, list_of_cmax_used, list_of_tmax_used, list_of_cmax_lp, list_of_tmax_lp

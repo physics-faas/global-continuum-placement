@@ -3,7 +3,7 @@ from typing import List
 from global_continuum_placement.domain.placement.placement import Placement
 from global_continuum_placement.domain.platform.platform import Platform
 from global_continuum_placement.domain.workload.workload import FunctionsMatrix
-from lp_pulp import lp_energy
+from lp_pulp import minimize_cmax_and_tmax, compute_max_cmax_and_tmax
 
 
 def apply(matrix: FunctionsMatrix, platform: Platform) -> List[Placement]:
@@ -19,19 +19,23 @@ def apply(matrix: FunctionsMatrix, platform: Platform) -> List[Placement]:
     env = matrix.containers_per_function
 
     # To build from the Platform
-    H = list(range(len(platform.sites)))
-    
+    #H = list(range(len(platform.sites)))
+    H = len(platform.sites)
+
     # To retrieve the number of resources per cluster
     mc: List[int] = [cluster.total_resources.nb_cpu for cluster in platform.sites]
 
     # Compute the Tmax allowed: the total time on the worst machine.
     Tmax: float = 0
-    for i in H:
+    for i in range(H):
         curr_time = sum(p[i]) + sum(c[i])
         if curr_time > Tmax:
             Tmax = curr_time
 
-    allocation_x, allocation_y = lp_energy(N, H, K, c, p, c_tilde, p_tilde, mc, env, Tmax, solver, verbosity)
+    #allocation_x, allocation_y = lp_energy(N, H, K, c, p, c_tilde, p_tilde, mc, env, Tmax, solver, verbosity)
+    Cmax, Tmax = compute_max_cmax_and_tmax(p, c, p_tilde, c_tilde, K, H, N)
+    #status_integral_solution, allocation_x, allocation_y = minimize_cmax_and_tmax(Cmax, Tmax, H, N, K, c, p, c_tilde, p_tilde, env, mc)#, factor):
+    status_new, allocation_x, allocation_y = minimize_cmax_and_tmax(Cmax, Tmax, H, N, K, c, p, c_tilde, p_tilde, env, mc)
     solution_list: List[Placement] = []
 
     # Create the placement to be returned using the cluster_id and function_id
