@@ -148,15 +148,27 @@ class Flow:
     def create_from_dict(cls, app_dict: Dict) -> "Flow":
         annotations = app_dict.get("annotations", {})
         performance = annotations.get("performance_known", {})
+        raw_objectives = app_dict.get("objectives")
+        objectives = {}
+        if not raw_objectives:
+            raw_objective = annotations.get("goal")
+            if raw_objective is not None:
+                objectives = {Objectives[raw_objective.upper()]: Levels.HIGH}
+        else:
+            objectives = {
+                Objectives[obj.upper()]: Levels[lvl.upper()]
+                for obj, lvl in raw_objectives.items()
+            }
+
+        functions = app_dict.get("functions")
+        if app_dict.get("native", True) and functions:
+            functions_dag = TaskDag.create_dag_from_functions_sequence(functions)
+        else:
+            functions_dag = None
         return Flow(
             id=app_dict.get("flowID", str(uuid.uuid4())),
-            objectives={
-                Objectives[obj.upper()]: Levels[lvl.upper()]
-                for obj, lvl in app_dict.get("objectives", {}).items()
-            },
-            functions_dag=TaskDag.create_dag_from_functions_sequence(
-                app_dict["functions"]
-            ),
+            objectives=objectives,
+            functions_dag=functions_dag,
             executor_mode=app_dict.get("executorMode", "NativeSequence"),
             cluster_list_placement_constraints=ClusterListPlacementConstraint(
                 clusters=app_dict.get("allocations", [])

@@ -110,7 +110,7 @@ def test_scheduler_architecture_invalid_constraint():
                 "resources": {"nb_cpu": 1},
                 "annotations": {"architecture": "x86_64"},
             },
-            [Placement("site1", "taskX86")],
+            [Placement("site1", "taskX86", fallback_cluster="site3")],
             id="x86_64 constraint",
         ),
     ],
@@ -153,7 +153,7 @@ async def test_scheduler_architecture_constraints(
                 "functions": [{"id": "task1", "annotations": {"cores": 1}}],
                 "objectives": {"Energy": "High"},
             },
-            [Placement("site2", "task1")],
+            [Placement("site2", "task1", fallback_cluster="site1")],
             id="mono objective",
         ),
         pytest.param(
@@ -181,7 +181,7 @@ async def test_scheduler_architecture_constraints(
                 "functions": [{"id": "task1", "annotations": {"cores": 1}}],
                 "objectives": {"Energy": "Medium"},
             },
-            [Placement("site1", "task1")],
+            [Placement("site1", "task1", fallback_cluster="site2")],
             id="mono objective equals",
         ),
         pytest.param(
@@ -209,7 +209,7 @@ async def test_scheduler_architecture_constraints(
                 "functions": [{"id": "task1", "annotations": {"cores": 1}}],
                 "objectives": {"Energy": "High", "Availability": "High"},
             },
-            [Placement("site2", "task1")],
+            [Placement("site2", "task1", fallback_cluster="site1")],
             id="two objectives same level",
         ),
         pytest.param(
@@ -237,7 +237,7 @@ async def test_scheduler_architecture_constraints(
                 "functions": [{"id": "task1", "annotations": {"cores": 1}}],
                 "objectives": {"Energy": "High", "Availability": "Low"},
             },
-            [Placement("site2", "task1")],
+            [Placement("site2", "task1", fallback_cluster="site1")],
             id="two objectives different level",
         ),
         pytest.param(
@@ -278,7 +278,7 @@ async def test_scheduler_architecture_constraints(
                     "Performance": "Medium",
                 },
             },
-            [Placement("site3", "task1")],
+            [Placement("site3", "task1", fallback_cluster="site2")],
             id="three objectives different level",
         ),
         pytest.param(

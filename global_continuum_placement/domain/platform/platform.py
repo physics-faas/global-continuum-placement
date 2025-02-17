@@ -26,6 +26,7 @@ class InvalidSiteDefinition(Exception):
 @dataclass
 class Cluster:
     id: str
+    name: str
     type: ClusterType
     total_resources: Resources
     free_resources: Resources
@@ -63,6 +64,7 @@ class Cluster:
             )
         return Cluster(
             id=site_id,
+            name=cast(str, site_dict.get("name", "Unknown")),
             type=ClusterType[type.upper()],
             total_resources=Resources(**resources),
             free_resources=Resources(**resources),

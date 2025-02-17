@@ -1,27 +1,25 @@
 [tool.poetry]
-name = "global-continuum-placement"
-version = "0.0.1"
+name = "global_continuum_placement"
+version = "0.0.2"
 description = ""
 authors = ["Physics Project Work Package 2 <wp2@physics-faas.eu>"]
 
 [tool.poetry.dependencies]
-python = "^3.8"
+python = "^3.10"
 aiohttp = "^3.5"
 dependency-injector = "^4.32"
 aiohttp-apispec = "^2.2.1"
-# Freeze version to avoir pakaging issues
-platformdirs = "2.5.1"
 
 [tool.poetry.dev-dependencies]
 isort = "^5.5.4"
-flake8 = "^3.8.3"
-pytest-cov = "^2.10.1"
-pytest = "6.1.0"
-mypy = "^0.812"
-black = "^22.6.0"
+flake8 = "^6.0"
+pytest-cov = "^4.1"
+pytest = "^7.4"
+mypy = "^1.6"
+black = "^23.10"
 
 [tool.poetry.scripts]
-pgcp = "global_continuum_placement.app:start"
+global-continuum-placement = "global_continuum_placement.app:start"
 
 [build-system]
 requires = ["poetry>=1.0.10"]
