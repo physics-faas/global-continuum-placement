@@ -17,48 +17,61 @@
           "sequence": 1,
           "allocations": [
             "cluster3"
-          ]
-        },
-        {
-          "id": "function2",
-          "sequence": 2,
+          ],
           "annotations": {
-            "cores": "2"
+            "memory": 512,
+            "timeout": 220000,
+            "goal": "energy",
+            "importance": "high",
+            "loadGenData": [
+              {
+                "achievedAverageRate": 20.09,
+                "averageDuration": 5.36,
+                "averageDurationContainer": 1,
+                "averageEnergy": 1,
+                "averageEnergyContainer": 1,
+                "averageInitTime": 0,
+                "averageStartLatency": 27.2,
+                "averageUserSideDelay": 32.56,
+                "averageWaitTime": 19.29,
+                "globalStartTime": 1689858679061,
+                "launchGeneratorDelay": 237,
+                "location": "default",
+                "memory": 256,
+                "sampleNumber": 55,
+                "setRate": 20.449897750511248,
+                "stdDevDuration": 5.92,
+                "stdDevInitTime": 0,
+                "stdDevStartLatency": 66.66,
+                "stdDevUserSideDelay": 66.56,
+                "stdDevWaitTime": 66.72,
+                "successPercentage": 100
+              },
+              {
+                "achievedAverageRate": 20,
+                "averageDuration": 5.3,
+                "averageDurationContainer": 1,
+                "averageEnergy": 1,
+                "averageEnergyContainer": 1,
+                "averageInitTime": 0,
+                "averageStartLatency": 29.2,
+                "averageUserSideDelay": 30.56,
+                "averageWaitTime": 15.29,
+                "globalStartTime": 1689858679061,
+                "launchGeneratorDelay": 239,
+                "location": "azure",
+                "memory": 256,
+                "sampleNumber": 55,
+                "setRate": 20.449897750511248,
+                "stdDevDuration": 5.93,
+                "stdDevInitTime": 0,
+                "stdDevStartLatency": 67.66,
+                "stdDevUserSideDelay": 65.56,
+                "stdDevWaitTime": 63.72,
+                "successPercentage": 100
+              }
+            ]
           }
-        },
-        {
-          "id": "function3",
-          "sequence": 3,
-          "annotations": {
-            "cores": "2"
-          }
-        },
-        {
-          "id": "function4",
-          "sequence": 4,
-          "annotations": {
-            "cores": "2",
-            "architecture": "arm64"
-          }
-        },
-        {
-          "id": "function5",
-          "sequence": 5,
-          "annotations": {
-            "cores": 2,
-            "memory": 1000
-          }
-        }
-      ]
-    },
-    {
-      "flowID": "flow2",
-      "executorMode": "NoderedFunction",
-      "annotations": {"core": 1, "memory": 1000},
-      "functions": [
-        {
-          "id": "excluded-func",
-          "annotations": { }
         }
       ]
     }

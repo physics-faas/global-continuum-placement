@@ -165,6 +165,34 @@ Finally, we use a first fit policy on the sorted by highest score and allocate t
 
 If not cluster fits the constraints of a function it is not allocated. (Might be rejected with an error in the future.)
 
+#### Foa-Energy scheduling policy
+
+`Foa-Energy` is an algorithm based on a Linear Program, to optimize the placement of batches of serverless functions in terms of `energy consumption`, `data transfers`, `execution time`, and `number of machines used`. It uses a single-constrained optimization Linear Program, that in addition to extra constraints turns into a multi-objective optimization algorithm.
+
+To take a decision of scheduling, Foa-Energy needs to have access to the platform description, where the different clusters and the number of nodes (or machines) per cluster are available. As a direct inputs, Foa-Energy needs to receive, per cluster (these inputs are provided into the workload json file):
+- `"averageDuration"`: 5.36,
+- `"averageDurationContainer"`: 1,
+- `"averageEnergy"`: 1,
+- `"averageEnergyContainer"`: 1,
+
+Foa-Energy follows a few notations:
+- `p`: Functions' execution time -> "averageDuration"
+- `p_tilde`: Containers' execution time -> "averageDurationContainer" -> 
+- `c`: Functions' energy consumption -> "averageEnergy"
+- `c_tilde`: Containers' energy consumption -> "averageEnergyContainer"
+- `N`: The number of functions in the batch
+- `H`: Number of clusters available
+- `K`: Number of different containers used
+- `env`: The association of container and function
+- `mc`: The number of machines per cluster
+- `TMax`: A constraint of makespan (maximum execution time)
+- `CMax`: A constraint of amount of data downloaded for containers
+
+The solution will be proposed as matrix `x` and `y`, where `x` is the allocation of functions over the clusters, and `y` the allocation of containers over the clusters.
+For a local level of scheduling, it is needed an algorithm to takes Foa-Energy decisions and to do the local placement.
+
+For more details, and to check a full evaluation of Foa-Energy, please refer to [Foa-Energy's paper repository](https://gitlab.com/andersonandrei/foa-energy-journal)
+
 ## Supported annotations
 
 for now the component supports these annotations:
